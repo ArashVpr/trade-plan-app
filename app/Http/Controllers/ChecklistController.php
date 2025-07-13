@@ -24,7 +24,7 @@ class ChecklistController extends Controller
     public function index()
     {
         $checklists = Checklist::where('user_id', '=', 1)->latest()->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
-        return Inertia::render('Index', ['checklists' => $checklists]);
+        return Inertia::render('Checklist/Index', ['checklists' => $checklists]);
     }
     public function store(Request $request)
     {
@@ -46,9 +46,20 @@ class ChecklistController extends Controller
             'asset' => $validated['asset'],
             'notes' => $validated['notes'],
         ]);
-        Log::info('Checklist saved', ['checklist_id' => $checklist->id]);
 
-        // return redirect()->route('checklists.index')->with('success', 'Checklist saved successfully.');
         return Inertia::location(route('checklists.index'));
+    }
+    public function show(Checklist $checklist)
+    {
+        // Ensure the checklist belongs to the authenticated user
+        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
+            abort(403, 'Unauthorized action.');
+        }
+
+        $checklist->zone_qualifiers = json_decode($checklist->zone_qualifiers, true);
+        
+        return Inertia::render('Checklist/Show', [
+            'checklist' => $checklist,
+        ]);
     }
 }
