@@ -1,6 +1,12 @@
 <template>
     <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
         <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist History</h1>
+        <button>
+            <Link href="/"
+                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
+                Create New Checklist
+            </Link>
+        </button>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-semibold text-blue-900 mb-4">Saved Checklists</h2>
             <div v-if="checklists.length === 0" class="text-gray-600">
@@ -12,7 +18,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-700">
                             Asset: {{ checklist.asset || 'N/A' }}
-                            id: {{ checklist.id }}
+                            Length: {{ checklists.length }}
                         </p>
                         <p class="text-sm text-gray-600">
                             Score: <span :class="[
@@ -20,7 +26,7 @@
                                 checklist.score < 50 ? 'text-red-600' :
                                     checklist.score <= 80 ? 'text-yellow-600' :
                                         'text-emerald-600'
-                            ]">{{ checklist.score }}/170</span>
+                            ]">{{ checklist.score }}/100</span>
                         </p>
                         <p class="text-sm text-gray-600">
                             Created: {{ new Date(checklist.created_at).toLocaleDateString() }}
@@ -48,10 +54,12 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3'
+
     defineProps({
         checklists: {
             type: Array,
-            default: () => []
+            default: () => ([])
         }
     })
     

@@ -302,7 +302,11 @@ export default {
             this.notes = '';
             this.progressCount = 0;
         },
-        submitChecklist() {
+submitChecklist() {
+            if (!this.canSubmit) return;
+
+            this.message = '';
+            this.messageType = '';
 
             Inertia.post('/checklists', {
                 zone_qualifiers: this.zoneQualifiers.filter((_, index) => this.checkedZoneQualifiers[index]),
@@ -312,8 +316,16 @@ export default {
                 asset: this.asset,
                 notes: this.notes
             }, {
+                preserveState: true,
                 onSuccess: () => {
+                    this.message = 'Checklist saved successfully!';
+                    this.messageType = 'success';
                     this.resetForm();
+                },
+                onError: (errors) => {
+                    this.message = 'Failed to save checklist: ' + (errors.message || Object.values(errors).join(', '));
+                    this.messageType = 'error';
+                    console.error('Submission error:', errors);
                 }
             });
         },

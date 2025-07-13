@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Checklist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ChecklistController extends Controller
@@ -21,7 +22,7 @@ class ChecklistController extends Controller
             'zone_qualifiers' => 'array',
             'technicals' => 'array',
             'fundamentals' => 'array',
-            'score' => 'integer|min:0|max:170',
+            'score' => 'integer|min:0|max:100',
             'asset' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
@@ -35,7 +36,9 @@ class ChecklistController extends Controller
             'asset' => $validated['asset'],
             'notes' => $validated['notes'],
         ]);
+        Log::info('Checklist saved', ['checklist_id' => $checklist->id]);
 
-        return redirect()->route('checklists.index')->with('success', 'Checklist saved successfully.');
+        // return redirect()->route('checklists.index')->with('success', 'Checklist saved successfully.');
+        return Inertia::location(route('checklists.index'));
     }
 }
