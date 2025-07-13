@@ -19,6 +19,17 @@
                 <!-- Step 1: Zone Qualifiers -->
                 <div v-if="currentStep === 1" class="space-y-4">
                     <h2 class="text-2xl font-semibold text-blue-900">Zone Qualifiers</h2>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Asset</label>
+                        <select v-model="asset"
+                            class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
+                            <option value="" disabled>Select Asset</option>
+                            <option value="EUR/USD">EUR/USD</option>
+                            <option value="GBP/USD">GBP/USD</option>
+                            <option value="USD/JPY">USD/JPY</option>
+                            <option value="AUD/USD">AUD/USD</option>
+                        </select>
+                    </div>
                     <ul class="space-y-3">
                         <li v-for="(qualifier, index) in zoneQualifiers" :key="index" class="flex items-center">
                             <label class="flex items-center space-x-3">
@@ -29,6 +40,7 @@
                             </label>
                         </li>
                     </ul>
+
                 </div>
 
                 <!-- Step 2: Technicals -->
@@ -107,6 +119,12 @@
                                 <option value="Bearish">Bearish</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            <textarea v-model="notes"
+                                class="form-textarea w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                rows="4" placeholder="Add any notes about this trade setup"></textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -117,14 +135,14 @@
                         Reset
                     </button>
                     <span>
-                    <button v-if="currentStep > 1" @click="currentStep--"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                        Previous
-                    </button>
-                    <button v-if="currentStep < 3" @click="currentStep++"
-                        class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
-                        Next
-                    </button>
+                        <button v-if="currentStep > 1" @click="currentStep--"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                            Previous
+                        </button>
+                        <button v-if="currentStep < 3" @click="currentStep++"
+                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
+                            Next
+                        </button>
                     </span>
                 </div>
 
@@ -210,6 +228,8 @@ export default {
                 'Minimum 1:2 Profit Margin',
                 'Big Brother Coverage'
             ],
+            asset: '',
+            notes: '',
             checkedZoneQualifiers: Array(6).fill(false),
             progressCount: 0,
             totalInputs: 12 // Total number of inputs across all steps
