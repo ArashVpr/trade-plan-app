@@ -116,14 +116,16 @@
                         class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-red-500 transition-colors">
                         Reset
                     </button>
+                    <span>
                     <button v-if="currentStep > 1" @click="currentStep--"
                         class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
                         Previous
                     </button>
                     <button v-if="currentStep < 3" @click="currentStep++"
-                        class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
+                        class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
                         Next
                     </button>
+                    </span>
                 </div>
 
                 <!-- Progress Bar -->
