@@ -143,6 +143,10 @@
                             class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
                             Next
                         </button>
+                        <button v-if="currentStep === 3" @click="submitChecklist" :disabled="!canSubmit"
+                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md transition-colors">
+                            Submit
+                        </button>
                     </span>
                 </div>
 
@@ -179,7 +183,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
-                            }})</h3>
+                        }})</h3>
                         <ul class="list-disc pl-5 text-sm text-gray-600">
                             <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
                                 {{ qualifier }}
@@ -205,6 +209,8 @@
 </template>
 
 <script>
+import { Inertia } from '@inertiajs/inertia';
+
 export default {
     data() {
         return {
@@ -257,6 +263,24 @@ export default {
             score += this.fundamentals.nonCommercials === 'Divergence' ? 15 : 0;
             score += ['Bullish', 'Bearish'].includes(this.fundamentals.cotIndex) ? 12 : 0;
             return score;
+        },
+        canProceed() {
+            if (this.currentStep === 1) {
+                return this.selectedZoneQualifiersCount > 0;
+            }
+            if (this.currentStep === 2) {
+                return this.technicals.location && this.technicals.direction;
+            }
+            return true;
+        },
+        canSubmit() {
+            return this.technicals.location &&
+                this.technicals.direction &&
+                this.fundamentals.valuation &&
+                this.fundamentals.seasonalConfluence &&
+                this.fundamentals.nonCommercials &&
+                this.fundamentals.cotIndex &&
+                this.selectedZoneQualifiersCount > 0;
         }
     },
     methods: {
@@ -274,8 +298,25 @@ export default {
             this.technicals = { location: '', direction: '' };
             this.fundamentals = { valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' };
             this.checkedZoneQualifiers = Array(6).fill(false);
+            this.asset = '';
+            this.notes = '';
             this.progressCount = 0;
-        }
+        },
+        submitChecklist() {
+
+            Inertia.post('/checklists', {
+                zone_qualifiers: this.zoneQualifiers.filter((_, index) => this.checkedZoneQualifiers[index]),
+                technicals: this.technicals,
+                fundamentals: this.fundamentals,
+                score: this.evaluationScore,
+                asset: this.asset,
+                notes: this.notes
+            }, {
+                onSuccess: () => {
+                    this.resetForm();
+                }
+            });
+        },
     }
 };
 </script>

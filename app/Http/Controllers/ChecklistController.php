@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Checklist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ChecklistController extends Controller
 {
     public function index()
     {
-        $checklists = Checklist::where('user_id', auth()->id())->latest()->get();
-        return Inertia::render('Checklists/Index', ['checklists' => $checklists]);
+        $checklists = Checklist::where('user_id', '=', 1)->get();  // Assuming a static user ID for now; replace with auth()->id() in production
+        // dd($checklists);
+        return Inertia::render('Index', ['checklists' => $checklists]);
     }
     public function store(Request $request)
     {
@@ -25,10 +27,10 @@ class ChecklistController extends Controller
         ]);
 
         $checklist = Checklist::create([
-            'user_id' => auth()->id(),
-            'zone_qualifiers' => $validated['zone_qualifiers'],
-            'technicals' => $validated['technicals'],
-            'fundamentals' => $validated['fundamentals'],
+            'user_id' => 1, // Assuming a static user ID for now; replace with auth()->id() in production
+            'zone_qualifiers' => json_encode($validated['zone_qualifiers']),
+            'technicals' => json_encode($validated['technicals']),
+            'fundamentals' => json_encode($validated['fundamentals']),
             'score' => $validated['score'],
             'asset' => $validated['asset'],
             'notes' => $validated['notes'],

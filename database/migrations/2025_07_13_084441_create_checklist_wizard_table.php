@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('checklist_wizard', function (Blueprint $table) {
+        Schema::create('checklists', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->json('zone_qualifiers')->nullable(); // Array of selected zone qualifiers
@@ -39,7 +39,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('checklist_wizard');
+        Schema::dropIfExists('checklists');
         Schema::dropIfExists('checklist_settings');
     }
 };
