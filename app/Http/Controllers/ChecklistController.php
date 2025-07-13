@@ -10,10 +10,20 @@ use Inertia\Inertia;
 
 class ChecklistController extends Controller
 {
+    //     public function index()
+    // {
+    //     $checklists = Checklist::where('user_id', auth()->id())
+    //         ->select('id', 'asset', 'score', 'created_at')
+    //         ->latest()
+    //         ->paginate(10);
+
+    //     return Inertia::render('Checklists/Index', [
+    //         'checklists' => $checklists
+    //     ]);
+    // }
     public function index()
     {
-        $checklists = Checklist::where('user_id', '=', 1)->get();  // Assuming a static user ID for now; replace with auth()->id() in production
-        // dd($checklists);
+        $checklists = Checklist::where('user_id', '=', 1)->latest()->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
         return Inertia::render('Index', ['checklists' => $checklists]);
     }
     public function store(Request $request)

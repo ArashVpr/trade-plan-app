@@ -183,7 +183,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
-                        }})</h3>
+                            }})</h3>
                         <ul class="list-disc pl-5 text-sm text-gray-600">
                             <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
                                 {{ qualifier }}
@@ -209,7 +209,7 @@
 </template>
 
 <script>
-import { Inertia } from '@inertiajs/inertia';
+import { Inertia } from '@inertiajs/inertia'
 
 export default {
     data() {
@@ -302,7 +302,7 @@ export default {
             this.notes = '';
             this.progressCount = 0;
         },
-submitChecklist() {
+        submitChecklist() {
             if (!this.canSubmit) return;
 
             this.message = '';

@@ -9,16 +9,15 @@
         </button>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-semibold text-blue-900 mb-4">Saved Checklists</h2>
-            <div v-if="checklists.length === 0" class="text-gray-600">
+            <div v-if="checklists.data.length === 0" class="text-gray-600">
                 No checklists found.
             </div>
             <div v-else class="space-y-4">
-                <div v-for="checklist in checklists" :key="checklist.id"
+                <div v-for="checklist in checklists.data" :key="checklist.id"
                     class="flex justify-between items-center p-4 border-b border-gray-200">
                     <div>
                         <p class="text-sm font-medium text-gray-700">
                             Asset: {{ checklist.asset || 'N/A' }}
-                            Length: {{ checklists.length }}
                         </p>
                         <p class="text-sm text-gray-600">
                             Score: <span :class="[
@@ -39,7 +38,7 @@
                 </div>
             </div>
             <!-- Pagination -->
-            <div class="mt-6 flex justify-center">
+            <div class="mt-6 flex justify-center" v-if="checklists.data.length > 0">
                 <button v-for="link in checklists.links" :key="link.label" v-html="link.label" :disabled="!link.url"
                     :class="[
                         'px-4 py-2 mx-1 rounded-md',
@@ -58,8 +57,8 @@ import { Link } from '@inertiajs/vue3'
 
     defineProps({
         checklists: {
-            type: Array,
-            default: () => ([])
+            type: Object,
+            default: () => ({})
         }
     })
     
