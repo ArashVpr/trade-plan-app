@@ -1,10 +1,24 @@
 <template>
     <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
         <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist Details</h1>
-        <Link href="/checklists" method="get" as="button"
-            class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
-        Back
-        </Link>
+        <div class="flex justify-between">
+            <div>
+                <Link href="/checklists" method="get" as="button"
+                    class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
+                Back
+                </Link>
+            </div>
+            <div>
+                <Link :href="`/checklists/${checklist.id}/edit`" method="get" as="button"
+                    class="px-4 py-2 bg-emerald-600 text-white rounded-md mr-2 hover:bg-emerald-700 transition-colors hover:cursor-pointer">
+                Edit
+                </Link>
+                <Link :href="`/checklists/${checklist.id}`" method="delete" as="button"
+                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors hover:cursor-pointer">
+                Delete
+                </Link>
+            </div>
+        </div>
         <div class="bg-white p-6 rounded-lg shadow-md mt-6">
             <h2 class="text-xl font-semibold text-blue-900 mb-4">Trade Setup Details</h2>
             <div class="space-y-6">
@@ -70,5 +84,5 @@ const props = defineProps({
         type: Object,
         required: true
     }
-});
+})
 </script>

@@ -57,9 +57,67 @@ class ChecklistController extends Controller
         }
 
         $checklist->zone_qualifiers = json_decode($checklist->zone_qualifiers, true);
-        
+        $checklist->technicals = json_decode($checklist->technicals, true);
+        $checklist->fundamentals = json_decode($checklist->fundamentals, true);
+
         return Inertia::render('Checklist/Show', [
             'checklist' => $checklist,
         ]);
+    }
+    public function edit(Checklist $checklist)
+    {
+        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
+            abort(403, 'Unauthorized');
+        }
+
+        $checklist->zone_qualifiers = json_decode($checklist->zone_qualifiers, true);
+        $checklist->technicals = json_decode($checklist->technicals, true);
+        $checklist->fundamentals = json_decode($checklist->fundamentals, true);
+
+        return Inertia::render('Checklist/Edit', [
+            'checklist' => $checklist
+        ]);
+    }
+    public function update(Request $request, Checklist $checklist)
+    {
+        Log::info($checklist);
+        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
+            abort(403, 'Unauthorized');
+        }
+
+        Log::info('Updating checklist', ['checklist_id' => $checklist->id]);
+        $validated = $request->validate([
+            'zone_qualifiers' => 'array|nullable',
+            'technicals' => 'array|required',
+            'technicals.location' => 'required|string|in:Very Expensive,Expensive,EQ,Cheap,Very Cheap',
+            'technicals.direction' => 'required|string|in:Correction,Impulsion',
+            'fundamentals' => 'array|required',
+            'fundamentals.valuation' => 'required|string|in:Overvalued,Neutral,Undervalued',
+            'fundamentals.seasonalConfluence' => 'required|string|in:Yes,No',
+            'fundamentals.nonCommercials' => 'required|string|in:Divergence,No-Divergence',
+            'fundamentals.cotIndex' => 'required|string|in:Bullish,Neutral,Bearish',
+            'score' => 'required|integer|min:0|max:170',
+            'asset' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+        ]);
+
+        $checklist->update($validated);
+
+        Log::info('Checklist updated', ['checklist_id' => $checklist->id]);
+
+        return Inertia::location(route('checklists.show', $checklist));
+    }
+
+    public function destroy(Checklist $checklist)
+    {
+        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
+            abort(403, 'Unauthorized');
+        }
+
+        $checklist->delete();
+
+        Log::info('Checklist deleted', ['checklist_id' => $checklist->id]);
+
+        return Inertia::location(route('checklists.index'));
     }
 }
