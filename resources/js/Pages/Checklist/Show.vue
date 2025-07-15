@@ -108,7 +108,6 @@ const props = defineProps({
 
 const confirmDelete = () => {
     const result = confirm('Are you sure you want to delete this checklist? This action cannot be undone.');
-    console.log('Confirm result:', result);
     if (result) {
         $inertia.delete(route('checklists.destroy', props.checklist.id));
     }
