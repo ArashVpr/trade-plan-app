@@ -3,11 +3,11 @@
         <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Edit Checklist</h1>
         <div class="flex justify-between mb-4">
             <Link :href="'/checklists/' + checklist.id" method="get" as="button"
-                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
+                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
             Back
             </Link>
-            <button type="submit" form="edit-form"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors">
+            <button type="submit" form="edit-form" :disabled="!canSubmit"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors hover:cursor-pointer">
                 Save
             </button>
         </div>
