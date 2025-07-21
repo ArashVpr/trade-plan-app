@@ -7,82 +7,87 @@
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Zone Qualifiers</h2>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Zone Fresh Weight</label>
-                        <input v-model="form.zone_fresh_weight" type="number" class="form-input mt-1 block w-full" />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fresh Weight</label>
+                        <input v-model="form.zone_fresh_weight" type="number"
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Zone Original Weight</label>
-                        <input v-model="form.zone_original_weight" type="number" class="form-input mt-1 block w-full" />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Original Weight</label>
+                        <input v-model="form.zone_original_weight" type="number"
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Zone Flip Weight</label>
-                        <input v-model="form.zone_flip_weight" type="number" class="form-input mt-1 block w-full" />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Flip Weight</label>
+                        <input v-model="form.zone_flip_weight" type="number"
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Zone LOL Weight</label>
-                        <input v-model="form.zone_lol_weight" type="number" class="form-input mt-1 block w-full" />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">LOL Weight</label>
+                        <input v-model="form.zone_lol_weight" type="number"
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Zone Min Profit Margin Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Profit Margin
+                            Weight</label>
                         <input v-model="form.zone_min_profit_margin_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Zone Big Brother Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Big Brother Weight</label>
                         <input v-model="form.zone_big_brother_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                 </div>
                 <!-- Technicals Category -->
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Technicals</h2>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Location</h3>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Technical Very Exp/Chp Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Very Exp/Chp Weight</label>
                         <input v-model="form.technical_very_exp_chp_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Technical Exp/Chp Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Exp/Chp Weight</label>
                         <input v-model="form.technical_exp_chp_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Direction</h3>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Technical Direction Impulsive
-                            Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Impulsive Weight</label>
                         <input v-model="form.technical_direction_impulsive_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Technical Direction Correction
-                            Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correction Weight</label>
                         <input v-model="form.technical_direction_correction_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                 </div>
                 <!-- Fundamentals Category -->
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Fundamentals</h2>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Fundamental Valuation Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Valuation Weight</label>
                         <input v-model="form.fundamental_valuation_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Fundamental Seasonal Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Seasonality Weight</label>
                         <input v-model="form.fundamental_seasonal_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Fundamental COT Index Weight</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">COT Index Weight</label>
                         <input v-model="form.fundamental_cot_index_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Fundamental Noncommercial Divergence
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Non-commercial Divergence
                             Weight
                         </label>
                         <input v-model="form.fundamental_noncommercial_divergence_weight" type="number"
-                            class="form-input mt-1 block w-full" />
+                            class="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                     </div>
                 </div>
             </div>
@@ -94,7 +99,7 @@
                             class="px-6 py-2 mr-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             Save Settings
                         </button>
-                        <Link :href="'/'" method="get" as="button"
+                        <Link :href="'/'"
                             class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer">
                         Cancel
                         </Link>
