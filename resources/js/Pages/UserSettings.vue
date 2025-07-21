@@ -86,14 +86,22 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-6 flex flex-wrap gap-4">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Save Settings
-                </button>
-                <Link :href="'/'" method="get" as="button"
-                    class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
-                Back
-                </Link>
+            <div class="mt-6 flex flex-wrap justify-between items-center">
+                <div>
+                    <Link :href="'/'" method="get" as="button"
+                        class="px-4 py-2 mr-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
+                    Back
+                    </Link>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
+                        Save Settings
+                    </button>
+                </div>
+                <div>
+                    <div
+                        :class="['px-4 py-2 rounded-md font-bold', totalWeight <= 100 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        Total Weight: {{ totalWeight }}
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -102,10 +110,9 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-const props = defineProps(
-    { settings: Object }
-)
+const props = defineProps({ settings: Object })
 
 const form = useForm({
     zone_fresh_weight: props.settings.zone_fresh_weight,
@@ -123,6 +130,24 @@ const form = useForm({
     fundamental_cot_index_weight: props.settings.fundamental_cot_index_weight,
     fundamental_noncommercial_divergence_weight: props.settings.fundamental_noncommercial_divergence_weight,
 });
+
+const totalWeight = computed(() => {
+    return Number(form.zone_fresh_weight) +
+        Number(form.zone_original_weight) +
+        Number(form.zone_flip_weight) +
+        Number(form.zone_lol_weight) +
+        Number(form.zone_min_profit_margin_weight) +
+        Number(form.zone_big_brother_weight) +
+        Number(form.technical_very_exp_chp_weight) +
+        Number(form.technical_exp_chp_weight) +
+        Number(form.technical_direction_impulsive_weight) +
+        Number(form.technical_direction_correction_weight) +
+        Number(form.fundamental_valuation_weight) +
+        Number(form.fundamental_seasonal_weight) +
+        Number(form.fundamental_cot_index_weight) +
+        Number(form.fundamental_noncommercial_divergence_weight);
+});
+
 function submit() {
     form.post('/user-settings');
 }
