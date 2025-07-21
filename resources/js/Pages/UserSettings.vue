@@ -103,6 +103,10 @@
                             class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer">
                         Cancel
                         </Link>
+                        <button type="button" @click="resetDefaults"
+                            class="px-6 py-2 ml-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer">
+                            Reset to Default
+                        </button>
                     </div>
                     <div>
                         <div
@@ -111,7 +115,7 @@
                         </div>
                     </div>
                 </div>
-                <p v-if="totalWeight !== 100" class="text-red-600 text-right">Total weight must be less than
+                <p v-if="totalWeight !== 100" class="text-red-600 text-right">Total weight must be
                     <strong>100</strong>
                 </p>
             </div>
@@ -141,6 +145,10 @@ const totalWeight = computed(() =>
 
 function submit() {
     form.post('/user-settings')
+}
+// Reset form values to initial defaults
+function resetDefaults() {
+    form.reset()
 }
 </script>
 
