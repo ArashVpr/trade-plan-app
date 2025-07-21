@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->integer('fundamental_seasonal_weight')->default(6);
             $table->integer('fundamental_cot_index_weight')->default(12);
             $table->integer('fundamental_noncommercial_divergence_weight')->default(15);
+            $table->timestamps();
         });
     }
 

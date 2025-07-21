@@ -11,27 +11,19 @@ class UserSettingsController extends Controller
 {
     public function index()
     {
+        // Retrieve default attribute values from the model
+        $defaults = (new UserSettings)->getAttributes();
+        // Create or fetch user settings, using defaults on create
         $settings = UserSettings::firstOrCreate(
             ['user_id' => 1], // Replace with Auth::id() in production
-            [
-                'zone_fresh_weight' => 10, 
-                'zone_original_weight' => 10,
-                'zone_flip_weight' => 10,
-                'zone_lol_weight' => 10,
-                'zone_min_profit_margin_weight' => 10,
-                'zone_big_brother_weight' => 10,
-                'technical_very_exp_chp_weight' => 10,
-                'technical_exp_chp_weight' => 10,
-                'technical_direction_impulsive_weight' => 10,
-                'technical_direction_correction_weight' => 10,
-                'fundamental_valuation_weight' => 10,
-                'fundamental_seasonal_weight' => 10,
-                'fundamental_cot_index_weight' => 10,
-                'fundamental_noncommercial_divergence_weight' => 10,
-            ]
+            $defaults
         );
 
-        return Inertia::render('UserSettings', ['settings' => $settings]);
+        // Pass both persisted settings and defaults to the view
+        return Inertia::render('UserSettings', [
+            'settings' => $settings,
+            'defaults' => $defaults,
+        ]);
     }
 
     public function update(Request $request)
@@ -63,6 +55,6 @@ class UserSettingsController extends Controller
             $validated
         );
 
-        return to_route('checklists.index')->with('success', 'Settings updated successfully!');
+        return redirect('/')->with('success', 'Settings updated successfully!');
     }
 }

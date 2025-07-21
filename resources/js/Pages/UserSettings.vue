@@ -128,7 +128,11 @@ import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
-const props = defineProps({ settings: Object })
+const props = defineProps({
+    settings: Object,
+    defaults: Object,
+})
+// Initialize form with persisted settings
 const form = useForm({
     ...props.settings
 })
@@ -146,9 +150,13 @@ const totalWeight = computed(() =>
 function submit() {
     form.post('/user-settings')
 }
-// Reset form values to initial defaults
+// Reset form values to initial defaults from model
 function resetDefaults() {
-    form.reset()
+    Object.entries(props.defaults).forEach(([key, value]) => {
+        if (key in form) {
+            form[key] = value;
+        }
+    });
 }
 </script>
 
