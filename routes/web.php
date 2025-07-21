@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\UserSettingsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -15,6 +16,8 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
 });
+Route::get('/user-settings', [UserSettingsController::class, 'index'])->name('user-settings.index');
+Route::post('/user-settings', [UserSettingsController::class, 'update'])->name('user-settings.update');
 Route::get('/checklists', [ChecklistController::class, 'index'])->name('checklists.index');
 Route::post('/checklists', [ChecklistController::class, 'store'])->name('checklists.store');
 Route::get('/checklists/{checklist}', [ChecklistController::class, 'show'])->name('checklists.show');

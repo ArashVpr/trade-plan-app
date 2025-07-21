@@ -195,7 +195,7 @@
                         <h3 class="text-xl font-semibold text-blue-900">Evaluation Score</h3>
                         <p :class="['text-2xl font-bold px-4 py-2 rounded-md inline-block',
                             evaluationScore < 50 ? 'text-red-600 bg-red-100' :
-                                evaluationScore <= 80 ? 'text-yellow-600 bg-yellow-100' :
+                                evaluationScore <= 70 ? 'text-yellow-600 bg-yellow-100' :
                                     'text-emerald-600 bg-emerald-100']">
                             {{ evaluationScore }}/100
                         </p>
@@ -204,133 +204,119 @@
                     </div>
                 </div>
             </div>
+            <Link :href="'/user-settings'" as="button"
+                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-700 transition-colors hover:cursor-pointer">
+            modify weights
+            </Link>
         </div>
     </div>
 </template>
 
-<script>
-import { Inertia } from '@inertiajs/inertia'
+<script setup>
+import { ref, computed } from 'vue';
+import { Inertia } from '@inertiajs/inertia';
+import { Link } from '@inertiajs/vue3';
 
-export default {
-    data() {
-        return {
-            currentStep: 1,
-            steps: ['Zone Qualifiers', 'Technicals', 'Fundamentals'],
-            technicals: {
-                location: '',
-                direction: ''
-            },
-            fundamentals: {
-                valuation: '',
-                seasonalConfluence: '',
-                nonCommercials: '',
-                cotIndex: ''
-            },
-            zoneQualifiers: [
-                'Fresh',
-                'Original',
-                'Flip',
-                'LOL',
-                'Minimum 1:2 Profit Margin',
-                'Big Brother Coverage'
-            ],
-            asset: '',
-            notes: '',
-            checkedZoneQualifiers: Array(6).fill(false),
-            progressCount: 0,
-            totalInputs: 12 // Total number of inputs across all steps
-        };
-    },
-    computed: {
-        progressPercentage() {
-            return Math.round((this.progressCount / this.totalInputs) * 100);
-        },
-        selectedZoneQualifiersCount() {
-            return this.checkedZoneQualifiers.filter(Boolean).length;
-        },
-        filteredZoneQualifiers() {
-            return this.zoneQualifiers.filter((_, index) => this.checkedZoneQualifiers[index]);
-        },
-        evaluationScore() {
-            let score = 0;
-            score += this.checkedZoneQualifiers.filter(Boolean).length * 5; // Each checked zone qualifier contributes 5 points
-            score += ['Very Cheap', 'Very Expensive'].includes(this.technicals.location) ? 12 : // 12 points for 'Very Cheap' and 'Very Expensive'
-                ['Cheap', 'Expensive'].includes(this.technicals.location) ? 7 : 0;
-            score += this.technicals.direction === 'Correction' ? 6 :
-                this.technicals.direction === 'Impulsion' ? 12 : 0;
-            score += ['Undervalued', 'Overvalued'].includes(this.fundamentals.valuation) ? 13 : 0;
-            score += this.fundamentals.seasonalConfluence === 'Yes' ? 6 : 0;
-            score += this.fundamentals.nonCommercials === 'Divergence' ? 15 : 0;
-            score += ['Bullish', 'Bearish'].includes(this.fundamentals.cotIndex) ? 12 : 0;
-            return score;
-        },
-        canProceed() {
-            if (this.currentStep === 1) {
-                return this.selectedZoneQualifiersCount > 0;
-            }
-            if (this.currentStep === 2) {
-                return this.technicals.location && this.technicals.direction;
-            }
-            return true;
-        },
-        canSubmit() {
-            return this.technicals.location &&
-                this.technicals.direction &&
-                this.fundamentals.valuation &&
-                this.fundamentals.seasonalConfluence &&
-                this.fundamentals.nonCommercials &&
-                this.fundamentals.cotIndex &&
-                this.selectedZoneQualifiersCount > 0;
-        }
-    },
-    methods: {
-        updateProgress() {
-            this.progressCount = this.checkedZoneQualifiers.filter(Boolean).length +
-                (this.technicals.location ? 1 : 0) +
-                (this.technicals.direction ? 1 : 0) +
-                (this.fundamentals.valuation ? 1 : 0) +
-                (this.fundamentals.seasonalConfluence ? 1 : 0) +
-                (this.fundamentals.nonCommercials ? 1 : 0) +
-                (this.fundamentals.cotIndex ? 1 : 0);
-        },
-        resetWizard() {
-            this.currentStep = 1;
-            this.technicals = { location: '', direction: '' };
-            this.fundamentals = { valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' };
-            this.checkedZoneQualifiers = Array(6).fill(false);
-            this.asset = '';
-            this.notes = '';
-            this.progressCount = 0;
-        },
-        submitChecklist() {
-            if (!this.canSubmit) return;
+const currentStep = ref(1);
+const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals'];
+const technicals = ref({ location: '', direction: '' });
+const fundamentals = ref({ valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' });
+const zoneQualifiers = [
+    'Fresh',
+    'Original',
+    'Flip',
+    'LOL',
+    'Minimum 1:2 Profit Margin',
+    'Big Brother Coverage'
+];
+const asset = ref('');
+const notes = ref('');
+const checkedZoneQualifiers = ref(Array(6).fill(false));
+const progressCount = ref(0);
+const totalInputs = 12;
+const message = ref('');
+const messageType = ref('');
 
-            this.message = '';
-            this.messageType = '';
-
-            Inertia.post('/checklists', {
-                zone_qualifiers: this.zoneQualifiers.filter((_, index) => this.checkedZoneQualifiers[index]),
-                technicals: this.technicals,
-                fundamentals: this.fundamentals,
-                score: this.evaluationScore,
-                asset: this.asset,
-                notes: this.notes
-            }, {
-                preserveState: true,
-                onSuccess: () => {
-                    this.message = 'Checklist saved successfully!';
-                    this.messageType = 'success';
-                    this.resetForm();
-                },
-                onError: (errors) => {
-                    this.message = 'Failed to save checklist: ' + (errors.message || Object.values(errors).join(', '));
-                    this.messageType = 'error';
-                    console.error('Submission error:', errors);
-                }
-            });
-        },
+const progressPercentage = computed(() => {
+    return Math.round((progressCount.value / totalInputs) * 100);
+});
+const selectedZoneQualifiersCount = computed(() => checkedZoneQualifiers.value.filter(Boolean).length);
+const filteredZoneQualifiers = computed(() => zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]));
+const evaluationScore = computed(() => {
+    let score = 0;
+    score += checkedZoneQualifiers.value.filter(Boolean).length * 5;
+    score += ['Very Cheap', 'Very Expensive'].includes(technicals.value.location) ? 12 :
+        ['Cheap', 'Expensive'].includes(technicals.value.location) ? 7 : 0;
+    score += technicals.value.direction === 'Correction' ? 6 :
+        technicals.value.direction === 'Impulsion' ? 12 : 0;
+    score += ['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation) ? 13 : 0;
+    score += fundamentals.value.seasonalConfluence === 'Yes' ? 6 : 0;
+    score += fundamentals.value.nonCommercials === 'Divergence' ? 15 : 0;
+    score += ['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex) ? 12 : 0;
+    return score;
+});
+const canProceed = computed(() => {
+    if (currentStep.value === 1) {
+        return selectedZoneQualifiersCount.value > 0;
     }
-};
+    if (currentStep.value === 2) {
+        return technicals.value.location && technicals.value.direction;
+    }
+    return true;
+});
+const canSubmit = computed(() => {
+    return technicals.value.location &&
+        technicals.value.direction &&
+        fundamentals.value.valuation &&
+        fundamentals.value.seasonalConfluence &&
+        fundamentals.value.nonCommercials &&
+        fundamentals.value.cotIndex &&
+        selectedZoneQualifiersCount.value > 0;
+});
+
+function updateProgress() {
+    progressCount.value = checkedZoneQualifiers.value.filter(Boolean).length +
+        (technicals.value.location ? 1 : 0) +
+        (technicals.value.direction ? 1 : 0) +
+        (fundamentals.value.valuation ? 1 : 0) +
+        (fundamentals.value.seasonalConfluence ? 1 : 0) +
+        (fundamentals.value.nonCommercials ? 1 : 0) +
+        (fundamentals.value.cotIndex ? 1 : 0);
+}
+function resetWizard() {
+    currentStep.value = 1;
+    technicals.value = { location: '', direction: '' };
+    fundamentals.value = { valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' };
+    checkedZoneQualifiers.value = Array(6).fill(false);
+    asset.value = '';
+    notes.value = '';
+    progressCount.value = 0;
+}
+function submitChecklist() {
+    if (!canSubmit.value) return;
+    message.value = '';
+    messageType.value = '';
+    Inertia.post('/checklists', {
+        zone_qualifiers: zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]),
+        technicals: technicals.value,
+        fundamentals: fundamentals.value,
+        score: evaluationScore.value,
+        asset: asset.value,
+        notes: notes.value
+    }, {
+        preserveState: true,
+        onSuccess: () => {
+            message.value = 'Checklist saved successfully!';
+            messageType.value = 'success';
+            resetWizard();
+        },
+        onError: (errors) => {
+            message.value = 'Failed to save checklist: ' + (errors.message || Object.values(errors).join(', '));
+            messageType.value = 'error';
+            console.error('Submission error:', errors);
+        }
+    });
+}
 </script>
 
 <style scoped>
