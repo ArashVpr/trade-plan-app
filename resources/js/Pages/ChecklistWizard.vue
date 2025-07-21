@@ -6,9 +6,8 @@
         <div class="flex justify-center mb-8">
             <div class="flex space-x-4">
                 <div v-for="(step, index) in steps" :key="index"
-                     :class="['px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-300',
-                              currentStep === index + 1 ? 'bg-blue-900 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300']"
-                     @click="currentStep = index + 1">
+                    :class="['px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-300',
+                        currentStep === index + 1 ? 'bg-blue-900 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300']" @click="currentStep = index + 1">
                     Step {{ index + 1 }}: {{ step }}
                 </div>
             </div>
@@ -20,16 +19,28 @@
                 <!-- Step 1: Zone Qualifiers -->
                 <div v-if="currentStep === 1" class="space-y-4">
                     <h2 class="text-2xl font-semibold text-blue-900">Zone Qualifiers</h2>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Asset</label>
+                        <select v-model="asset"
+                            class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
+                            <option value="" disabled>Select Asset</option>
+                            <option value="EUR/USD">EUR/USD</option>
+                            <option value="GBP/USD">GBP/USD</option>
+                            <option value="USD/JPY">USD/JPY</option>
+                            <option value="AUD/USD">AUD/USD</option>
+                        </select>
+                    </div>
                     <ul class="space-y-3">
                         <li v-for="(qualifier, index) in zoneQualifiers" :key="index" class="flex items-center">
                             <label class="flex items-center space-x-3">
                                 <input type="checkbox" v-model="checkedZoneQualifiers[index]"
-                                       class="form-checkbox h-5 w-5 text-blue-900 rounded focus:ring-blue-900"
-                                       @change="updateProgress" />
+                                    class="form-checkbox h-5 w-5 text-blue-900 rounded focus:ring-blue-900"
+                                    @change="updateProgress" />
                                 <span class="text-gray-700">{{ qualifier }}</span>
                             </label>
                         </li>
                     </ul>
+
                 </div>
 
                 <!-- Step 2: Technicals -->
@@ -39,8 +50,8 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
                             <select v-model="technicals.location"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                    @change="updateProgress">
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                @change="updateProgress">
                                 <option value="" disabled>Select Location</option>
                                 <option value="Very Expensive">Very Expensive</option>
                                 <option value="Expensive">Expensive</option>
@@ -52,8 +63,8 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Direction</label>
                             <select v-model="technicals.direction"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                    @change="updateProgress">
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                @change="updateProgress">
                                 <option value="" disabled>Select Direction</option>
                                 <option value="Correction">Correction</option>
                                 <option value="Impulsion">Impulsion</option>
@@ -69,8 +80,8 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Valuation</label>
                             <select v-model="fundamentals.valuation"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                    @change="updateProgress">
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                @change="updateProgress">
                                 <option value="" disabled>Select Valuation</option>
                                 <option value="Overvalued">Overvalued</option>
                                 <option value="Neutral">Neutral</option>
@@ -80,8 +91,8 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Seasonal Confluence</label>
                             <select v-model="fundamentals.seasonalConfluence"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                    @change="updateProgress">
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                @change="updateProgress">
                                 <option value="" disabled>Select Seasonal Confluence</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
@@ -90,8 +101,8 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Non-Commercials</label>
                             <select v-model="fundamentals.nonCommercials"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                    @change="updateProgress">
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                @change="updateProgress">
                                 <option value="" disabled>Select Non-Commercials</option>
                                 <option value="Divergence">Divergence</option>
                                 <option value="No-Divergence">No-Divergence</option>
@@ -100,36 +111,56 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">CoT Index</label>
                             <select v-model="fundamentals.cotIndex"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                    @change="updateProgress">
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                @change="updateProgress">
                                 <option value="" disabled>Select CoT Index</option>
                                 <option value="Bullish">Bullish</option>
                                 <option value="Neutral">Neutral</option>
                                 <option value="Bearish">Bearish</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            <textarea v-model="notes"
+                                class="form-textarea w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
+                                rows="4" placeholder="Add any notes about this trade setup"></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Navigation Buttons -->
                 <div class="mt-6 flex justify-between">
-                    <button v-if="currentStep > 1" @click="currentStep--"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                        Previous
+                    <button @click="resetWizard"
+                        class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-red-500 transition-colors hover:cursor-pointer">
+                        Reset
                     </button>
-                    <button v-if="currentStep < 3" @click="currentStep++"
-                            class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
-                        Next
-                    </button>
+                    <span>
+                        <button v-if="currentStep > 1" @click="currentStep--"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors hover:cursor-pointer">
+                            Previous
+                        </button>
+                        <button v-if="currentStep < 3" @click="currentStep++"
+                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
+                            Next
+                        </button>
+                        <button v-if="currentStep === 3" @click="submitChecklist" :disabled="!canSubmit"
+                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md transition-colors hover:bg-blue-800 hover:cursor-pointer">
+                            Submit
+                        </button>
+                    </span>
                 </div>
 
                 <!-- Progress Bar -->
                 <div class="mt-6">
                     <div class="progress-bar-container bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div class="progress-bar bg-emerald-500 h-full transition-all duration-300"
-                             :style="{ width: progressPercentage + '%' }"></div>
+                        <div class="progress-bar h-full transition-all duration-300"
+                            :style="{ width: evaluationScore + '%' }" :class="{
+                                'bg-red-500': evaluationScore < 50,
+                                'bg-yellow-500': evaluationScore >= 50 && evaluationScore <= 80,
+                                'bg-emerald-500': evaluationScore > 80
+                            }">
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-600 mt-2">{{ progressPercentage }}% Completed</p>
                 </div>
             </div>
 
@@ -145,90 +176,156 @@
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Fundamentals</h3>
                         <p class="text-sm text-gray-600">Valuation: {{ fundamentals.valuation || 'Not selected' }}</p>
-                        <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence || 'Not selected' }}</p>
-                        <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not selected' }}</p>
+                        <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence || "Not selected" }} </p>
+                        <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not selected' }} </p>
                         <p class="text-sm text-gray-600">CoT Index: {{ fundamentals.cotIndex || 'Not selected' }}</p>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount }})</h3>
+                        <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
+                        }})</h3>
                         <ul class="list-disc pl-5 text-sm text-gray-600">
-                            <li v-for="(qualifier, index) in zoneQualifiers" :key="index"
-                                v-if="checkedZoneQualifiers[index]">
+                            <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
                                 {{ qualifier }}
                             </li>
-                            <li v-if="selectedZoneQualifiersCount === 0" class="text-gray-500">None selected</li>
+                            <li v-if="filteredZoneQualifiers.length === 0" class="text-gray-500">None selected</li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="text-xl font-semibold text-blue-900">Evaluation Score</h3>
-                        <p class="text-2xl font-bold text-emerald-600">{{ evaluationScore }}/140</p>
+                        <p :class="['text-2xl font-bold px-4 py-2 rounded-md inline-block',
+                            evaluationScore < 50 ? 'text-red-600 bg-red-100' :
+                                evaluationScore <= 70 ? 'text-yellow-600 bg-yellow-100' :
+                                    'text-emerald-600 bg-emerald-100']">
+                            {{ evaluationScore }}/100
+                        </p>
+                        <div v-if="evaluationScore === 100" class="text-yellow-500 mt-2 font-bold text-lg text-center">★
+                            All Stars Aligned ★</div>
                     </div>
                 </div>
             </div>
+            <Link :href="'/user-settings'" as="button"
+                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-700 transition-colors hover:cursor-pointer">
+            modify weights
+            </Link>
         </div>
     </div>
 </template>
 
-<script>
-export default {
-    data() {
-        return {
-            currentStep: 1,
-            steps: ['Zone Qualifiers', 'Technicals', 'Fundamentals'],
-            technicals: {
-                location: '',
-                direction: ''
-            },
-            fundamentals: {
-                valuation: '',
-                seasonalConfluence: '',
-                nonCommercials: '',
-                cotIndex: ''
-            },
-            zoneQualifiers: [
-                'Fresh',
-                'Original',
-                'Flip',
-                'LOL',
-                'Minimum 1:2 Profit Margin',
-                'Big Brother Coverage'
-            ],
-            checkedZoneQualifiers: Array(6).fill(false),
-            progressCount: 0,
-            totalInputs: 12 // Total number of inputs across all steps
-        };
-    },
-    computed: {
-        progressPercentage() {
-            return Math.round((this.progressCount / this.totalInputs) * 100);
-        },
-        selectedZoneQualifiersCount() {
-            return this.checkedZoneQualifiers.filter(Boolean).length;
-        },
-        evaluationScore() {
-            let score = 0;
-            score += this.checkedZoneQualifiers.filter(Boolean).length * 10; // Each Zone Qualifier adds 10 points
-            score += this.technicals.location ? 20 : 0; // Location adds 20 points
-            score += this.technicals.direction ? 20 : 0; // Direction adds 20 points
-            score += this.fundamentals.valuation === 'Undervalued' ? 30 : this.fundamentals.valuation ? 10 : 0; // Undervalued: 30, others: 10
-            score += this.fundamentals.seasonalConfluence === 'Yes' ? 20 : 0; // Yes: 20 points
-            score += this.fundamentals.nonCommercials === 'Divergence' ? 15 : 0; // Divergence: 15 points
-            score += this.fundamentals.cotIndex === 'Bullish' ? 25 : this.fundamentals.cotIndex === 'Neutral' ? 10 : 0; // Bullish: 25, Neutral: 10
-            return score;
+<script setup>
+import { ref, computed } from 'vue';
+import { Inertia } from '@inertiajs/inertia';
+import { Link } from '@inertiajs/vue3';
+
+const props = defineProps({
+    settings: Object
+})
+
+const currentStep = ref(1);
+const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals'];
+const technicals = ref({ location: '', direction: '' });
+const fundamentals = ref({ valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' });
+const zoneQualifiers = [
+    'Fresh',
+    'Original',
+    'Flip',
+    'LOL',
+    'Minimum 1:2 Profit Margin',
+    'Big Brother Coverage'
+];
+const asset = ref('');
+const notes = ref('');
+const checkedZoneQualifiers = ref(Array(6).fill(false));
+const progressCount = ref(0);
+const totalInputs = 12;
+const message = ref('');
+const messageType = ref('');
+
+const progressPercentage = computed(() => {
+    return Math.round((progressCount.value / totalInputs) * 100);
+});
+const selectedZoneQualifiersCount = computed(() => checkedZoneQualifiers.value.filter(Boolean).length);
+const filteredZoneQualifiers = computed(() => zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]));
+const evaluationScore = computed(() => {
+    let score = 0;
+    // Zone qualifiers: add individual weights based on selection
+    const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
+    zoneKeys.forEach((key, idx) => {
+        if (checkedZoneQualifiers.value[idx]) {
+            score += Number(props.settings[`zone_${key}_weight`] || 0);
         }
-    },
-    methods: {
-        updateProgress() {
-            this.progressCount = this.checkedZoneQualifiers.filter(Boolean).length +
-                (this.technicals.location ? 1 : 0) +
-                (this.technicals.direction ? 1 : 0) +
-                (this.fundamentals.valuation ? 1 : 0) +
-                (this.fundamentals.seasonalConfluence ? 1 : 0) +
-                (this.fundamentals.nonCommercials ? 1 : 0) +
-                (this.fundamentals.cotIndex ? 1 : 0);
-        }
+    });
+    score += ['Very Cheap', 'Very Expensive'].includes(technicals.value.location) ? props.settings.technical_very_exp_chp_weight :
+        ['Cheap', 'Expensive'].includes(technicals.value.location) ? props.settings.technical_exp_chp_weight : 0;
+    score += technicals.value.direction === 'Correction' ? props.settings.technical_direction_correction_weight :
+        technicals.value.direction === 'Impulsion' ? props.settings.technical_direction_impulsive_weight : 0;
+    score += ['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation) ? props.settings.fundamental_valuation_weight : 0;
+    score += fundamentals.value.seasonalConfluence === 'Yes' ? props.settings.fundamental_seasonal_weight : 0;
+    score += fundamentals.value.nonCommercials === 'Divergence' ? props.settings.fundamental_noncommercial_divergence_weight : 0;
+    score += ['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex) ? props.settings.fundamental_cot_index_weight : 0;
+    return score;
+});
+const canProceed = computed(() => {
+    if (currentStep.value === 1) {
+        return selectedZoneQualifiersCount.value > 0;
     }
-};
+    if (currentStep.value === 2) {
+        return technicals.value.location && technicals.value.direction;
+    }
+    return true;
+});
+const canSubmit = computed(() => {
+    return technicals.value.location &&
+        technicals.value.direction &&
+        fundamentals.value.valuation &&
+        fundamentals.value.seasonalConfluence &&
+        fundamentals.value.nonCommercials &&
+        fundamentals.value.cotIndex &&
+        selectedZoneQualifiersCount.value > 0;
+});
+
+function updateProgress() {
+    progressCount.value = checkedZoneQualifiers.value.filter(Boolean).length +
+        (technicals.value.location ? 1 : 0) +
+        (technicals.value.direction ? 1 : 0) +
+        (fundamentals.value.valuation ? 1 : 0) +
+        (fundamentals.value.seasonalConfluence ? 1 : 0) +
+        (fundamentals.value.nonCommercials ? 1 : 0) +
+        (fundamentals.value.cotIndex ? 1 : 0);
+}
+function resetWizard() {
+    currentStep.value = 1;
+    technicals.value = { location: '', direction: '' };
+    fundamentals.value = { valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' };
+    checkedZoneQualifiers.value = Array(6).fill(false);
+    asset.value = '';
+    notes.value = '';
+    progressCount.value = 0;
+}
+function submitChecklist() {
+    if (!canSubmit.value) return;
+    message.value = '';
+    messageType.value = '';
+    Inertia.post('/checklists', {
+        zone_qualifiers: zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]),
+        technicals: technicals.value,
+        fundamentals: fundamentals.value,
+        score: evaluationScore.value,
+        asset: asset.value,
+        notes: notes.value
+    }, {
+        preserveState: true,
+        onSuccess: () => {
+            message.value = 'Checklist saved successfully!';
+            messageType.value = 'success';
+            resetWizard();
+        },
+        onError: (errors) => {
+            message.value = 'Failed to save checklist: ' + (errors.message || Object.values(errors).join(', '));
+            messageType.value = 'error';
+            console.error('Submission error:', errors);
+        }
+    });
+}
 </script>
 
 <style scoped>
@@ -236,6 +333,7 @@ export default {
 .form-select {
     transition: all 0.3s ease;
 }
+
 .form-select:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
