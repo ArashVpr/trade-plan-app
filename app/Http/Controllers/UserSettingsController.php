@@ -14,7 +14,7 @@ class UserSettingsController extends Controller
         $settings = UserSettings::firstOrCreate(
             ['user_id' => 1], // Replace with Auth::id() in production
             [
-                'zone_fresh_weight' => 10,
+                'zone_fresh_weight' => 10, 
                 'zone_original_weight' => 10,
                 'zone_flip_weight' => 10,
                 'zone_lol_weight' => 10,
@@ -54,8 +54,8 @@ class UserSettingsController extends Controller
         ]);
 
         $totalWeight = array_sum($validated);
-        if ($totalWeight !== 140) {
-            return back()->withErrors(['error' => 'The total weight must equal 140.']);
+        if ($totalWeight !== 100) {
+            return back()->withErrors(['error' => 'The total weight must equal 100.']);
         }
 
         $settings = UserSettings::updateOrCreate(
@@ -63,6 +63,6 @@ class UserSettingsController extends Controller
             $validated
         );
 
-        return redirect()->route('user-settings.index')->with('success', 'Settings updated successfully!');
+        return to_route('checklists.index')->with('success', 'Settings updated successfully!');
     }
 }
