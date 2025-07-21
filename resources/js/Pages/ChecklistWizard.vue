@@ -131,20 +131,20 @@
                 <!-- Navigation Buttons -->
                 <div class="mt-6 flex justify-between">
                     <button @click="resetWizard"
-                        class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-red-500 transition-colors">
+                        class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-red-500 transition-colors hover:cursor-pointer">
                         Reset
                     </button>
                     <span>
                         <button v-if="currentStep > 1" @click="currentStep--"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors hover:cursor-pointer">
                             Previous
                         </button>
                         <button v-if="currentStep < 3" @click="currentStep++"
-                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors">
+                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
                             Next
                         </button>
                         <button v-if="currentStep === 3" @click="submitChecklist" :disabled="!canSubmit"
-                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md transition-colors">
+                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md transition-colors hover:bg-blue-800 hover:cursor-pointer">
                             Submit
                         </button>
                     </span>
@@ -161,7 +161,6 @@
                             }">
                         </div>
                     </div>
-                    <!-- <p class="text-sm text-gray-600 mt-2">{{ evaluationScore }} Score</p> -->
                 </div>
             </div>
 
@@ -220,8 +219,6 @@ import { Link } from '@inertiajs/vue3';
 const props = defineProps({
     settings: Object
 })
-console.log('id is:', props.settings);
-
 
 const currentStep = ref(1);
 const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals'];
