@@ -132,6 +132,7 @@ const props = defineProps({
     settings: Object,
     defaults: Object,
 })
+
 // Initialize form with persisted settings
 const form = useForm({
     ...props.settings

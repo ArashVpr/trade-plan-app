@@ -5,14 +5,16 @@ use App\Http\Controllers\UserSettingsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render(
-        'ChecklistWizard',
-        [
-            'name' => 'Arash God'
-        ]
-    );
-});
+// Route::get('/', function () {
+//     return Inertia::render(
+//         'ChecklistWizard',
+//         [
+//             'name' => 'Arash God'
+//         ]
+//     );
+// });
+
+Route::get('/', [ChecklistController::class, 'checklistWeights'])->name('home');
 
 Route::middleware('auth')->group(function () {
 });

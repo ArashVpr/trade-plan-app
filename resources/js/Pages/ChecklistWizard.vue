@@ -183,7 +183,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
-                            }})</h3>
+                        }})</h3>
                         <ul class="list-disc pl-5 text-sm text-gray-600">
                             <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
                                 {{ qualifier }}
@@ -217,6 +217,12 @@ import { ref, computed } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 import { Link } from '@inertiajs/vue3';
 
+const props = defineProps({
+    settings: Object
+})
+console.log('id is:', props.settings);
+
+
 const currentStep = ref(1);
 const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals'];
 const technicals = ref({ location: '', direction: '' });
@@ -244,15 +250,21 @@ const selectedZoneQualifiersCount = computed(() => checkedZoneQualifiers.value.f
 const filteredZoneQualifiers = computed(() => zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]));
 const evaluationScore = computed(() => {
     let score = 0;
-    score += checkedZoneQualifiers.value.filter(Boolean).length * 5;
-    score += ['Very Cheap', 'Very Expensive'].includes(technicals.value.location) ? 12 :
-        ['Cheap', 'Expensive'].includes(technicals.value.location) ? 7 : 0;
-    score += technicals.value.direction === 'Correction' ? 6 :
-        technicals.value.direction === 'Impulsion' ? 12 : 0;
-    score += ['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation) ? 13 : 0;
-    score += fundamentals.value.seasonalConfluence === 'Yes' ? 6 : 0;
-    score += fundamentals.value.nonCommercials === 'Divergence' ? 15 : 0;
-    score += ['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex) ? 12 : 0;
+    // Zone qualifiers: add individual weights based on selection
+    const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
+    zoneKeys.forEach((key, idx) => {
+        if (checkedZoneQualifiers.value[idx]) {
+            score += Number(props.settings[`zone_${key}_weight`] || 0);
+        }
+    });
+    score += ['Very Cheap', 'Very Expensive'].includes(technicals.value.location) ? props.settings.technical_very_exp_chp_weight :
+        ['Cheap', 'Expensive'].includes(technicals.value.location) ? props.settings.technical_exp_chp_weight : 0;
+    score += technicals.value.direction === 'Correction' ? props.settings.technical_direction_correction_weight :
+        technicals.value.direction === 'Impulsion' ? props.settings.technical_direction_impulsive_weight : 0;
+    score += ['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation) ? props.settings.fundamental_valuation_weight : 0;
+    score += fundamentals.value.seasonalConfluence === 'Yes' ? props.settings.fundamental_seasonal_weight : 0;
+    score += fundamentals.value.nonCommercials === 'Divergence' ? props.settings.fundamental_noncommercial_divergence_weight : 0;
+    score += ['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex) ? props.settings.fundamental_cot_index_weight : 0;
     return score;
 });
 const canProceed = computed(() => {

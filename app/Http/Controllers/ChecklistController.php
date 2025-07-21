@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
+use App\Models\UserSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -11,17 +12,6 @@ use Inertia\Inertia;
 
 class ChecklistController extends Controller
 {
-    //     public function index()
-    // {
-    //     $checklists = Checklist::where('user_id', auth()->id())
-    //         ->select('id', 'asset', 'score', 'created_at')
-    //         ->latest()
-    //         ->paginate(10);
-
-    //     return Inertia::render('Checklists/Index', [
-    //         'checklists' => $checklists
-    //     ]);
-    // }
     public function index()
     {
         $checklists = Checklist::where('user_id', '=', 1)->latest()->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
@@ -109,4 +99,13 @@ class ChecklistController extends Controller
         return Inertia::location(route('checklists.index'));
     }
 
+    public function checklistWeights()
+    {
+        $settings = UserSettings::firstOrCreate(
+            ['user_id' => 1], // Replace with Auth::id() in production
+        );
+        return Inertia::render('ChecklistWizard', [
+            'settings' => $settings,
+        ]);
+    }
 }
