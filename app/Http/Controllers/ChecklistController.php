@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
+
 class ChecklistController extends Controller
 {
     //     public function index()
@@ -39,9 +40,9 @@ class ChecklistController extends Controller
 
         $checklist = Checklist::create([
             'user_id' => 1, // Assuming a static user ID for now; replace with auth()->id() in production
-            'zone_qualifiers' => json_encode($validated['zone_qualifiers']),
-            'technicals' => json_encode($validated['technicals']),
-            'fundamentals' => json_encode($validated['fundamentals']),
+            'zone_qualifiers' => $validated['zone_qualifiers'],
+            'technicals' => $validated['technicals'],
+            'fundamentals' => $validated['fundamentals'],
             'score' => $validated['score'],
             'asset' => $validated['asset'],
             'notes' => $validated['notes'],
@@ -56,10 +57,6 @@ class ChecklistController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $checklist->zone_qualifiers = json_decode($checklist->zone_qualifiers, true);
-        $checklist->technicals = json_decode($checklist->technicals, true);
-        $checklist->fundamentals = json_decode($checklist->fundamentals, true);
-
         return Inertia::render('Checklist/Show', [
             'checklist' => $checklist,
         ]);
@@ -69,10 +66,6 @@ class ChecklistController extends Controller
         if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
             abort(403, 'Unauthorized');
         }
-
-        $checklist->zone_qualifiers = json_decode($checklist->zone_qualifiers, true);
-        $checklist->technicals = json_decode($checklist->technicals, true);
-        $checklist->fundamentals = json_decode($checklist->fundamentals, true);
 
         return Inertia::render('Checklist/Edit', [
             'checklist' => $checklist
@@ -85,7 +78,6 @@ class ChecklistController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        Log::info('Updating checklist', ['checklist_id' => $checklist->id]);
         $validated = $request->validate([
             'zone_qualifiers' => 'array|nullable',
             'technicals' => 'array|required',
@@ -103,8 +95,6 @@ class ChecklistController extends Controller
 
         $checklist->update($validated);
 
-        Log::info('Checklist updated', ['checklist_id' => $checklist->id]);
-
         return Inertia::location(route('checklists.show', $checklist));
     }
 
@@ -116,8 +106,7 @@ class ChecklistController extends Controller
 
         $checklist->delete();
 
-        Log::info('Checklist deleted', ['checklist_id' => $checklist->id]);
-
         return Inertia::location(route('checklists.index'));
     }
+
 }
