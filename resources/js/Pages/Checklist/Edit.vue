@@ -130,6 +130,55 @@
                         class="form-textarea w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
                         rows="4" placeholder="Add any notes about this trade setup"></textarea>
                 </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700">Order Entry Details</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Entry Date</label>
+                            <input type="date" v-model="form.entry_date"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Position Type</label>
+                            <select v-model="form.position_type"
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
+                                <option value="" disabled>Select Position Type</option>
+                                <option value="Long">Long</option>
+                                <option value="Short">Short</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Entry Price</label>
+                            <input type="number" v-model="form.entry_price" step="any"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Stop Price</label>
+                            <input type="number" v-model="form.stop_price" step="any"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Target Price</label>
+                            <input type="number" v-model="form.target_price" step="any"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Outcome</label>
+                            <select v-model="form.outcome"
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
+                                <option value="" disabled>Select Outcome</option>
+                                <option value="win">Win</option>
+                                <option value="loss">Loss</option>
+                                <option value="breakeven">Breakeven</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Screenshot</label>
+                            <input type="file" @change="onFileChange" accept="image/*"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -141,8 +190,11 @@ import { computed, watch } from 'vue';
 
 const props = defineProps({
     checklist: Object,
-    settings: Object
+    settings: Object,
+    tradeEntry: Object
 })
+console.log(props.tradeEntry.notes)
+
 
 const zoneQualifiers = [
     'Fresh', 'Original', 'Flip', 'LOL', 'Minimum 1:2 Profit Margin', 'Big Brother Coverage'
@@ -154,7 +206,14 @@ const form = useForm({
     fundamentals: { ...props.checklist.fundamentals },
     score: props.checklist.score,
     asset: props.checklist.asset,
-    notes: props.checklist.notes
+    notes: props.tradeEntry.notes,
+    entry_date: props.tradeEntry?.entry_date || '',
+    position_type: props.tradeEntry?.position_type || '',
+    entry_price: props.tradeEntry?.entry_price || '',
+    stop_price: props.tradeEntry?.stop_price || '',
+    target_price: props.tradeEntry?.target_price || '',
+    outcome: props.tradeEntry?.outcome || '',
+    screenshot: null
 })
 
 const canSubmit = computed(() => {
@@ -164,7 +223,13 @@ const canSubmit = computed(() => {
         form.fundamentals.seasonalConfluence &&
         form.fundamentals.nonCommercials &&
         form.fundamentals.cotIndex &&
-        form.zone_qualifiers.length > 0
+        form.zone_qualifiers.length > 0 &&
+        form.entry_date &&
+        form.position_type &&
+        form.entry_price &&
+        form.stop_price &&
+        form.target_price &&
+        form.outcome
 })
 
 const evaluationScore = () => {

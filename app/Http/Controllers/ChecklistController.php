@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Models\TradeEntry;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 
 
 class ChecklistController extends Controller
@@ -36,8 +38,8 @@ class ChecklistController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Persist checklist
-        Checklist::create([
+        // Persist checklist and capture its ID
+        $checklist = Checklist::create([
             'user_id' => 1, // replace with auth()->id() in production
             'zone_qualifiers' => $validated['zone_qualifiers'],
             'technicals' => $validated['technicals'],
@@ -45,9 +47,10 @@ class ChecklistController extends Controller
             'score' => $validated['score'],
             'asset' => $validated['asset'],
         ]);
-        // Persist corresponding trade entry
+        // Persist corresponding trade entry linked to this checklist
         TradeEntry::create([
             'user_id' => 1, // replace with auth()->id() in production
+            'checklist_id' => $checklist->id,
             'instrument' => $validated['asset'],
             'entry_date' => $validated['entry_date'],
             'position_type' => $validated['position_type'],
@@ -67,8 +70,12 @@ class ChecklistController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // Fetch the entry tied to this specific checklist
+        $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
+
         return Inertia::render('Checklist/Show', [
             'checklist' => $checklist,
+            'tradeEntry' => $tradeEntry,
         ]);
     }
     public function edit(Checklist $checklist)
@@ -79,10 +86,13 @@ class ChecklistController extends Controller
         $settings = UserSettings::firstOrCreate(
             ['user_id' => 1], // Replace with Auth::id() in production
         );
+        // Fetch the entry tied to this specific checklist
+        $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
 
         return Inertia::render('Checklist/Edit', [
             'checklist' => $checklist,
             'settings' => $settings,
+            'tradeEntry' => $tradeEntry,
         ]);
     }
     public function update(Request $request, Checklist $checklist)
@@ -103,11 +113,44 @@ class ChecklistController extends Controller
             'fundamentals.cotIndex' => 'required|string|in:Bullish,Neutral,Bearish',
             'score' => 'required|integer|min:0|max:170',
             'asset' => 'nullable|string|max:255',
+            // Order entry
+            'entry_date' => 'required|date',
+            'position_type' => 'required|in:Long,Short',
+            'entry_price' => 'required|numeric',
+            'stop_price' => 'required|numeric',
+            'target_price' => 'required|numeric',
+            'outcome' => 'required|in:win,loss,breakeven',
             'notes' => 'nullable|string',
         ]);
 
-        $checklist->update($validated);
-
+        // Update both Checklist and its TradeEntry atomically
+        DB::transaction(function () use ($checklist, $validated) {
+            // Update checklist fields
+            $checklist->update(Arr::only($validated, [
+                'zone_qualifiers',
+                'technicals',
+                'fundamentals',
+                'score',
+                'asset',
+            ]));
+            // Prepare trade entry data
+            $tradeData = Arr::only($validated, [
+                'entry_date',
+                'position_type',
+                'entry_price',
+                'stop_price',
+                'target_price',
+                'outcome',
+                'notes'
+            ]);
+            // Ensure instrument sync
+            $tradeData['instrument'] = $validated['asset'] ?? $checklist->asset;
+            // Update or create the related trade entry
+            $checklist->tradeEntry()->updateOrCreate(
+                ['checklist_id' => $checklist->id],
+                $tradeData
+            );
+        });
         return Inertia::location(route('checklists.show', $checklist));
     }
 

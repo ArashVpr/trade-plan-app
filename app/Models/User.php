@@ -45,4 +45,29 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the user settings associated with the user.
+     */
+    public function settings()
+    {
+        return $this->hasOne(UserSettings::class);
+    }
+
+    /**
+     * Get the checklists associated with the user.
+     */
+    public function checklists()
+    {
+        return $this->hasMany(Checklist::class);
+    }
+
+    /**
+     * Get the trade entries associated with the user.
+     */
+
+    public function tradeEntries()
+    {
+        return $this->hasMany(TradeEntry::class);
+    }
 }

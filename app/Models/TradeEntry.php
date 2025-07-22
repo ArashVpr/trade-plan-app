@@ -11,6 +11,7 @@ class TradeEntry extends Model
 
     protected $fillable = [
         'user_id',
+        'checklist_id',
         'instrument',
         'position_type',
         'entry_date',
@@ -21,4 +22,9 @@ class TradeEntry extends Model
         'screenshot_path',
         'outcome',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

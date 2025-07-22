@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('trade_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('checklist_id')->constrained()->cascadeOnDelete();
             $table->string('instrument');
             $table->date('entry_date');
             $table->enum('position_type', ['Long', 'Short'])->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->string('screenshot_path')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+
         });
     }
 
