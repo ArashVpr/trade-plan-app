@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('score')->default(0); // Calculated evaluation score
             $table->string('asset')->nullable(); // Optional: Asset being evaluated (e.g., stock, forex pair)
             $table->text('notes')->nullable(); // Optional: User notes for the checklist
+            $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Foreign key constraint to ensure checklist belongs to a user
         });

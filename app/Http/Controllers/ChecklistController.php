@@ -56,9 +56,13 @@ class ChecklistController extends Controller
         if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
             abort(403, 'Unauthorized');
         }
+        $settings = UserSettings::firstOrCreate(
+            ['user_id' => 1], // Replace with Auth::id() in production
+        );
 
         return Inertia::render('Checklist/Edit', [
-            'checklist' => $checklist
+            'checklist' => $checklist,
+            'settings' => $settings,
         ]);
     }
     public function update(Request $request, Checklist $checklist)
