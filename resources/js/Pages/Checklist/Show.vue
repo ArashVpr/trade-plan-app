@@ -36,30 +36,10 @@
                                         'text-emerald-600 bg-emerald-100']">
                                 {{ checklist.score }}/100
                             </p>
-                            <div v-if="checklist.score === 100"
-                                class="text-yellow-500 mt-2 font-bold text-lg text-center">★ All
-                                Stars Aligned ★</div>
                         </div>
                         <div>
                             <h3 class="text-lg font-medium text-gray-700">Created</h3>
                             <p class="text-sm text-gray-600">{{ new Date(checklist.created_at).toLocaleDateString() }}
-                            </p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Technicals</h3>
-                            <p class="text-sm text-gray-600">Location: {{ checklist.technicals.location || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">Direction: {{ checklist.technicals.direction || 'Not selected' }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Fundamentals</h3>
-                            <p class="text-sm text-gray-600">Valuation: {{ checklist.fundamentals.valuation || 'Not selected' }}
-                            </p>
-                            <p class="text-sm text-gray-600">Seasonal Confluence: {{
-                                checklist.fundamentals.seasonalConfluence
-                                || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">Non-Commercials: {{ checklist.fundamentals.nonCommercials
-                                || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">CoT Index: {{ checklist.fundamentals.cotIndex || 'Not selected' }}
                             </p>
                         </div>
                         <div>
@@ -75,6 +55,19 @@
                             </ul>
                         </div>
                         <div>
+                            <h3 class="text-lg font-medium text-gray-700">Technicals</h3>
+                            <p class="text-sm text-gray-600">Location: {{ checklist.technicals.location || 'Not selected' }}</p>
+                            <p class="text-sm text-gray-600">Direction: {{ checklist.technicals.direction || 'Not selected' }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700">Fundamentals</h3>
+                            <p class="text-sm text-gray-600">Valuation: {{ checklist.fundamentals.valuation || 'Not selected' }}</p>
+                            <p class="text-sm text-gray-600">Seasonal Confluence: {{ checklist.fundamentals.seasonalConfluence || 'Not selected' }}</p>
+                            <p class="text-sm text-gray-600">Non-Commercials: {{ checklist.fundamentals.nonCommercials || 'Not selected' }}</p>
+                            <p class="text-sm text-gray-600">CoT Index: {{ checklist.fundamentals.cotIndex || 'Not selected' }}</p>
+                        </div>
+
+                        <div>
                             <h3 class="text-lg font-medium text-gray-700">Notes</h3>
                             <p class="text-sm text-gray-600">{{ checklist.notes || 'No notes provided' }}</p>
                         </div>
@@ -85,7 +78,11 @@
                     <div class="w-full h-80">
                         <Radar :data="chartData" :options="chartOptions" />
                     </div>
+                    <div v-if="checklist.score === 100" class="text-yellow-500 mt-2 font-bold text-lg text-center">
+                        ★ All Stars Aligned ★
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>

@@ -46,9 +46,6 @@ class UserSettingsController extends Controller
         ]);
 
         $totalWeight = array_sum($validated);
-        if ($totalWeight !== 100) {
-            return back()->withErrors(['error' => 'The total weight must equal 100.']);
-        }
 
         $settings = UserSettings::updateOrCreate(
             ['user_id' => 1], // Replace with Auth::id() in production

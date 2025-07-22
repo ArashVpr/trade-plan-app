@@ -29,7 +29,7 @@
                     <h3 class="text-lg font-medium text-gray-700">Score</h3>
                     <p :class="['text-xl font-bold px-4 py-2 rounded-md inline-block',
                         form.score < 50 ? 'text-red-600 bg-red-100' :
-                            form.score <= 80 ? 'text-yellow-600 bg-yellow-100' :
+                            form.score <= 70 ? 'text-yellow-600 bg-yellow-100' :
                                 'text-emerald-600 bg-emerald-100']">
                         {{ form.score }}/100
                     </p>
@@ -140,10 +140,8 @@ import { Link, useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 
 const props = defineProps({
-    checklist: {
-        type: Object,
-        required: true
-    }
+    checklist: Object,
+    settings: Object
 })
 
 const zoneQualifiers = [
@@ -170,17 +168,60 @@ const canSubmit = computed(() => {
 })
 
 const evaluationScore = () => {
-    let score = 0;
-    score += form.zone_qualifiers.filter(Boolean).length * 5 // Each checked zone qualifier contributes 5 points
-    score += ['Very Cheap', 'Very Expensive'].includes(form.technicals.location) ? 12 : // 12 points for 'Very Cheap' and 'Very Expensive'
-        ['Cheap', 'Expensive'].includes(form.technicals.location) ? 7 : 0
-    score += form.technicals.direction === 'Correction' ? 6 :
-        form.technicals.direction === 'Impulsion' ? 12 : 0
-    score += ['Undervalued', 'Overvalued'].includes(form.fundamentals.valuation) ? 13 : 0
-    score += form.fundamentals.seasonalConfluence === 'Yes' ? 6 : 0
-    score += form.fundamentals.nonCommercials === 'Divergence' ? 15 : 0
-    score += ['Bullish', 'Bearish'].includes(form.fundamentals.cotIndex) ? 12 : 0
-    form.score = score
+    // 1. Raw weighted score
+    let raw = 0;
+    const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
+    zoneKeys.forEach((key, idx) => {
+        if (form.zone_qualifiers.includes(zoneQualifiers[idx])) {
+            raw += Number(props.settings[`zone_${key}_weight`] || 0);
+        }
+    });
+    // Technicals: Location
+    if (['Very Cheap', 'Very Expensive'].includes(form.technicals.location)) {
+        raw += Number(props.settings.technical_very_exp_chp_weight || 0);
+    } else if (['Cheap', 'Expensive'].includes(form.technicals.location)) {
+        raw += Number(props.settings.technical_exp_chp_weight || 0);
+    }
+    // Technicals: Direction
+    if (form.technicals.direction === 'Impulsion') {
+        raw += Number(props.settings.technical_direction_impulsive_weight || 0);
+    } else if (form.technicals.direction === 'Correction') {
+        raw += Number(props.settings.technical_direction_correction_weight || 0);
+    }
+    // Fundamentals: Valuation
+    if (['Undervalued', 'Overvalued'].includes(form.fundamentals.valuation)) {
+        raw += Number(props.settings.fundamental_valuation_weight || 0);
+    }
+    // Fundamentals: Seasonal
+    if (form.fundamentals.seasonalConfluence === 'Yes') {
+        raw += Number(props.settings.fundamental_seasonal_weight || 0);
+    }
+    // Fundamentals: Non-Commercial
+    if (form.fundamentals.nonCommercials === 'Divergence') {
+        raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
+    }
+    // Fundamentals: CoT Index
+    if (['Bullish', 'Bearish'].includes(form.fundamentals.cotIndex)) {
+        raw += Number(props.settings.fundamental_cot_index_weight || 0);
+    }
+    // 2. Max possible score based on one selection per category
+    const zoneMax = zoneKeys.reduce((sum, key) => sum + Number(props.settings[`zone_${key}_weight`] || 0), 0);
+    const locHigh = Math.max(
+        Number(props.settings.technical_very_exp_chp_weight || 0),
+        Number(props.settings.technical_exp_chp_weight || 0)
+    );
+    const dirHigh = Math.max(
+        Number(props.settings.technical_direction_impulsive_weight || 0),
+        Number(props.settings.technical_direction_correction_weight || 0)
+    );
+    const fundMax =
+        Number(props.settings.fundamental_valuation_weight || 0) +
+        Number(props.settings.fundamental_seasonal_weight || 0) +
+        Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
+        Number(props.settings.fundamental_cot_index_weight || 0);
+    const max = zoneMax + locHigh + dirHigh + fundMax;
+    // 3. Normalize to 0-100
+    form.score = max > 0 ? Math.round((raw / max) * 100) : 0;
 };
 
 // Watch for changes in form fields and update score

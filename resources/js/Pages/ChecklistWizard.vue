@@ -246,23 +246,61 @@ const progressPercentage = computed(() => {
 const selectedZoneQualifiersCount = computed(() => checkedZoneQualifiers.value.filter(Boolean).length);
 const filteredZoneQualifiers = computed(() => zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]));
 const evaluationScore = computed(() => {
-    let score = 0;
-    // Zone qualifiers: add individual weights based on selection
+    // 1. Compute raw weighted score
+    let raw = 0;
     const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
     zoneKeys.forEach((key, idx) => {
         if (checkedZoneQualifiers.value[idx]) {
-            score += Number(props.settings[`zone_${key}_weight`] || 0);
+            raw += Number(props.settings[`zone_${key}_weight`] || 0);
         }
     });
-    score += ['Very Cheap', 'Very Expensive'].includes(technicals.value.location) ? props.settings.technical_very_exp_chp_weight :
-        ['Cheap', 'Expensive'].includes(technicals.value.location) ? props.settings.technical_exp_chp_weight : 0;
-    score += technicals.value.direction === 'Correction' ? props.settings.technical_direction_correction_weight :
-        technicals.value.direction === 'Impulsion' ? props.settings.technical_direction_impulsive_weight : 0;
-    score += ['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation) ? props.settings.fundamental_valuation_weight : 0;
-    score += fundamentals.value.seasonalConfluence === 'Yes' ? props.settings.fundamental_seasonal_weight : 0;
-    score += fundamentals.value.nonCommercials === 'Divergence' ? props.settings.fundamental_noncommercial_divergence_weight : 0;
-    score += ['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex) ? props.settings.fundamental_cot_index_weight : 0;
-    return score;
+    // Technicals: Location
+    if (['Very Cheap', 'Very Expensive'].includes(technicals.value.location)) {
+        raw += Number(props.settings.technical_very_exp_chp_weight || 0);
+    } else if (['Cheap', 'Expensive'].includes(technicals.value.location)) {
+        raw += Number(props.settings.technical_exp_chp_weight || 0);
+    }
+    // Technicals: Direction
+    if (technicals.value.direction === 'Impulsion') {
+        raw += Number(props.settings.technical_direction_impulsive_weight || 0);
+    } else if (technicals.value.direction === 'Correction') {
+        raw += Number(props.settings.technical_direction_correction_weight || 0);
+    }
+    // Fundamentals
+    if (['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation)) {
+        raw += Number(props.settings.fundamental_valuation_weight || 0);
+    }
+    if (fundamentals.value.seasonalConfluence === 'Yes') {
+        raw += Number(props.settings.fundamental_seasonal_weight || 0);
+    }
+    if (fundamentals.value.nonCommercials === 'Divergence') {
+        raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
+    }
+    if (['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex)) {
+        raw += Number(props.settings.fundamental_cot_index_weight || 0);
+    }
+    // 2. Compute max possible score based on one selection per category
+    const zoneMax = zoneKeys.reduce((sum, key) => sum + Number(props.settings[`zone_${key}_weight`] || 0), 0);
+    // Technicals: Location (pick the higher of very_exp or exp)
+    const locHigh = Math.max(
+        Number(props.settings.technical_very_exp_chp_weight || 0),
+        Number(props.settings.technical_exp_chp_weight || 0)
+    );
+    // Technicals: Direction (pick the higher of impulsive or correction)
+    const dirHigh = Math.max(
+        Number(props.settings.technical_direction_impulsive_weight || 0),
+        Number(props.settings.technical_direction_correction_weight || 0)
+    );
+    // Fundamentals: sum of all criteria
+    const fundMax =
+        Number(props.settings.fundamental_valuation_weight || 0) +
+        Number(props.settings.fundamental_seasonal_weight || 0) +
+        Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
+        Number(props.settings.fundamental_cot_index_weight || 0);
+    const max = zoneMax + locHigh + dirHigh + fundMax;
+
+    // 3. Normalize to a 0–100 scale
+    return max > 0 ? Math.round((raw / max) * 100) : 0;
 });
 const canProceed = computed(() => {
     if (currentStep.value === 1) {
