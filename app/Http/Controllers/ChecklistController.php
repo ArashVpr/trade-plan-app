@@ -35,6 +35,7 @@ class ChecklistController extends Controller
             'stop_price' => 'required|numeric',
             'target_price' => 'required|numeric',
             'outcome' => 'required|in:win,loss,breakeven',
+            'rrr' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
 
@@ -58,6 +59,7 @@ class ChecklistController extends Controller
             'stop_price' => $validated['stop_price'],
             'target_price' => $validated['target_price'],
             'outcome' => $validated['outcome'],
+            'rrr' => $validated['rrr'],
             'notes' => $validated['notes'],
         ]);
 
@@ -120,6 +122,7 @@ class ChecklistController extends Controller
             'stop_price' => 'required|numeric',
             'target_price' => 'required|numeric',
             'outcome' => 'required|in:win,loss,breakeven',
+            'rrr' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
 
@@ -140,6 +143,7 @@ class ChecklistController extends Controller
                 'entry_price',
                 'stop_price',
                 'target_price',
+                'rrr',
                 'outcome',
                 'notes'
             ]);

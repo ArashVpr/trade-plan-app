@@ -9,19 +9,21 @@ class TradeEntry extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'checklist_id',
-        'instrument',
-        'position_type',
-        'entry_date',
-        'entry_price',
-        'stop_price',
-        'target_price',
-        'notes',
-        'screenshot_path',
-        'outcome',
-    ];
+    protected $guarded = [];
+
+    // protected $fillable = [
+    //     'user_id',
+    //     'checklist_id',
+    //     'instrument',
+    //     'position_type',
+    //     'entry_date',
+    //     'entry_price',
+    //     'stop_price',
+    //     'target_price',
+    //     'notes',
+    //     'screenshot_path',
+    //     'outcome',
+    // ];
 
     public function user()
     {

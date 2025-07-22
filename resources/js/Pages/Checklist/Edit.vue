@@ -177,6 +177,11 @@
                             <input type="file" @change="onFileChange" accept="image/*"
                                 class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">R:R</label>
+                            <input type="number" v-model="form.rrr" step="any"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
                     </div>
                 </div>
             </form>
@@ -213,6 +218,7 @@ const form = useForm({
     stop_price: props.tradeEntry?.stop_price || '',
     target_price: props.tradeEntry?.target_price || '',
     outcome: props.tradeEntry?.outcome || '',
+    rrr: props.tradeEntry?.rrr || '',
     screenshot: null
 })
 
@@ -229,7 +235,8 @@ const canSubmit = computed(() => {
         form.entry_price &&
         form.stop_price &&
         form.target_price &&
-        form.outcome
+        form.outcome &&
+        form.rrr
 })
 
 const evaluationScore = () => {

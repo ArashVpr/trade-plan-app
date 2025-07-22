@@ -50,6 +50,10 @@
                         <p class="text-sm text-gray-600">{{ tradeEntry.outcome || 'N/A' }}</p>
                     </div>
                     <div>
+                            <h3 class="text-lg font-medium text-gray-700">R:R</h3>
+                            <p class="text-sm text-gray-600">{{ tradeEntry.rrr }}</p>
+                        </div>
+                    <div>
                         <h3 class="text-lg font-medium text-gray-700">Notes</h3>
                         <p class="text-sm text-gray-600">{{ tradeEntry.notes || 'None' }}</p>
                     </div>

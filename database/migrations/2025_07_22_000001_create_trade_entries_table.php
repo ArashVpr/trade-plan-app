@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('stop_price', 12, 4);
             $table->decimal('target_price', 12, 4);
             $table->enum('outcome', ['win', 'loss', 'breakeven'])->nullable();
+            $table->decimal('rrr', 4, 2)->nullable(); // Risk-Reward Ratio
             $table->string('screenshot_path')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

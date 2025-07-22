@@ -172,6 +172,11 @@
                                 <option value="breakeven">Breakeven</option>
                             </select>
                         </div>
+                        <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">R:R</label>
+                                <input type="number" step="0.0001" v-model="rrr" @input="updateProgress"
+                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                            </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Screenshot</label>
                             <input type="file" @change="e => screenshot = e.target.files[0]"
@@ -298,6 +303,7 @@ const stopPrice = ref('');
 const targetPrice = ref('');
 const positionType = ref('');
 const outcome = ref('');
+const rrr = ref('');
 const screenshot = ref(null);
 const checkedZoneQualifiers = ref(Array(6).fill(false));
 const progressCount = ref(0);
@@ -380,7 +386,7 @@ const canProceed = computed(() => {
         return fundamentals.value.valuation && fundamentals.value.seasonalConfluence && fundamentals.value.nonCommercials && fundamentals.value.cotIndex;
     }
     if (currentStep.value === 4) {
-        return entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value;
+        return entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value && rrr.value;
     }
     return false;
 });
@@ -392,7 +398,7 @@ const canSubmit = computed(() => {
         fundamentals.value.seasonalConfluence &&
         fundamentals.value.nonCommercials &&
         fundamentals.value.cotIndex &&
-        entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value;
+        entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value && rrr.value;
 });
 
 function updateProgress() {
@@ -409,6 +415,7 @@ function updateProgress() {
         + + (targetPrice.value ? 1 : 0)
         + + (positionType.value ? 1 : 0)
         + + (outcome.value ? 1 : 0)
+        + + (rrr.value ? 1 : 0)
         + + (screenshot.value ? 1 : 0);
 }
 function resetWizard() {
@@ -424,6 +431,7 @@ function resetWizard() {
     targetPrice.value = '';
     positionType.value = '';
     outcome.value = '';
+    rrr.value = '';
     screenshot.value = null;
     progressCount.value = 0;
 }
@@ -444,6 +452,7 @@ function submitChecklist() {
         target_price: targetPrice.value,
         position_type: positionType.value,
         outcome: outcome.value,
+        rrr: rrr.value,
         screenshot: screenshot.value
     }, {
         preserveState: true,
