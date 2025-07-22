@@ -29,13 +29,6 @@ Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])
 Route::put('/checklists/{checklist}', [ChecklistController::class, 'update'])->name('checklists.update');
 Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
 
-Route::get('/trade-journals', [TradeJournalController::class, 'index'])->name('trade-journals.index');
-Route::get('/trade-journals/create', [TradeJournalController::class, 'store'])->name('trade-journals.store');
-Route::post('/trade-journals', [TradeJournalController::class, 'store'])->name('trade-journals.store');
-Route::get('/trade-journals/{tradeJournal}', [TradeJournalController::class, 'show'])->name('trade-journals.show');
-Route::get('/trade-journals/{tradeJournal}/edit', [TradeJournalController::class, 'edit'])->name('trade-journals.edit');
-Route::put('/trade-journals/{tradeJournal}', [TradeJournalController::class, 'update'])->name('trade-journals.update');
-Route::delete('/trade-journals/{tradeJournal}', [TradeJournalController::class, 'destroy'])->name('trade-journals.destroy');
 
 
 // Route::get('/login', function () {

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use App\Models\TradeEntry;
 
 
 class ChecklistController extends Controller
@@ -25,16 +26,35 @@ class ChecklistController extends Controller
             'fundamentals' => 'array',
             'score' => 'integer|min:0|max:100',
             'asset' => 'nullable|string|max:255',
+            // Order entry
+            'entry_date' => 'required|date',
+            'position_type' => 'required|in:Long,Short',
+            'entry_price' => 'required|numeric',
+            'stop_price' => 'required|numeric',
+            'target_price' => 'required|numeric',
+            'outcome' => 'required|in:win,loss,breakeven',
             'notes' => 'nullable|string',
         ]);
 
-        $checklist = Checklist::create([
-            'user_id' => 1, // Assuming a static user ID for now; replace with auth()->id() in production
+        // Persist checklist
+        Checklist::create([
+            'user_id' => 1, // replace with auth()->id() in production
             'zone_qualifiers' => $validated['zone_qualifiers'],
             'technicals' => $validated['technicals'],
             'fundamentals' => $validated['fundamentals'],
             'score' => $validated['score'],
             'asset' => $validated['asset'],
+        ]);
+        // Persist corresponding trade entry
+        TradeEntry::create([
+            'user_id' => 1, // replace with auth()->id() in production
+            'instrument' => $validated['asset'],
+            'entry_date' => $validated['entry_date'],
+            'position_type' => $validated['position_type'],
+            'entry_price' => $validated['entry_price'],
+            'stop_price' => $validated['stop_price'],
+            'target_price' => $validated['target_price'],
+            'outcome' => $validated['outcome'],
             'notes' => $validated['notes'],
         ]);
 
@@ -67,7 +87,6 @@ class ChecklistController extends Controller
     }
     public function update(Request $request, Checklist $checklist)
     {
-        Log::info($checklist);
         if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
             abort(403, 'Unauthorized');
         }

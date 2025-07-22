@@ -119,11 +119,69 @@
                                 <option value="Bearish">Bearish</option>
                             </select>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Order Entry -->
+                <div v-if="currentStep === 4" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-semibold text-blue-900">Order Entry</h2>
+                        <span class="text-sm font-medium text-gray-700">Instrument: {{ asset || '—' }}</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex space-x-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Entry Date</label>
+                                <input type="date" v-model="entryDate" @change="updateProgress"
+                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Position Type</label>
+                                <select v-model="positionType" @change="updateProgress"
+                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
+                                    <option value="" disabled>Select Position Type</option>
+                                    <option value="Long">Long</option>
+                                    <option value="Short">Short</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex space-x-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Entry Price</label>
+                                <input type="number" step="0.0001" v-model="entryPrice" @input="updateProgress"
+                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Stop Price</label>
+                                <input type="number" step="0.0001" v-model="stopPrice" @input="updateProgress"
+                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Price</label>
+                                <input type="number" step="0.0001" v-model="targetPrice" @input="updateProgress"
+                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Outcome</label>
+                            <select v-model="outcome" @change="updateProgress"
+                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
+                                <option value="" disabled>Select Outcome</option>
+                                <option value="win">Win</option>
+                                <option value="loss">Loss</option>
+                                <option value="breakeven">Breakeven</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Screenshot</label>
+                            <input type="file" @change="e => screenshot = e.target.files[0]"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                            <textarea v-model="notes"
+                            <textarea v-model="notes" rows="3"
                                 class="form-textarea w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                rows="4" placeholder="Add any notes about this trade setup"></textarea>
+                                placeholder="Add any notes about this order"></textarea>
                         </div>
                     </div>
                 </div>
@@ -139,11 +197,11 @@
                             class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors hover:cursor-pointer">
                             Previous
                         </button>
-                        <button v-if="currentStep < 3" @click="currentStep++"
+                        <button v-if="currentStep < steps.length" @click="currentStep++" :disabled="!canProceed"
                             class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
                             Next
                         </button>
-                        <button v-if="currentStep === 3" @click="submitChecklist" :disabled="!canSubmit"
+                        <button v-if="currentStep === steps.length" @click="submitChecklist" :disabled="!canSubmit"
                             class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md transition-colors hover:bg-blue-800 hover:cursor-pointer">
                             Submit
                         </button>
@@ -221,7 +279,7 @@ const props = defineProps({
 })
 
 const currentStep = ref(1);
-const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals'];
+const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals', 'Order Entry'];
 const technicals = ref({ location: '', direction: '' });
 const fundamentals = ref({ valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' });
 const zoneQualifiers = [
@@ -234,11 +292,20 @@ const zoneQualifiers = [
 ];
 const asset = ref('');
 const notes = ref('');
+const entryDate = ref('');
+const entryPrice = ref('');
+const stopPrice = ref('');
+const targetPrice = ref('');
+const positionType = ref('');
+const outcome = ref('');
+const screenshot = ref(null);
 const checkedZoneQualifiers = ref(Array(6).fill(false));
 const progressCount = ref(0);
-const totalInputs = 12;
+// total fields: 6 zones + 2 technicals + 4 fundamentals + 4 entry + 1 position + 1 outcome + 1 notes + 1 screenshot = 20
+const totalInputs = 20;
 const message = ref('');
 const messageType = ref('');
+
 
 const progressPercentage = computed(() => {
     return Math.round((progressCount.value / totalInputs) * 100);
@@ -309,16 +376,23 @@ const canProceed = computed(() => {
     if (currentStep.value === 2) {
         return technicals.value.location && technicals.value.direction;
     }
-    return true;
+    if (currentStep.value === 3) {
+        return fundamentals.value.valuation && fundamentals.value.seasonalConfluence && fundamentals.value.nonCommercials && fundamentals.value.cotIndex;
+    }
+    if (currentStep.value === 4) {
+        return entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value;
+    }
+    return false;
 });
 const canSubmit = computed(() => {
-    return technicals.value.location &&
+    return selectedZoneQualifiersCount.value > 0 &&
+        technicals.value.location &&
         technicals.value.direction &&
         fundamentals.value.valuation &&
         fundamentals.value.seasonalConfluence &&
         fundamentals.value.nonCommercials &&
         fundamentals.value.cotIndex &&
-        selectedZoneQualifiersCount.value > 0;
+        entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value;
 });
 
 function updateProgress() {
@@ -328,7 +402,14 @@ function updateProgress() {
         (fundamentals.value.valuation ? 1 : 0) +
         (fundamentals.value.seasonalConfluence ? 1 : 0) +
         (fundamentals.value.nonCommercials ? 1 : 0) +
-        (fundamentals.value.cotIndex ? 1 : 0);
+        (fundamentals.value.cotIndex ? 1 : 0)
+        + + (entryDate.value ? 1 : 0)
+        + + (entryPrice.value ? 1 : 0)
+        + + (stopPrice.value ? 1 : 0)
+        + + (targetPrice.value ? 1 : 0)
+        + + (positionType.value ? 1 : 0)
+        + + (outcome.value ? 1 : 0)
+        + + (screenshot.value ? 1 : 0);
 }
 function resetWizard() {
     currentStep.value = 1;
@@ -337,6 +418,13 @@ function resetWizard() {
     checkedZoneQualifiers.value = Array(6).fill(false);
     asset.value = '';
     notes.value = '';
+    entryDate.value = '';
+    entryPrice.value = '';
+    stopPrice.value = '';
+    targetPrice.value = '';
+    positionType.value = '';
+    outcome.value = '';
+    screenshot.value = null;
     progressCount.value = 0;
 }
 function submitChecklist() {
@@ -349,7 +437,14 @@ function submitChecklist() {
         fundamentals: fundamentals.value,
         score: evaluationScore.value,
         asset: asset.value,
-        notes: notes.value
+        notes: notes.value,
+        entry_date: entryDate.value,
+        entry_price: entryPrice.value,
+        stop_price: stopPrice.value,
+        target_price: targetPrice.value,
+        position_type: positionType.value,
+        outcome: outcome.value,
+        screenshot: screenshot.value
     }, {
         preserveState: true,
         onSuccess: () => {
@@ -364,6 +459,7 @@ function submitChecklist() {
         }
     });
 }
+
 </script>
 
 <style scoped>
