@@ -18,4 +18,9 @@ class Checklist extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function tradeEntry()
+    {
+        return $this->hasOne(TradeEntry::class);
+    }
 }

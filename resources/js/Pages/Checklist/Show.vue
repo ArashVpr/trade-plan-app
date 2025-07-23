@@ -20,6 +20,50 @@
             </div>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+            <div v-if="tradeEntry" class="mb-6">
+                <h2 class="text-xl font-semibold text-blue-900 mb-4">Order Entry Details</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-700">Entry Date</h3>
+                        <p class="text-sm text-gray-600">{{ tradeEntry.entry_date || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-700">Position</h3>
+                        <p class="text-sm text-gray-600">{{ tradeEntry.position_type || 'N/A' }}</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700">Entry Price</h3>
+                            <p class="text-sm text-gray-600">{{ tradeEntry.entry_price }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700">Stop Price</h3>
+                            <p class="text-sm text-gray-600">{{ tradeEntry.stop_price }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700">Target Price</h3>
+                            <p class="text-sm text-gray-600">{{ tradeEntry.target_price }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-700">Outcome</h3>
+                        <p class="text-sm text-gray-600">{{ tradeEntry.outcome || 'N/A' }}</p>
+                    </div>
+                    <div>
+                            <h3 class="text-lg font-medium text-gray-700">R:R</h3>
+                            <p class="text-sm text-gray-600">{{ tradeEntry.rrr }}</p>
+                        </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-700">Notes</h3>
+                        <p class="text-sm text-gray-600">{{ tradeEntry.notes || 'None' }}</p>
+                    </div>
+                    <div v-if="tradeEntry.screenshot_path">
+                        <h3 class="text-lg font-medium text-gray-700">Screenshot</h3>
+                        <img :src="`/storage/${tradeEntry.screenshot_path}`" alt="screenshot"
+                            class="max-w-full h-auto rounded" />
+                    </div>
+                </div>
+            </div>
             <div class="flex flex-wrap">
                 <div class="w-full md:w-1/2">
                     <h2 class="text-xl font-semibold text-blue-900 mb-4">Trade Setup Details</h2>
@@ -45,7 +89,7 @@
                         <div>
                             <h3 class="text-lg font-medium text-gray-700">Zone Qualifiers ({{
                                 checklist.zone_qualifiers.length
-                                }})</h3>
+                            }})</h3>
                             <ul class="list-disc pl-5 text-sm text-gray-600">
                                 <li v-for="qualifier in checklist.zone_qualifiers" :key="qualifier">
                                     {{ qualifier }}
@@ -63,13 +107,14 @@
                             <h3 class="text-lg font-medium text-gray-700">Fundamentals</h3>
                             <p class="text-sm text-gray-600">Valuation: {{ checklist.fundamentals.valuation || 'Not selected' }}</p>
                             <p class="text-sm text-gray-600">Seasonal Confluence: {{ checklist.fundamentals.seasonalConfluence || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">Non-Commercials: {{ checklist.fundamentals.nonCommercials || 'Not selected' }}</p>
+                            <p class="text-sm text-gray-600">Non-Commercials: {{ checklist.fundamentals.nonCommercials
+                                || 'Not selected' }}</p>
                             <p class="text-sm text-gray-600">CoT Index: {{ checklist.fundamentals.cotIndex || 'Not selected' }}</p>
                         </div>
 
                         <div>
                             <h3 class="text-lg font-medium text-gray-700">Notes</h3>
-                            <p class="text-sm text-gray-600">{{ checklist.notes || 'No notes provided' }}</p>
+                            <p class="text-sm text-gray-600">{{ tradeEntry.notes || 'No notes provided' }}</p>
                         </div>
                     </div>
                 </div>
@@ -93,20 +138,19 @@ import { Link } from '@inertiajs/vue3'
 import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
 import { computed } from 'vue'
+import { Inertia } from '@inertiajs/inertia'
 
 Chart.register(...registerables)
 
 const props = defineProps({
-    checklist: {
-        type: Object,
-        required: true
-    }
+    checklist: Object,
+    tradeEntry: Object
 })
 
 const confirmDelete = () => {
     const result = confirm('Are you sure you want to delete this checklist? This action cannot be undone.');
     if (result) {
-        $inertia.delete(route('checklists.destroy', props.checklist.id));
+        Inertia.delete(`/checklists/${props.checklist.id}`)
     }
 }
 
