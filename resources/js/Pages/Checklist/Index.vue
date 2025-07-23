@@ -15,31 +15,77 @@
                     </Message>
                 </div>
                 <div v-else>
-                    <DataTable :value="checklists.data" :paginator="false" :rows="10" stripedRows
-                        class="p-datatable-sm">
-                        <Column field="asset" header="Asset">
+                    <DataTable :value="checklists.data" :paginator="false" :rows="10" stripedRows class="p-datatable-sm"
+                        scrollable scrollHeight="600px">
+                        <Column header="Date" :style="{ width: '100px' }">
                             <template #body="slotProps">
-                                {{ slotProps.data.asset || 'N/A' }}
+                                <span class="text-sm">
+                                    {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+                                </span>
                             </template>
                         </Column>
 
-                        <Column header="Score">
+                        <Column field="asset" header="Instrument" :style="{ width: '100px' }">
+                            <template #body="slotProps">
+                                <Chip :label="slotProps.data.asset || 'N/A'" size="small" />
+                            </template>
+                        </Column>
+
+                        <Column header="Score" :style="{ width: '80px' }">
                             <template #body="slotProps">
                                 <Tag :value="`${slotProps.data.score}/100`"
                                     :severity="getScoreSeverity(slotProps.data.score)" />
                             </template>
                         </Column>
 
-                        <Column header="Created">
+                        <Column header="Position" :style="{ width: '80px' }">
                             <template #body="slotProps">
-                                {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+                                <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
+                                    :severity="slotProps.data.trade_entry?.position_type === 'Long' ? 'success' : 'danger'"
+                                    v-if="slotProps.data.trade_entry?.position_type" />
+                                <span v-else class="text-gray-400 text-sm">N/A</span>
                             </template>
                         </Column>
 
-                        <Column header="Actions">
+                        <Column header="Entry Date" :style="{ width: '100px' }">
                             <template #body="slotProps">
-                                <Button label="View Details" icon="pi pi-eye" size="small"
-                                    @click="$inertia.get(`/checklists/${slotProps.data.id}`)" />
+                                <span class="text-sm">
+                                    {{ slotProps.data.trade_entry?.entry_date ?
+                                        new Date(slotProps.data.trade_entry.entry_date).toLocaleDateString() : 'N/A' }}
+                                </span>
+                            </template>
+                        </Column>
+
+                        <Column header="Outcome" :style="{ width: '90px' }">
+                            <template #body="slotProps">
+                                <Tag :value="slotProps.data.trade_entry?.outcome || 'N/A'"
+                                    :severity="getOutcomeSeverity(slotProps.data.trade_entry?.outcome)"
+                                    v-if="slotProps.data.trade_entry?.outcome" />
+                                <span v-else class="text-gray-400 text-sm">N/A</span>
+                            </template>
+                        </Column>
+
+                        <Column header="R:R" :style="{ width: '70px' }">
+                            <template #body="slotProps">
+                                <span class="text-sm font-mono">
+                                    {{ slotProps.data.trade_entry?.rrr ?
+                                        Number(slotProps.data.trade_entry.rrr).toFixed(2) : 'N/A' }}
+                                </span>
+                            </template>
+                        </Column>
+
+                        <Column header="Actions" :style="{ width: '140px' }">
+                            <template #body="slotProps">
+                                <div class="flex gap-1">
+                                    <Button icon="pi pi-eye" size="small" severity="info" text
+                                        @click="$inertia.get(`/checklists/${slotProps.data.id}`)"
+                                        v-tooltip="'View Details'" />
+                                    <Button icon="pi pi-pencil" size="small" severity="success" text
+                                        @click="$inertia.get(`/checklists/${slotProps.data.id}/edit`)"
+                                        v-tooltip="'Edit'" />
+                                    <Button icon="pi pi-trash" size="small" severity="danger" text
+                                        @click="confirmDelete(slotProps.data.id)" v-tooltip="'Delete'" />
+                                </div>
                             </template>
                         </Column>
                     </DataTable>
@@ -53,11 +99,33 @@
                 </div>
             </template>
         </Card>
+
+        <!-- PrimeVue ConfirmDialog -->
+        <ConfirmDialog group="headless">
+            <template #container="{ message, acceptCallback, rejectCallback }">
+                <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
+                    <div
+                        class="rounded-full bg-red-500 text-white inline-flex justify-center items-center h-24 w-24 -mt-20">
+                        <i class="pi pi-trash !text-4xl"></i>
+                    </div>
+                    <span class="font-bold text-2xl block mb-2 mt-6">{{ message.header }}</span>
+                    <p class="mb-0 text-center">{{ message.message }}</p>
+                    <div class="flex items-center gap-2 mt-6">
+                        <Button label="Delete" @click="acceptCallback" severity="danger" class="w-32"></Button>
+                        <Button label="Cancel" outlined @click="rejectCallback" class="w-32"></Button>
+                    </div>
+                </div>
+            </template>
+        </ConfirmDialog>
     </div>
 </template>
 
 <script setup>
 import { Link } from '@inertiajs/vue3'
+import { Inertia } from '@inertiajs/inertia'
+import { useConfirm } from 'primevue/useconfirm'
+
+const confirm = useConfirm()
 
 const props = defineProps({
     checklists: {
@@ -71,6 +139,28 @@ const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
     if (score <= 80) return 'warning'
     return 'success'
+}
+
+// Helper function to determine outcome severity
+const getOutcomeSeverity = (outcome) => {
+    switch (outcome) {
+        case 'win': return 'success'
+        case 'loss': return 'danger'
+        case 'breakeven': return 'warning'
+        default: return 'secondary'
+    }
+}
+
+// Handle delete confirmation
+const confirmDelete = (checklistId, event) => {
+    confirm.require({
+        group: 'headless',
+        header: 'Delete Checklist',
+        message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
+        accept: () => {
+            Inertia.delete(`/checklists/${checklistId}`)
+        }
+    })
 }
 
 // Handle pagination

@@ -15,9 +15,12 @@ use Illuminate\Support\Arr;
 
 class ChecklistController extends Controller
 {
-    public function index()
+        public function index()
     {
-        $checklists = Checklist::where('user_id', '=', 1)->latest()->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
+        $checklists = Checklist::with('tradeEntry')
+            ->where('user_id', '=', 1)
+            ->latest()
+            ->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
         return Inertia::render('Checklist/Index', ['checklists' => $checklists]);
     }
     public function store(Request $request)
