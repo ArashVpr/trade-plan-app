@@ -14,79 +14,6 @@
 
         <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Order Entry Details -->
-            <Card v-if="tradeEntry">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-money-bill text-blue-900"></i>
-                        <span class="text-blue-900">Order Entry Details</span>
-                    </div>
-                </template>
-                <template #content>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Entry Date -->
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Entry Date</label>
-                            <InputText :value="tradeEntry.entry_date || 'N/A'" readonly class="w-full" />
-                        </div>
-
-                        <!-- Position Type -->
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Position</label>
-                            <Tag :value="getPositionDisplay(tradeEntry.position_type)"
-                                :severity="tradeEntry.position_type === 'Long' ? 'success' : 'danger'" class="w-full" />
-                        </div>
-
-                        <!-- Prices -->
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Entry Price</label>
-                            <InputText
-                                :value="tradeEntry.entry_price ? Number(tradeEntry.entry_price).toFixed(4) : 'N/A'"
-                                readonly class="w-full" />
-                        </div>
-
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Stop Price</label>
-                            <InputText :value="tradeEntry.stop_price ? Number(tradeEntry.stop_price).toFixed(4) : 'N/A'"
-                                readonly class="w-full" />
-                        </div>
-
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Target Price</label>
-                            <InputText
-                                :value="tradeEntry.target_price ? Number(tradeEntry.target_price).toFixed(4) : 'N/A'"
-                                readonly class="w-full" />
-                        </div>
-
-                        <!-- Outcome -->
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Outcome</label>
-                            <Tag :value="tradeEntry.outcome || 'N/A'"
-                                :severity="getOutcomeSeverity(tradeEntry.outcome)" />
-                        </div>
-
-                        <!-- R:R -->
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-1">Risk:Reward</label>
-                            <InputText :value="tradeEntry.rrr ? Number(tradeEntry.rrr).toFixed(2) : 'N/A'" readonly
-                                class="w-full" />
-                        </div>
-                    </div>
-
-                    <!-- Notes -->
-                    <div class="field mt-4">
-                        <label class="block text-sm font-medium mb-1">Notes</label>
-                        <Textarea :value="tradeEntry.notes || 'None'" readonly rows="3" class="w-full" />
-                    </div>
-
-                    <!-- Screenshot -->
-                    <div v-if="tradeEntry.screenshot_path" class="field mt-4">
-                        <label class="block text-sm font-medium mb-1">Screenshot</label>
-                        <Image :src="`/storage/${tradeEntry.screenshot_path}`" alt="Trading Screenshot" preview
-                            class="max-w-full h-auto rounded border" />
-                    </div>
-                </template>
-            </Card>
 
             <!-- Trade Setup Details -->
             <Card>
@@ -181,6 +108,80 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </template>
+            </Card>
+
+            <!-- Order Entry Details -->
+            <Card v-if="tradeEntry">
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-money-bill text-blue-900"></i>
+                        <span class="text-blue-900">Order Entry Details</span>
+                    </div>
+                </template>
+                <template #content>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Entry Date -->
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Entry Date</label>
+                            <InputText :value="tradeEntry.entry_date || 'N/A'" readonly class="w-full" />
+                        </div>
+
+                        <!-- Position Type -->
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Position</label>
+                            <Tag :value="getPositionDisplay(tradeEntry.position_type)"
+                                :severity="tradeEntry.position_type === 'Long' ? 'success' : 'danger'" class="w-full" />
+                        </div>
+
+                        <!-- Prices -->
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Entry Price</label>
+                            <InputText
+                                :value="tradeEntry.entry_price ? Number(tradeEntry.entry_price).toFixed(4) : 'N/A'"
+                                readonly class="w-full" />
+                        </div>
+
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Stop Price</label>
+                            <InputText :value="tradeEntry.stop_price ? Number(tradeEntry.stop_price).toFixed(4) : 'N/A'"
+                                readonly class="w-full" />
+                        </div>
+
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Target Price</label>
+                            <InputText
+                                :value="tradeEntry.target_price ? Number(tradeEntry.target_price).toFixed(4) : 'N/A'"
+                                readonly class="w-full" />
+                        </div>
+
+                        <!-- Outcome -->
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Outcome</label>
+                            <Tag :value="tradeEntry.outcome || 'N/A'"
+                                :severity="getOutcomeSeverity(tradeEntry.outcome)" />
+                        </div>
+
+                        <!-- R:R -->
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-1">Risk:Reward</label>
+                            <InputText :value="tradeEntry.rrr ? Number(tradeEntry.rrr).toFixed(2) : 'N/A'" readonly
+                                class="w-full" />
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="field mt-4">
+                        <label class="block text-sm font-medium mb-1">Notes</label>
+                        <Textarea :value="tradeEntry.notes || 'None'" readonly rows="3" class="w-full" />
+                    </div>
+
+                    <!-- Screenshot -->
+                    <div v-if="tradeEntry.screenshot_path" class="field mt-4">
+                        <label class="block text-sm font-medium mb-1">Screenshot</label>
+                        <Image :src="`/storage/${tradeEntry.screenshot_path}`" alt="Trading Screenshot" preview
+                            class="max-w-full h-auto rounded border" />
                     </div>
                 </template>
             </Card>

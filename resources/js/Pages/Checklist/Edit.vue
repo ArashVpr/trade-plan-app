@@ -1,196 +1,220 @@
 <template>
-    <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
         <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Edit Checklist</h1>
-        <div class="flex justify-between mb-4">
-            <Link :href="'/checklists/' + checklist.id" method="get" as="button"
-                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
-            Back
-            </Link>
-            <button type="submit" form="edit-form" :disabled="!canSubmit"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors hover:cursor-pointer">
-                Save
-            </button>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center mb-6">
+            <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
+                @click="$inertia.get(`/checklists/${checklist.id}`)" />
+            <div class="flex gap-3">
+                <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined
+                    @click="$inertia.get(`/checklists/${checklist.id}`)" />
+                <Button label="Save Changes" icon="pi pi-save" severity="success"
+                    @click="form.put(`/checklists/${checklist.id}`)" :disabled="!canSubmit" />
+            </div>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md mt-6">
-            <h2 class="text-xl font-semibold text-blue-900 mb-4">Trade Setup Details</h2>
-            <form @submit.prevent="form.put('/checklists/' + checklist.id)" id="edit-form" class="space-y-6">
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Asset</h3>
-                    <select v-model="form.asset"
-                        class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                        <option value="" disabled>Select Asset</option>
-                        <option v-for="asset in ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']" :key="asset"
-                            :value="asset">
-                            {{ asset }}
-                        </option>
-                    </select>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Score</h3>
-                    <p :class="['text-xl font-bold px-4 py-2 rounded-md inline-block',
-                        form.score < 50 ? 'text-red-600 bg-red-100' :
-                            form.score <= 70 ? 'text-yellow-600 bg-yellow-100' :
-                                'text-emerald-600 bg-emerald-100']">
-                        {{ form.score }}/100
-                    </p>
-                    <div v-if="form.score === 100" class="text-yellow-500 mt-2 font-bold text-lg text-center">★ All
-                        Stars Aligned ★</div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Created</h3>
-                    <p class="text-sm text-gray-600">{{ new Date(checklist.created_at).toLocaleDateString() }}</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Technicals</h3>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Location</label>
-                            <select v-model="form.technicals.location"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Location</option>
-                                <option v-for="loc in ['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
-                                    :key="loc" :value="loc">
-                                    {{ loc }}
-                                </option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Direction</label>
-                            <select v-model="form.technicals.direction"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Direction</option>
-                                <option v-for="dir in ['Correction', 'Impulsion']" :key="dir" :value="dir">
-                                    {{ dir }}
-                                </option>
-                            </select>
+
+        <!-- Main Content -->
+        <Card class="w-full">
+            <template #title>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-edit text-blue-900"></i>
+                        <span class="text-blue-900">Edit Trade Setup</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <Tag :value="`Score: ${form.score}/100`" :severity="getScoreSeverity(form.score)"
+                            class="text-lg font-bold px-4 py-2" />
+                        <div v-if="form.score === 100" class="text-yellow-500 font-bold text-sm">
+                            ★ All Stars Aligned ★
                         </div>
                     </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Fundamentals</h3>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Valuation</label>
-                            <select v-model="form.fundamentals.valuation"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Valuation</option>
-                                <option v-for="val in ['Overvalued', 'Neutral', 'Undervalued']" :key="val" :value="val">
-                                    {{ val }}
-                                </option>
-                            </select>
+            </template>
+            <template #content>
+                <form @submit.prevent="form.put('/checklists/' + checklist.id)" class="space-y-8">
+                    <!-- Basic Information Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-2">Asset</label>
+                            <Dropdown v-model="form.asset" :options="['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']"
+                                placeholder="Select Asset" class="w-full" />
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Seasonal Confluence</label>
-                            <select v-model="form.fundamentals.seasonalConfluence"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Seasonal Confluence</option>
-                                <option v-for="sc in ['Yes', 'No']" :key="sc" :value="sc">
-                                    {{ sc }}
-                                </option>
-                            </select>
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-2">Entry Date</label>
+                            <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid iconDisplay="input" />
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Non-Commercials</label>
-                            <select v-model="form.fundamentals.nonCommercials"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Non-Commercials</option>
-                                <option v-for="nc in ['Divergence', 'No-Divergence']" :key="nc" :value="nc">
-                                    {{ nc }}
-                                </option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">CoT Index</label>
-                            <select v-model="form.fundamentals.cotIndex"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select CoT Index</option>
-                                <option v-for="ci in ['Bullish', 'Neutral', 'Bearish']" :key="ci" :value="ci">
-                                    {{ ci }}
-                                </option>
-                            </select>
+                        <div class="field">
+                            <label class="block text-sm font-medium mb-2">Created</label>
+                            <InputText :value="new Date(checklist.created_at).toLocaleDateString()" readonly
+                                class="w-full" />
                         </div>
                     </div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Zone Qualifiers ({{ form.zone_qualifiers.length }})
-                    </h3>
-                    <ul class="space-y-2">
-                        <li v-for="(qualifier, index) in zoneQualifiers" :key="index" class="flex items-center">
-                            <label class="flex items-center space-x-3">
-                                <input type="checkbox" v-model="form.zone_qualifiers" :value="qualifier"
-                                    class="form-checkbox h-5 w-5 text-blue-900 rounded focus:ring-blue-900" />
-                                <span class="text-gray-700">{{ qualifier }}</span>
-                            </label>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Notes</h3>
-                    <textarea v-model="form.notes"
-                        class="form-textarea w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                        rows="4" placeholder="Add any notes about this trade setup"></textarea>
-                </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-700">Order Entry Details</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Entry Date</label>
-                            <input type="date" v-model="form.entry_date"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+
+                    <!-- Analysis Sections -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Left Column: Technical & Fundamental Analysis -->
+                        <div class="space-y-6">
+                            <!-- Technical Analysis -->
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <i class="pi pi-chart-line text-blue-900"></i>
+                                    Technical Analysis
+                                </h3>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Location</label>
+                                        <Dropdown v-model="form.technicals.location"
+                                            :options="['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
+                                            placeholder="Select Location" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Direction</label>
+                                        <Dropdown v-model="form.technicals.direction"
+                                            :options="['Correction', 'Impulsion']" placeholder="Select Direction"
+                                            class="w-full" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fundamental Analysis -->
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <i class="pi pi-globe text-blue-900"></i>
+                                    Fundamental Analysis
+                                </h3>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Valuation</label>
+                                        <Dropdown v-model="form.fundamentals.valuation"
+                                            :options="['Overvalued', 'Neutral', 'Undervalued']"
+                                            placeholder="Select Valuation" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Seasonal Confluence</label>
+                                        <Dropdown v-model="form.fundamentals.seasonalConfluence"
+                                            :options="['Yes', 'No']" placeholder="Select Seasonal Confluence"
+                                            class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Non-Commercials</label>
+                                        <Dropdown v-model="form.fundamentals.nonCommercials"
+                                            :options="['Divergence', 'No-Divergence']"
+                                            placeholder="Select Non-Commercials" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">CoT Index</label>
+                                        <Dropdown v-model="form.fundamentals.cotIndex"
+                                            :options="['Bullish', 'Neutral', 'Bearish']" placeholder="Select CoT Index"
+                                            class="w-full" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Position Type</label>
-                            <select v-model="form.position_type"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Position Type</option>
-                                <option value="Long">Long</option>
-                                <option value="Short">Short</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Entry Price</label>
-                            <input type="number" v-model="form.entry_price" step="any"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Stop Price</label>
-                            <input type="number" v-model="form.stop_price" step="any"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Target Price</label>
-                            <input type="number" v-model="form.target_price" step="any"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Outcome</label>
-                            <select v-model="form.outcome"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Outcome</option>
-                                <option value="win">Win</option>
-                                <option value="loss">Loss</option>
-                                <option value="breakeven">Breakeven</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Screenshot</label>
-                            <input type="file" @change="onFileChange" accept="image/*"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">R:R</label>
-                            <input type="number" v-model="form.rrr" step="any"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+
+                        <!-- Right Column: Zone Qualifiers & Order Details -->
+                        <div class="space-y-6">
+                            <!-- Zone Qualifiers -->
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <i class="pi pi-map-marker text-blue-900"></i>
+                                    Zone Qualifiers ({{ form.zone_qualifiers.length }})
+                                </h3>
+                                <div class="grid grid-cols-1 gap-2">
+                                    <div v-for="(qualifier, index) in zoneQualifiers" :key="index"
+                                        class="flex items-center">
+                                        <Checkbox v-model="form.zone_qualifiers" :value="qualifier"
+                                            :inputId="`qualifier-${index}`" class="mr-3" />
+                                        <label :for="`qualifier-${index}`" class="text-gray-700 text-sm">
+                                            {{ qualifier }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Order Entry Details -->
+                            <div class="p-4 border border-gray-200 rounded-lg">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <i class="pi pi-money-bill text-blue-900"></i>
+                                    Order Entry Details
+                                </h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Position Type</label>
+                                        <Dropdown v-model="form.position_type" :options="['Long', 'Short']"
+                                            placeholder="Select Position Type" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Trade Outcome</label>
+                                        <Dropdown v-model="form.outcome" :options="['win', 'loss', 'breakeven']"
+                                            placeholder="Select Outcome" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Entry Price</label>
+                                        <InputText v-model="form.entry_price" type="number" step="0.0001"
+                                            placeholder="0.0000" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Stop Loss</label>
+                                        <InputText v-model="form.stop_price" type="number" step="0.0001"
+                                            placeholder="0.0000" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">Take Profit</label>
+                                        <InputText v-model="form.target_price" type="number" step="0.0001"
+                                            placeholder="0.0000" class="w-full" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="block text-sm font-medium mb-1">R:R Ratio</label>
+                                        <InputText v-model="form.rrr" type="number" step="0.01" placeholder="1.50"
+                                            class="w-full" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
-        </div>
+
+                    <!-- Notes & Screenshot Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Notes -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i class="pi pi-file-edit text-blue-900"></i>
+                                Trading Notes
+                            </h3>
+                            <div class="field">
+                                <Textarea v-model="form.notes" rows="6" class="w-full"
+                                    placeholder="Document your analysis, reasoning, and any additional context for this trade..." />
+                            </div>
+                        </div>
+
+                        <!-- Screenshot Upload -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i class="pi pi-image text-blue-900"></i>
+                                Chart Screenshot
+                            </h3>
+                            <div class="field">
+                                <div
+                                    class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
+                                    <i class="pi pi-upload text-gray-400 text-2xl mb-2"></i>
+                                    <input type="file" @change="onFileChange" accept="image/*"
+                                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        Upload a screenshot of your trading chart
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </template>
+        </Card>
     </div>
 </template>
 
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 
 const props = defineProps({
@@ -198,8 +222,21 @@ const props = defineProps({
     settings: Object,
     tradeEntry: Object
 })
-console.log(props.tradeEntry.notes)
 
+// Helper functions for PrimeVue components
+const getScoreSeverity = (score) => {
+    if (score < 50) return 'danger'
+    if (score <= 80) return 'warning'
+    return 'success'
+}
+
+// File upload handler
+const onFileChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        form.screenshot = file
+    }
+}
 
 const zoneQualifiers = [
     'Fresh', 'Original', 'Flip', 'LOL', 'Minimum 1:2 Profit Margin', 'Big Brother Coverage'
@@ -299,16 +336,3 @@ const evaluationScore = () => {
 // Watch for changes in form fields and update score
 watch(() => form, evaluationScore, { deep: true })
 </script>
-
-<style scoped>
-.form-select,
-.form-textarea {
-    transition: all 0.3s ease
-}
-
-.form-select:focus,
-.form-textarea:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2)
-}
-</style>
