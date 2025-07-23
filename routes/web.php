@@ -29,6 +29,9 @@ Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])
 Route::put('/checklists/{checklist}', [ChecklistController::class, 'update'])->name('checklists.update');
 Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
 
+Route::get('/test', function () {
+    return Inertia::render('Test');
+})->name('test');
 
 
 // Route::get('/login', function () {
