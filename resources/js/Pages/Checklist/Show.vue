@@ -138,6 +138,7 @@ import { Link } from '@inertiajs/vue3'
 import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
 import { computed } from 'vue'
+import { Inertia } from '@inertiajs/inertia'
 
 Chart.register(...registerables)
 
@@ -149,7 +150,7 @@ const props = defineProps({
 const confirmDelete = () => {
     const result = confirm('Are you sure you want to delete this checklist? This action cannot be undone.');
     if (result) {
-        $inertia.delete(route('checklists.destroy', props.checklist.id));
+        Inertia.delete(`/checklists/${props.checklist.id}`)
     }
 }
 
