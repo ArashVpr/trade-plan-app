@@ -15,160 +15,20 @@
                 <Card>
                     <template #content>
                         <!-- Step 1: Zone Qualifiers -->
-                        <div v-if="currentStep === 1" class="space-y-6">
-                            <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-                                <i class="pi pi-map-marker text-blue-900"></i>
-                                Zone Qualifiers
-                            </h2>
-
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-2">Instrument</label>
-                                <Dropdown v-model="asset" :options="assetOptions" placeholder="Select Instrument"
-                                    class="w-full" @change="updateProgress" />
-                            </div>
-
-                            <div class="space-y-4">
-                                <div v-for="(qualifier, index) in zoneQualifiers" :key="index"
-                                    class="flex items-center">
-                                    <Checkbox v-model="selectedZoneQualifiers" :value="qualifier"
-                                        :inputId="`qualifier-${index}`" @change="updateProgress" class="mr-3" />
-                                    <label :for="`qualifier-${index}`" class="text-gray-700">
-                                        {{ qualifier }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                        <ZoneQualifiersStep v-if="currentStep === 1" v-model="zoneQualifiersData"
+                            @progress-updated="updateProgress" />
 
                         <!-- Step 2: Technicals -->
-                        <div v-if="currentStep === 2" class="space-y-6">
-                            <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-                                <i class="pi pi-chart-line text-blue-900"></i>
-                                Technical Analysis
-                            </h2>
-
-                            <div class="grid grid-cols-1 gap-6">
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Location</label>
-                                    <Dropdown v-model="technicals.location" :options="locationOptions"
-                                        placeholder="Select Location" class="w-full" @change="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Direction</label>
-                                    <Dropdown v-model="technicals.direction" :options="directionOptions"
-                                        placeholder="Select Direction" class="w-full" @change="updateProgress" />
-                                </div>
-                            </div>
-                        </div>
+                        <TechnicalsStep v-if="currentStep === 2" v-model="technicalsData"
+                            @progress-updated="updateProgress" />
 
                         <!-- Step 3: Fundamentals -->
-                        <div v-if="currentStep === 3" class="space-y-6">
-                            <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-                                <i class="pi pi-globe text-blue-900"></i>
-                                Fundamental Analysis
-                            </h2>
-
-                            <div class="grid grid-cols-1 gap-6">
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Valuation</label>
-                                    <Dropdown v-model="fundamentals.valuation" :options="valuationOptions"
-                                        placeholder="Select Valuation" class="w-full" @change="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Seasonal Confluence</label>
-                                    <Dropdown v-model="fundamentals.seasonalConfluence" :options="seasonalOptions"
-                                        placeholder="Select Seasonal Confluence" class="w-full"
-                                        @change="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Non-Commercials</label>
-                                    <Dropdown v-model="fundamentals.nonCommercials" :options="nonCommercialsOptions"
-                                        placeholder="Select Non-Commercials" class="w-full" @change="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">CoT Index</label>
-                                    <Dropdown v-model="fundamentals.cotIndex" :options="cotIndexOptions"
-                                        placeholder="Select CoT Index" class="w-full" @change="updateProgress" />
-                                </div>
-                            </div>
-                        </div>
+                        <FundamentalsStep v-if="currentStep === 3" v-model="fundamentalsData"
+                            @progress-updated="updateProgress" />
 
                         <!-- Step 4: Order Entry -->
-                        <div v-if="currentStep === 4" class="space-y-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-2xl font-semibold text-blue-900 flex items-center gap-2">
-                                    <i class="pi pi-money-bill text-blue-900"></i>
-                                    Order Entry (Optional)
-                                </h2>
-                                <Chip :label="`Instrument: ${asset || '—'}`" />
-                            </div>
-
-                            <Message severity="info" :closable="false" class="mb-4">
-                                <strong>Optional:</strong> You can submit your analysis without filling out the order
-                                entry details.
-                                Complete this section only if you've actually placed or plan to place a trade.
-                            </Message>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Entry Date</label>
-                                    <DatePicker v-model="entryDate" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
-                                        iconDisplay="input" @date-select="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Position Type</label>
-                                    <Dropdown v-model="positionType" :options="positionOptions"
-                                        placeholder="Select Position Type" class="w-full" @change="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Entry Price</label>
-                                    <InputText v-model="entryPrice" type="number" step="0.0001" placeholder="0.0000"
-                                        class="w-full" @input="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Stop Price</label>
-                                    <InputText v-model="stopPrice" type="number" step="0.0001" placeholder="0.0000"
-                                        class="w-full" @input="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">Target Price</label>
-                                    <InputText v-model="targetPrice" type="number" step="0.0001" placeholder="0.0000"
-                                        class="w-full" @input="updateProgress" />
-                                </div>
-
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-2">R:R Ratio</label>
-                                    <InputText v-model="rrr" type="number" step="0.01" placeholder="1.50" class="w-full"
-                                        @input="updateProgress" />
-                                </div>
-                            </div>
-
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-2">Outcome</label>
-                                <Dropdown v-model="outcome" :options="outcomeOptions" placeholder="Select Outcome"
-                                    class="w-full" @change="updateProgress" />
-                            </div>
-
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-2">Chart Screenshot</label>
-                                <FileUpload mode="basic" name="screenshot" :auto="false" accept="image/*"
-                                    :maxFileSize="10000000" @select="onFileSelect" chooseLabel="Choose File"
-                                    class="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-2">Notes</label>
-                                <Textarea v-model="notes" rows="3" placeholder="Add any notes about this trade"
-                                    class="w-full" />
-                            </div>
-                        </div>
+                        <OrderEntryStep v-if="currentStep === 4" v-model="orderEntryData"
+                            :asset="zoneQualifiersData.asset" @progress-updated="updateProgress" />
 
                         <!-- Navigation Buttons -->
                         <div class="mt-8 flex justify-between items-center">
@@ -212,9 +72,10 @@
                         <div>
                             <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
                             <div class="space-y-1">
-                                <p class="text-sm text-gray-600">Location: {{ technicals.location || 'Not selected' }}
+                                <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not selected'
+                                    }}
                                 </p>
-                                <p class="text-sm text-gray-600">Direction: {{ technicals.direction || 'Not selected' }}
+                                <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not                                    selected' }}
                                 </p>
                             </div>
                         </div>
@@ -222,13 +83,15 @@
                         <div>
                             <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
                             <div class="space-y-1">
-                                <p class="text-sm text-gray-600">Valuation: {{ fundamentals.valuation || 'Not selected'
-                                }}</p>
-                                <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence
+                                <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not                                    selected'
+                                    }}</p>
+                                <p class="text-sm text-gray-600">Seasonal Confluence: {{
+                                    fundamentalsData.seasonalConfluence
                                     || 'Not selected' }}</p>
-                                <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not                                    selected' }}</p>
-                                <p class="text-sm text-gray-600">CoT Index: {{ fundamentals.cotIndex || 'Not selected'
-                                }}</p>
+                                <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials ||
+                                    'Not selected' }}</p>
+                                <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not                                    selected'
+                                    }}</p>
                             </div>
                         </div>
 
@@ -236,10 +99,11 @@
                             <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{
                                 selectedZoneQualifiersCount }})</h3>
                             <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                                <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
+                                <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
                                     {{ qualifier }}
                                 </li>
-                                <li v-if="filteredZoneQualifiers.length === 0" class="text-gray-500">None selected</li>
+                                <li v-if="zoneQualifiersData.selectedZoneQualifiers.length === 0" class="text-gray-500">
+                                    None selected</li>
                             </ul>
                         </div>
 
@@ -277,6 +141,12 @@ import { router, Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { useToast } from 'primevue/usetoast';
 
+// Import step components
+import ZoneQualifiersStep from '@/Components/ChecklistSteps/ZoneQualifiersStep.vue';
+import TechnicalsStep from '@/Components/ChecklistSteps/TechnicalsStep.vue';
+import FundamentalsStep from '@/Components/ChecklistSteps/FundamentalsStep.vue';
+import OrderEntryStep from '@/Components/ChecklistSteps/OrderEntryStep.vue';
+
 const props = defineProps({
     settings: Object
 })
@@ -286,8 +156,42 @@ const toast = useToast();
 // Reactive data
 const currentStep = ref(1);
 const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals', 'Order Entry'];
-const technicals = ref({ location: '', direction: '' });
-const fundamentals = ref({ valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' });
+
+// Step data objects
+const zoneQualifiersData = ref({
+    asset: '',
+    selectedZoneQualifiers: []
+});
+
+const technicalsData = ref({
+    location: '',
+    direction: ''
+});
+
+const fundamentalsData = ref({
+    valuation: '',
+    seasonalConfluence: '',
+    nonCommercials: '',
+    cotIndex: ''
+});
+
+const orderEntryData = ref({
+    entryDate: '',
+    positionType: '',
+    entryPrice: '',
+    stopPrice: '',
+    targetPrice: '',
+    rrr: '',
+    outcome: '',
+    screenshot: null,
+    notes: ''
+});
+
+const progressCount = ref(0);
+const message = ref('');
+const messageType = ref('');
+
+// Zone qualifiers for reference
 const zoneQualifiers = [
     'Fresh',
     'Original',
@@ -306,33 +210,6 @@ const stepItems = computed(() =>
     }))
 );
 
-// Form data
-const asset = ref('');
-const notes = ref('');
-const entryDate = ref('');
-const entryPrice = ref('');
-const stopPrice = ref('');
-const targetPrice = ref('');
-const positionType = ref('');
-const outcome = ref('');
-const rrr = ref('');
-const screenshot = ref(null);
-const selectedZoneQualifiers = ref([]);
-const progressCount = ref(0);
-const message = ref('');
-const messageType = ref('');
-
-// Options for dropdowns
-const assetOptions = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD'];
-const locationOptions = ['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap'];
-const directionOptions = ['Correction', 'Impulsion'];
-const valuationOptions = ['Overvalued', 'Neutral', 'Undervalued'];
-const seasonalOptions = ['Yes', 'No'];
-const nonCommercialsOptions = ['Divergence', 'No-Divergence'];
-const cotIndexOptions = ['Bullish', 'Neutral', 'Bearish'];
-const positionOptions = ['Long', 'Short'];
-const outcomeOptions = ['win', 'loss', 'breakeven'];
-
 // Helper functions
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
@@ -350,11 +227,6 @@ const formatDate = (date) => {
     return date
 }
 
-const onFileSelect = (event) => {
-    screenshot.value = event.files[0];
-    updateProgress();
-};
-
 // Constants
 const totalInputs = 20; // 6 zones + 2 technicals + 4 fundamentals + 8 order entry fields
 
@@ -362,75 +234,88 @@ const totalInputs = 20; // 6 zones + 2 technicals + 4 fundamentals + 8 order ent
 const progressPercentage = computed(() => {
     return Math.round((progressCount.value / totalInputs) * 100);
 });
-const selectedZoneQualifiersCount = computed(() => selectedZoneQualifiers.value.length);
-const filteredZoneQualifiers = computed(() => selectedZoneQualifiers.value);
+
+const selectedZoneQualifiersCount = computed(() => zoneQualifiersData.value.selectedZoneQualifiers.length);
+
 const evaluationScore = computed(() => {
     // 1. Compute raw weighted score
     let raw = 0;
     const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
     zoneKeys.forEach((key, idx) => {
         const qualifierName = zoneQualifiers[idx];
-        if (selectedZoneQualifiers.value.includes(qualifierName)) {
+        if (zoneQualifiersData.value.selectedZoneQualifiers.includes(qualifierName)) {
             raw += Number(props.settings[`zone_${key}_weight`] || 0);
         }
     });
+
     // Technicals: Location
-    if (['Very Cheap', 'Very Expensive'].includes(technicals.value.location)) {
+    if (['Very Cheap', 'Very Expensive'].includes(technicalsData.value.location)) {
         raw += Number(props.settings.technical_very_exp_chp_weight || 0);
-    } else if (['Cheap', 'Expensive'].includes(technicals.value.location)) {
+    } else if (['Cheap', 'Expensive'].includes(technicalsData.value.location)) {
         raw += Number(props.settings.technical_exp_chp_weight || 0);
     }
+
     // Technicals: Direction
-    if (technicals.value.direction === 'Impulsion') {
+    if (technicalsData.value.direction === 'Impulsion') {
         raw += Number(props.settings.technical_direction_impulsive_weight || 0);
-    } else if (technicals.value.direction === 'Correction') {
+    } else if (technicalsData.value.direction === 'Correction') {
         raw += Number(props.settings.technical_direction_correction_weight || 0);
     }
+
     // Fundamentals
-    if (['Undervalued', 'Overvalued'].includes(fundamentals.value.valuation)) {
+    if (['Undervalued', 'Overvalued'].includes(fundamentalsData.value.valuation)) {
         raw += Number(props.settings.fundamental_valuation_weight || 0);
     }
-    if (fundamentals.value.seasonalConfluence === 'Yes') {
+    if (fundamentalsData.value.seasonalConfluence === 'Yes') {
         raw += Number(props.settings.fundamental_seasonal_weight || 0);
     }
-    if (fundamentals.value.nonCommercials === 'Divergence') {
+    if (fundamentalsData.value.nonCommercials === 'Divergence') {
         raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
     }
-    if (['Bullish', 'Bearish'].includes(fundamentals.value.cotIndex)) {
+    if (['Bullish', 'Bearish'].includes(fundamentalsData.value.cotIndex)) {
         raw += Number(props.settings.fundamental_cot_index_weight || 0);
     }
+
     // 2. Compute max possible score based on one selection per category
     const zoneMax = zoneKeys.reduce((sum, key) => sum + Number(props.settings[`zone_${key}_weight`] || 0), 0);
+
     // Technicals: Location (pick the higher of very_exp or exp)
     const locHigh = Math.max(
         Number(props.settings.technical_very_exp_chp_weight || 0),
         Number(props.settings.technical_exp_chp_weight || 0)
     );
+
     // Technicals: Direction (pick the higher of impulsive or correction)
     const dirHigh = Math.max(
         Number(props.settings.technical_direction_impulsive_weight || 0),
         Number(props.settings.technical_direction_correction_weight || 0)
     );
+
     // Fundamentals: sum of all criteria
     const fundMax =
         Number(props.settings.fundamental_valuation_weight || 0) +
         Number(props.settings.fundamental_seasonal_weight || 0) +
         Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
         Number(props.settings.fundamental_cot_index_weight || 0);
+
     const max = zoneMax + locHigh + dirHigh + fundMax;
 
     // 3. Normalize to a 0–100 scale
     return max > 0 ? Math.round((raw / max) * 100) : 0;
 });
+
 const canProceed = computed(() => {
     if (currentStep.value === 1) {
         return selectedZoneQualifiersCount.value > 0;
     }
     if (currentStep.value === 2) {
-        return technicals.value.location && technicals.value.direction;
+        return technicalsData.value.location && technicalsData.value.direction;
     }
     if (currentStep.value === 3) {
-        return fundamentals.value.valuation && fundamentals.value.seasonalConfluence && fundamentals.value.nonCommercials && fundamentals.value.cotIndex;
+        return fundamentalsData.value.valuation &&
+            fundamentalsData.value.seasonalConfluence &&
+            fundamentalsData.value.nonCommercials &&
+            fundamentalsData.value.cotIndex;
     }
     if (currentStep.value === 4) {
         // Order Entry is now optional - always allow proceeding
@@ -438,69 +323,84 @@ const canProceed = computed(() => {
     }
     return false;
 });
+
 const canSubmit = computed(() => {
     // Only require the analysis sections, Order Entry is optional
     return selectedZoneQualifiersCount.value > 0 &&
-        technicals.value.location &&
-        technicals.value.direction &&
-        fundamentals.value.valuation &&
-        fundamentals.value.seasonalConfluence &&
-        fundamentals.value.nonCommercials &&
-        fundamentals.value.cotIndex;
+        technicalsData.value.location &&
+        technicalsData.value.direction &&
+        fundamentalsData.value.valuation &&
+        fundamentalsData.value.seasonalConfluence &&
+        fundamentalsData.value.nonCommercials &&
+        fundamentalsData.value.cotIndex;
 });
 
 function updateProgress() {
-    progressCount.value = selectedZoneQualifiers.value.length +
-        (technicals.value.location ? 1 : 0) +
-        (technicals.value.direction ? 1 : 0) +
-        (fundamentals.value.valuation ? 1 : 0) +
-        (fundamentals.value.seasonalConfluence ? 1 : 0) +
-        (fundamentals.value.nonCommercials ? 1 : 0) +
-        (fundamentals.value.cotIndex ? 1 : 0)
-        + + (entryDate.value ? 1 : 0)
-        + + (entryPrice.value ? 1 : 0)
-        + + (stopPrice.value ? 1 : 0)
-        + + (targetPrice.value ? 1 : 0)
-        + + (positionType.value ? 1 : 0)
-        + + (outcome.value ? 1 : 0)
-        + + (rrr.value ? 1 : 0)
-        + + (screenshot.value ? 1 : 0);
+    progressCount.value = zoneQualifiersData.value.selectedZoneQualifiers.length +
+        (technicalsData.value.location ? 1 : 0) +
+        (technicalsData.value.direction ? 1 : 0) +
+        (fundamentalsData.value.valuation ? 1 : 0) +
+        (fundamentalsData.value.seasonalConfluence ? 1 : 0) +
+        (fundamentalsData.value.nonCommercials ? 1 : 0) +
+        (fundamentalsData.value.cotIndex ? 1 : 0) +
+        (orderEntryData.value.entryDate ? 1 : 0) +
+        (orderEntryData.value.entryPrice ? 1 : 0) +
+        (orderEntryData.value.stopPrice ? 1 : 0) +
+        (orderEntryData.value.targetPrice ? 1 : 0) +
+        (orderEntryData.value.positionType ? 1 : 0) +
+        (orderEntryData.value.outcome ? 1 : 0) +
+        (orderEntryData.value.rrr ? 1 : 0) +
+        (orderEntryData.value.screenshot ? 1 : 0);
 }
+
 function resetWizard() {
     currentStep.value = 1;
-    technicals.value = { location: '', direction: '' };
-    fundamentals.value = { valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' };
-    selectedZoneQualifiers.value = [];
-    asset.value = '';
-    notes.value = '';
-    entryDate.value = '';
-    entryPrice.value = '';
-    stopPrice.value = '';
-    targetPrice.value = '';
-    positionType.value = '';
-    outcome.value = '';
-    rrr.value = '';
-    screenshot.value = null;
+    zoneQualifiersData.value = {
+        asset: '',
+        selectedZoneQualifiers: []
+    };
+    technicalsData.value = {
+        location: '',
+        direction: ''
+    };
+    fundamentalsData.value = {
+        valuation: '',
+        seasonalConfluence: '',
+        nonCommercials: '',
+        cotIndex: ''
+    };
+    orderEntryData.value = {
+        entryDate: '',
+        positionType: '',
+        entryPrice: '',
+        stopPrice: '',
+        targetPrice: '',
+        rrr: '',
+        outcome: '',
+        screenshot: null,
+        notes: ''
+    };
     progressCount.value = 0;
 }
+
 function submitChecklist() {
     if (!canSubmit.value) return;
 
     router.post(route('checklists.store'), {
-        zone_qualifiers: selectedZoneQualifiers.value,
-        technicals: technicals.value,
-        fundamentals: fundamentals.value,
+        zone_qualifiers: zoneQualifiersData.value.selectedZoneQualifiers,
+        technicals: technicalsData.value,
+        fundamentals: fundamentalsData.value,
         score: evaluationScore.value,
-        asset: asset.value,
-        notes: notes.value,
-        entry_date: formatDate(entryDate.value),
-        entry_price: entryPrice.value,
-        stop_price: stopPrice.value,
-        target_price: targetPrice.value,
-        position_type: positionType.value,
-        outcome: outcome.value,
-        rrr: rrr.value,
-        screenshot: screenshot.value
+        asset: zoneQualifiersData.value.asset,
+        notes: orderEntryData.value.notes,
+        entry_date: formatDate(orderEntryData.value.entryDate),
+        entry_price: orderEntryData.value.entryPrice,
+        stop_price: orderEntryData.value.stopPrice,
+        target_price: orderEntryData.value.targetPrice,
+        position_type: orderEntryData.value.positionType,
+        outcome: orderEntryData.value.outcome,
+        rrr: orderEntryData.value.rrr,
+        screenshot: orderEntryData.value.screenshot
     }, {
         preserveState: true,
         onSuccess: () => {
@@ -523,7 +423,6 @@ function submitChecklist() {
         }
     });
 }
-
 </script>
 
 <style scoped>
