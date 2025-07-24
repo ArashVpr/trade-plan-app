@@ -125,8 +125,19 @@
                 <!-- Step 4: Order Entry -->
                 <div v-if="currentStep === 4" class="space-y-6">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-semibold text-blue-900">Order Entry</h2>
+                        <h2 class="text-2xl font-semibold text-blue-900">Order Entry (Optional)</h2>
                         <span class="text-sm font-medium text-gray-700">Instrument: {{ asset || '—' }}</span>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                        <div class="flex">
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    <strong>Optional:</strong> You can submit your analysis without filling out the
+                                    order entry details.
+                                    Complete this section only if you've actually placed or plan to place a trade.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                     <div class="space-y-4">
                         <div class="flex space-x-4">
@@ -173,10 +184,10 @@
                             </select>
                         </div>
                         <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">R:R</label>
-                                <input type="number" step="0.0001" v-model="rrr" @input="updateProgress"
-                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">R:R</label>
+                            <input type="number" step="0.0001" v-model="rrr" @input="updateProgress"
+                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Screenshot</label>
                             <input type="file" @change="e => screenshot = e.target.files[0]"
@@ -245,7 +256,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
-                        }})</h3>
+                            }})</h3>
                         <ul class="list-disc pl-5 text-sm text-gray-600">
                             <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
                                 {{ qualifier }}
@@ -386,19 +397,20 @@ const canProceed = computed(() => {
         return fundamentals.value.valuation && fundamentals.value.seasonalConfluence && fundamentals.value.nonCommercials && fundamentals.value.cotIndex;
     }
     if (currentStep.value === 4) {
-        return entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value && rrr.value;
+        // Order Entry is now optional - always allow proceeding
+        return true;
     }
     return false;
 });
 const canSubmit = computed(() => {
+    // Only require the analysis sections, Order Entry is optional
     return selectedZoneQualifiersCount.value > 0 &&
         technicals.value.location &&
         technicals.value.direction &&
         fundamentals.value.valuation &&
         fundamentals.value.seasonalConfluence &&
         fundamentals.value.nonCommercials &&
-        fundamentals.value.cotIndex &&
-        entryDate.value && entryPrice.value && stopPrice.value && targetPrice.value && positionType.value && outcome.value && rrr.value;
+        fundamentals.value.cotIndex;
 });
 
 function updateProgress() {

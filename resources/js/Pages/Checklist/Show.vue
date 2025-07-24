@@ -112,6 +112,32 @@
                 </template>
             </Card>
 
+            <!-- Analysis Only Placeholder Card -->
+            <Card v-if="!tradeEntry">
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-chart-line text-blue-900"></i>
+                        <span class="text-blue-900">Trade Status</span>
+                    </div>
+                </template>
+                <template #content>
+                    <div class="text-center py-8">
+                        <div class="mb-4">
+                            <i class="pi pi-info-circle text-blue-900 text-6xl opacity-50"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Analysis Only</h3>
+                        <p class="text-gray-600 mb-4">
+                            This setup was analyzed but no trade was taken. You can edit this checklist to add order
+                            entry details if you decide to trade this setup.
+                        </p>
+                        <div class="flex justify-center">
+                            <Button label="Add Trade Details" icon="pi pi-plus" severity="info" outlined
+                                @click="$inertia.get(`/checklists/${checklist.id}/edit?focus=order-entry`)" />
+                        </div>
+                    </div>
+                </template>
+            </Card>
+
             <!-- Order Entry Details -->
             <Card v-if="tradeEntry">
                 <template #title>

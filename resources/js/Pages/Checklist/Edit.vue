@@ -9,8 +9,8 @@
             <div class="flex gap-3">
                 <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined
                     @click="$inertia.get(`/checklists/${checklist.id}`)" />
-                <Button label="Save Changes" icon="pi pi-save" severity="success"
-                    @click="form.put(`/checklists/${checklist.id}`)" :disabled="!canSubmit" />
+                <Button label="Save Changes" icon="pi pi-save" severity="success" @click="submitForm"
+                    :disabled="!canSubmit" />
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                 </div>
             </template>
             <template #content>
-                <form @submit.prevent="form.put('/checklists/' + checklist.id)" class="space-y-8">
+                <form @submit.prevent="submitForm" class="space-y-8">
                     <!-- Basic Information Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
@@ -42,7 +42,8 @@
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Entry Date</label>
-                            <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid iconDisplay="input" />
+                            <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
+                                iconDisplay="input" />
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
@@ -133,10 +134,13 @@
                             </div>
 
                             <!-- Order Entry Details -->
-                            <div class="p-4 border border-gray-200 rounded-lg">
+                            <div ref="orderEntryRef"
+                                class="p-4 border border-gray-200 rounded-lg transition-all duration-500"
+                                :class="{ 'border-blue-500 bg-blue-50': shouldHighlightOrderEntry }">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                     <i class="pi pi-money-bill text-blue-900"></i>
                                     Order Entry Details
+                                    <Tag v-if="shouldHighlightOrderEntry" value="Focus" severity="info" class="ml-2" />
                                 </h3>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="field">
@@ -215,12 +219,42 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { computed, watch, onMounted, ref } from 'vue';
+
+const orderEntryRef = ref(null)
 
 const props = defineProps({
     checklist: Object,
     settings: Object,
     tradeEntry: Object
+})
+
+// Check if we should focus on order entry section
+const shouldHighlightOrderEntry = ref(false)
+
+// Handle focus on order entry when coming from "Add Trade Details"
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const focusParam = urlParams.get('focus')
+
+    if (focusParam === 'order-entry') {
+        shouldHighlightOrderEntry.value = true
+
+        // Scroll to order entry section after a brief delay
+        setTimeout(() => {
+            if (orderEntryRef.value) {
+                orderEntryRef.value.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                })
+            }
+        }, 300)
+
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+            shouldHighlightOrderEntry.value = false
+        }, 3000)
+    }
 })
 
 // Helper functions for PrimeVue components
@@ -230,12 +264,31 @@ const getScoreSeverity = (score) => {
     return 'success'
 }
 
+// Date formatting helper
+const formatDate = (date) => {
+    if (!date) return ''
+    if (typeof date === 'string') return date
+    if (date instanceof Date) {
+        return date.toISOString().split('T')[0] // Convert to YYYY-MM-DD format
+    }
+    return date
+}
+
 // File upload handler
 const onFileChange = (event) => {
     const file = event.target.files[0]
     if (file) {
         form.screenshot = file
     }
+}
+
+// Form submission handler
+const submitForm = () => {
+    // Format the entry_date before submission
+    const originalDate = form.entry_date
+    form.entry_date = formatDate(form.entry_date)
+
+    form.put(`/checklists/${props.checklist.id}`)
 }
 
 const zoneQualifiers = [
@@ -248,7 +301,7 @@ const form = useForm({
     fundamentals: { ...props.checklist.fundamentals },
     score: props.checklist.score,
     asset: props.checklist.asset,
-    notes: props.tradeEntry.notes,
+    notes: props.tradeEntry?.notes || '',
     entry_date: props.tradeEntry?.entry_date || '',
     position_type: props.tradeEntry?.position_type || '',
     entry_price: props.tradeEntry?.entry_price || '',

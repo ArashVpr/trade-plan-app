@@ -56,12 +56,10 @@
                             </template>
                         </Column>
 
-                        <Column header="Outcome" :style="{ width: '90px' }">
+                        <Column header="Trade Status" :style="{ width: '100px' }">
                             <template #body="slotProps">
-                                <Tag :value="slotProps.data.trade_entry?.outcome || 'N/A'"
-                                    :severity="getOutcomeSeverity(slotProps.data.trade_entry?.outcome)"
-                                    v-if="slotProps.data.trade_entry?.outcome" />
-                                <span v-else class="text-gray-400 text-sm">N/A</span>
+                                <Tag :value="getTradeStatus(slotProps.data)"
+                                    :severity="getTradeStatusSeverity(slotProps.data)" />
                             </template>
                         </Column>
 
@@ -149,6 +147,32 @@ const getOutcomeSeverity = (outcome) => {
         case 'breakeven': return 'warning'
         default: return 'secondary'
     }
+}
+
+// Helper function to get trade status
+const getTradeStatus = (checklist) => {
+    if (!checklist.trade_entry) {
+        return 'Analysis Only'
+    }
+    if (checklist.trade_entry.outcome) {
+        // Show the outcome (Win/Loss/Breakeven) if trade is completed
+        return checklist.trade_entry.outcome.charAt(0).toUpperCase() + checklist.trade_entry.outcome.slice(1)
+    }
+    // Show position type if trade is taken but not completed
+    return checklist.trade_entry.position_type || 'Trade Pending'
+}
+
+// Helper function to get trade status severity
+const getTradeStatusSeverity = (checklist) => {
+    if (!checklist.trade_entry) {
+        return 'info'  // Blue for analysis only
+    }
+    if (checklist.trade_entry.outcome) {
+        // Use outcome severity for completed trades
+        return getOutcomeSeverity(checklist.trade_entry.outcome)
+    }
+    // Use position severity for pending trades
+    return checklist.trade_entry.position_type === 'Long' ? 'success' : 'danger'
 }
 
 // Handle delete confirmation
