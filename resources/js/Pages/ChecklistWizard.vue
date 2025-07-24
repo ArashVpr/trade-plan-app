@@ -1,287 +1,273 @@
 <template>
-    <div class="checklist-container max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
         <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Trade Setup Checklist</h1>
 
         <!-- Step Indicator -->
-        <div class="flex justify-center mb-8">
-            <div class="flex space-x-4">
-                <div v-for="(step, index) in steps" :key="index"
-                    :class="['px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-300',
-                        currentStep === index + 1 ? 'bg-blue-900 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300']" @click="currentStep = index + 1">
-                    Step {{ index + 1 }}: {{ step }}
-                </div>
-            </div>
-        </div>
+        <Card class="mb-6">
+            <template #content>
+                <Steps :model="stepItems" :readonly="false" class="mb-4" />
+            </template>
+        </Card>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Wizard Steps -->
-            <div class="col-span-2 bg-white p-6 rounded-lg shadow-md">
-                <!-- Step 1: Zone Qualifiers -->
-                <div v-if="currentStep === 1" class="space-y-4">
-                    <h2 class="text-2xl font-semibold text-blue-900">Zone Qualifiers</h2>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Asset</label>
-                        <select v-model="asset"
-                            class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                            <option value="" disabled>Select Asset</option>
-                            <option value="EUR/USD">EUR/USD</option>
-                            <option value="GBP/USD">GBP/USD</option>
-                            <option value="USD/JPY">USD/JPY</option>
-                            <option value="AUD/USD">AUD/USD</option>
-                        </select>
-                    </div>
-                    <ul class="space-y-3">
-                        <li v-for="(qualifier, index) in zoneQualifiers" :key="index" class="flex items-center">
-                            <label class="flex items-center space-x-3">
-                                <input type="checkbox" v-model="checkedZoneQualifiers[index]"
-                                    class="form-checkbox h-5 w-5 text-blue-900 rounded focus:ring-blue-900"
-                                    @change="updateProgress" />
-                                <span class="text-gray-700">{{ qualifier }}</span>
-                            </label>
-                        </li>
-                    </ul>
+            <div class="col-span-2">
+                <Card>
+                    <template #content>
+                        <!-- Step 1: Zone Qualifiers -->
+                        <div v-if="currentStep === 1" class="space-y-6">
+                            <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                                <i class="pi pi-map-marker text-blue-900"></i>
+                                Zone Qualifiers
+                            </h2>
 
-                </div>
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-2">Instrument</label>
+                                <Dropdown v-model="asset" :options="assetOptions" placeholder="Select Instrument"
+                                    class="w-full" @change="updateProgress" />
+                            </div>
 
-                <!-- Step 2: Technicals -->
-                <div v-if="currentStep === 2" class="space-y-6">
-                    <h2 class="text-2xl font-semibold text-blue-900">Technicals</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                            <select v-model="technicals.location"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                @change="updateProgress">
-                                <option value="" disabled>Select Location</option>
-                                <option value="Very Expensive">Very Expensive</option>
-                                <option value="Expensive">Expensive</option>
-                                <option value="EQ">EQ</option>
-                                <option value="Cheap">Cheap</option>
-                                <option value="Very Cheap">Very Cheap</option>
-                            </select>
+                            <div class="space-y-4">
+                                <div v-for="(qualifier, index) in zoneQualifiers" :key="index"
+                                    class="flex items-center">
+                                    <Checkbox v-model="selectedZoneQualifiers" :value="qualifier"
+                                        :inputId="`qualifier-${index}`" @change="updateProgress" class="mr-3" />
+                                    <label :for="`qualifier-${index}`" class="text-gray-700">
+                                        {{ qualifier }}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Direction</label>
-                            <select v-model="technicals.direction"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                @change="updateProgress">
-                                <option value="" disabled>Select Direction</option>
-                                <option value="Correction">Correction</option>
-                                <option value="Impulsion">Impulsion</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Step 3: Fundamentals -->
-                <div v-if="currentStep === 3" class="space-y-6">
-                    <h2 class="text-2xl font-semibold text-blue-900">Fundamentals</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Valuation</label>
-                            <select v-model="fundamentals.valuation"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                @change="updateProgress">
-                                <option value="" disabled>Select Valuation</option>
-                                <option value="Overvalued">Overvalued</option>
-                                <option value="Neutral">Neutral</option>
-                                <option value="Undervalued">Undervalued</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Seasonal Confluence</label>
-                            <select v-model="fundamentals.seasonalConfluence"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                @change="updateProgress">
-                                <option value="" disabled>Select Seasonal Confluence</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Non-Commercials</label>
-                            <select v-model="fundamentals.nonCommercials"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                @change="updateProgress">
-                                <option value="" disabled>Select Non-Commercials</option>
-                                <option value="Divergence">Divergence</option>
-                                <option value="No-Divergence">No-Divergence</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">CoT Index</label>
-                            <select v-model="fundamentals.cotIndex"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                @change="updateProgress">
-                                <option value="" disabled>Select CoT Index</option>
-                                <option value="Bullish">Bullish</option>
-                                <option value="Neutral">Neutral</option>
-                                <option value="Bearish">Bearish</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                        <!-- Step 2: Technicals -->
+                        <div v-if="currentStep === 2" class="space-y-6">
+                            <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                                <i class="pi pi-chart-line text-blue-900"></i>
+                                Technical Analysis
+                            </h2>
 
-                <!-- Step 4: Order Entry -->
-                <div v-if="currentStep === 4" class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-semibold text-blue-900">Order Entry (Optional)</h2>
-                        <span class="text-sm font-medium text-gray-700">Instrument: {{ asset || '—' }}</span>
+                            <div class="grid grid-cols-1 gap-6">
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Location</label>
+                                    <Dropdown v-model="technicals.location" :options="locationOptions"
+                                        placeholder="Select Location" class="w-full" @change="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Direction</label>
+                                    <Dropdown v-model="technicals.direction" :options="directionOptions"
+                                        placeholder="Select Direction" class="w-full" @change="updateProgress" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Fundamentals -->
+                        <div v-if="currentStep === 3" class="space-y-6">
+                            <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                                <i class="pi pi-globe text-blue-900"></i>
+                                Fundamental Analysis
+                            </h2>
+
+                            <div class="grid grid-cols-1 gap-6">
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Valuation</label>
+                                    <Dropdown v-model="fundamentals.valuation" :options="valuationOptions"
+                                        placeholder="Select Valuation" class="w-full" @change="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Seasonal Confluence</label>
+                                    <Dropdown v-model="fundamentals.seasonalConfluence" :options="seasonalOptions"
+                                        placeholder="Select Seasonal Confluence" class="w-full"
+                                        @change="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Non-Commercials</label>
+                                    <Dropdown v-model="fundamentals.nonCommercials" :options="nonCommercialsOptions"
+                                        placeholder="Select Non-Commercials" class="w-full" @change="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">CoT Index</label>
+                                    <Dropdown v-model="fundamentals.cotIndex" :options="cotIndexOptions"
+                                        placeholder="Select CoT Index" class="w-full" @change="updateProgress" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Order Entry -->
+                        <div v-if="currentStep === 4" class="space-y-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-2xl font-semibold text-blue-900 flex items-center gap-2">
+                                    <i class="pi pi-money-bill text-blue-900"></i>
+                                    Order Entry (Optional)
+                                </h2>
+                                <Chip :label="`Instrument: ${asset || '—'}`" />
+                            </div>
+
+                            <Message severity="info" :closable="false" class="mb-4">
+                                <strong>Optional:</strong> You can submit your analysis without filling out the order
+                                entry details.
+                                Complete this section only if you've actually placed or plan to place a trade.
+                            </Message>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Entry Date</label>
+                                    <DatePicker v-model="entryDate" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
+                                        iconDisplay="input" @date-select="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Position Type</label>
+                                    <Dropdown v-model="positionType" :options="positionOptions"
+                                        placeholder="Select Position Type" class="w-full" @change="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Entry Price</label>
+                                    <InputText v-model="entryPrice" type="number" step="0.0001" placeholder="0.0000"
+                                        class="w-full" @input="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Stop Price</label>
+                                    <InputText v-model="stopPrice" type="number" step="0.0001" placeholder="0.0000"
+                                        class="w-full" @input="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">Target Price</label>
+                                    <InputText v-model="targetPrice" type="number" step="0.0001" placeholder="0.0000"
+                                        class="w-full" @input="updateProgress" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-2">R:R Ratio</label>
+                                    <InputText v-model="rrr" type="number" step="0.01" placeholder="1.50" class="w-full"
+                                        @input="updateProgress" />
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-2">Outcome</label>
+                                <Dropdown v-model="outcome" :options="outcomeOptions" placeholder="Select Outcome"
+                                    class="w-full" @change="updateProgress" />
+                            </div>
+
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-2">Chart Screenshot</label>
+                                <FileUpload mode="basic" name="screenshot" :auto="false" accept="image/*"
+                                    :maxFileSize="10000000" @select="onFileSelect" chooseLabel="Choose File"
+                                    class="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-2">Notes</label>
+                                <Textarea v-model="notes" rows="3" placeholder="Add any notes about this trade"
+                                    class="w-full" />
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="mt-8 flex justify-between items-center">
+                            <Button label="Reset" icon="pi pi-refresh" severity="secondary" @click="resetWizard" />
+
+                            <div class="flex gap-2">
+                                <Button v-if="currentStep > 1" label="Previous" icon="pi pi-arrow-left"
+                                    severity="secondary" @click="currentStep--" />
+                                <Button v-if="currentStep < steps.length" label="Next" icon="pi pi-arrow-right"
+                                    iconPos="right" @click="currentStep++" :disabled="!canProceed" />
+                                <Button v-if="currentStep === steps.length" label="Submit Checklist" icon="pi pi-check"
+                                    @click="submitChecklist" :disabled="!canSubmit" />
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mt-6">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span>Setup Progress</span>
+                                <span>{{ evaluationScore }}/100</span>
+                            </div>
+                            <ProgressBar :value="evaluationScore" :class="{
+                                'progress-danger': evaluationScore < 50,
+                                'progress-warning': evaluationScore >= 50 && evaluationScore <= 80,
+                                'progress-success': evaluationScore > 80
+                            }" />
+                        </div>
+                    </template>
+                </Card>
+            </div>
+            <!-- Summary Section -->
+            <Card>
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-chart-bar text-blue-900"></i>
+                        <span class="text-blue-900">Trade Setup Summary</span>
                     </div>
-                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
-                        <div class="flex">
-                            <div class="ml-3">
-                                <p class="text-sm text-blue-700">
-                                    <strong>Optional:</strong> You can submit your analysis without filling out the
-                                    order entry details.
-                                    Complete this section only if you've actually placed or plan to place a trade.
+                </template>
+                <template #content>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
+                            <div class="space-y-1">
+                                <p class="text-sm text-gray-600">Location: {{ technicals.location || 'Not selected' }}
+                                </p>
+                                <p class="text-sm text-gray-600">Direction: {{ technicals.direction || 'Not selected' }}
                                 </p>
                             </div>
                         </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex space-x-4">
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Entry Date</label>
-                                <input type="date" v-model="entryDate" @change="updateProgress"
-                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Position Type</label>
-                                <select v-model="positionType" @change="updateProgress"
-                                    class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                    <option value="" disabled>Select Position Type</option>
-                                    <option value="Long">Long</option>
-                                    <option value="Short">Short</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex space-x-4">
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Entry Price</label>
-                                <input type="number" step="0.0001" v-model="entryPrice" @input="updateProgress"
-                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Stop Price</label>
-                                <input type="number" step="0.0001" v-model="stopPrice" @input="updateProgress"
-                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Price</label>
-                                <input type="number" step="0.0001" v-model="targetPrice" @input="updateProgress"
-                                    class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Outcome</label>
-                            <select v-model="outcome" @change="updateProgress"
-                                class="form-select w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900">
-                                <option value="" disabled>Select Outcome</option>
-                                <option value="win">Win</option>
-                                <option value="loss">Loss</option>
-                                <option value="breakeven">Breakeven</option>
-                            </select>
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">R:R</label>
-                            <input type="number" step="0.0001" v-model="rrr" @input="updateProgress"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Screenshot</label>
-                            <input type="file" @change="e => screenshot = e.target.files[0]"
-                                class="form-input w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                            <textarea v-model="notes" rows="3"
-                                class="form-textarea w-full rounded-md border-gray-300 focus:ring-blue-900 focus:border-blue-900"
-                                placeholder="Add any notes about this order"></textarea>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Navigation Buttons -->
-                <div class="mt-6 flex justify-between">
-                    <button @click="resetWizard"
-                        class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-red-500 transition-colors hover:cursor-pointer">
-                        Reset
-                    </button>
-                    <span>
-                        <button v-if="currentStep > 1" @click="currentStep--"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors hover:cursor-pointer">
-                            Previous
-                        </button>
-                        <button v-if="currentStep < steps.length" @click="currentStep++" :disabled="!canProceed"
-                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
-                            Next
-                        </button>
-                        <button v-if="currentStep === steps.length" @click="submitChecklist" :disabled="!canSubmit"
-                            class="px-4 py-2 ml-2 bg-blue-900 text-white rounded-md transition-colors hover:bg-blue-800 hover:cursor-pointer">
-                            Submit
-                        </button>
-                    </span>
-                </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
+                            <div class="space-y-1">
+                                <p class="text-sm text-gray-600">Valuation: {{ fundamentals.valuation || 'Not selected'
+                                }}</p>
+                                <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence
+                                    || 'Not selected' }}</p>
+                                <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not                                    selected' }}</p>
+                                <p class="text-sm text-gray-600">CoT Index: {{ fundamentals.cotIndex || 'Not selected'
+                                }}</p>
+                            </div>
+                        </div>
 
-                <!-- Progress Bar -->
-                <div class="mt-6">
-                    <div class="progress-bar-container bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div class="progress-bar h-full transition-all duration-300"
-                            :style="{ width: evaluationScore + '%' }" :class="{
-                                'bg-red-500': evaluationScore < 50,
-                                'bg-yellow-500': evaluationScore >= 50 && evaluationScore <= 80,
-                                'bg-emerald-500': evaluationScore > 80
-                            }">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{
+                                selectedZoneQualifiersCount }})</h3>
+                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                                <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
+                                    {{ qualifier }}
+                                </li>
+                                <li v-if="filteredZoneQualifiers.length === 0" class="text-gray-500">None selected</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold text-blue-900 mb-2">Evaluation Score</h3>
+                            <Tag :value="`${evaluationScore}/100`" :severity="getScoreSeverity(evaluationScore)"
+                                class="text-2xl font-bold px-4 py-2" />
+                            <div v-if="evaluationScore === 100"
+                                class="text-yellow-500 mt-3 font-bold text-lg text-center">
+                                ★ All Stars Aligned ★
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </Card>
 
-            <!-- Summary Section -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold text-blue-900 mb-4">Trade Setup Summary</h2>
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700">Technicals</h3>
-                        <p class="text-sm text-gray-600">Location: {{ technicals.location || 'Not selected' }}</p>
-                        <p class="text-sm text-gray-600">Direction: {{ technicals.direction || 'Not selected' }}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700">Fundamentals</h3>
-                        <p class="text-sm text-gray-600">Valuation: {{ fundamentals.valuation || 'Not selected' }}</p>
-                        <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence || "Not                            selected" }} </p>
-                        <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not                            selected' }} </p>
-                        <p class="text-sm text-gray-600">CoT Index: {{ fundamentals.cotIndex || 'Not selected' }}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
-                        }})</h3>
-                        <ul class="list-disc pl-5 text-sm text-gray-600">
-                            <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
-                                {{ qualifier }}
-                            </li>
-                            <li v-if="filteredZoneQualifiers.length === 0" class="text-gray-500">None selected</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-blue-900">Evaluation Score</h3>
-                        <p :class="['text-2xl font-bold px-4 py-2 rounded-md inline-block',
-                            evaluationScore < 50 ? 'text-red-600 bg-red-100' :
-                                evaluationScore <= 70 ? 'text-yellow-600 bg-yellow-100' :
-                                    'text-emerald-600 bg-emerald-100']">
-                            {{ evaluationScore }}/100
-                        </p>
-                        <div v-if="evaluationScore === 100" class="text-yellow-500 mt-2 font-bold text-lg text-center">★
-                            All Stars Aligned ★</div>
-                    </div>
-                </div>
-            </div>
-            <Link :href="'/user-settings'" as="button"
-                class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-700 transition-colors hover:cursor-pointer">
-            modify weights
-            </Link>
+            <!-- Settings Link -->
+            <Button label="Modify Weights" icon="pi pi-cog" severity="secondary" outlined
+                @click="router.get(route('user-settings.index'))" class="w-full" />
         </div>
+
+        <!-- Success/Error Messages -->
+        <Message v-if="message" :severity="messageType" :closable="true" class="mt-6">
+            {{ message }}
+        </Message>
+
+        <!-- Toast for notifications -->
+        <Toast />
     </div>
 </template>
 
@@ -289,11 +275,15 @@
 import { ref, computed } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import { useToast } from 'primevue/usetoast';
 
 const props = defineProps({
     settings: Object
 })
 
+const toast = useToast();
+
+// Reactive data
 const currentStep = ref(1);
 const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals', 'Order Entry'];
 const technicals = ref({ location: '', direction: '' });
@@ -306,6 +296,17 @@ const zoneQualifiers = [
     'Minimum 1:2 Profit Margin',
     'Big Brother Coverage'
 ];
+
+// Step items for PrimeVue Steps component
+const stepItems = computed(() =>
+    steps.map((step, index) => ({
+        label: step,
+        to: '#',
+        command: () => { currentStep.value = index + 1 }
+    }))
+);
+
+// Form data
 const asset = ref('');
 const notes = ref('');
 const entryDate = ref('');
@@ -316,25 +317,60 @@ const positionType = ref('');
 const outcome = ref('');
 const rrr = ref('');
 const screenshot = ref(null);
-const checkedZoneQualifiers = ref(Array(6).fill(false));
+const selectedZoneQualifiers = ref([]);
 const progressCount = ref(0);
-// total fields: 6 zones + 2 technicals + 4 fundamentals + 4 entry + 1 position + 1 outcome + 1 notes + 1 screenshot = 20
-const totalInputs = 20;
 const message = ref('');
 const messageType = ref('');
 
+// Options for dropdowns
+const assetOptions = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD'];
+const locationOptions = ['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap'];
+const directionOptions = ['Correction', 'Impulsion'];
+const valuationOptions = ['Overvalued', 'Neutral', 'Undervalued'];
+const seasonalOptions = ['Yes', 'No'];
+const nonCommercialsOptions = ['Divergence', 'No-Divergence'];
+const cotIndexOptions = ['Bullish', 'Neutral', 'Bearish'];
+const positionOptions = ['Long', 'Short'];
+const outcomeOptions = ['win', 'loss', 'breakeven'];
 
+// Helper functions
+const getScoreSeverity = (score) => {
+    if (score < 50) return 'danger'
+    if (score <= 80) return 'warning'
+    return 'success'
+}
+
+// Date formatting helper
+const formatDate = (date) => {
+    if (!date) return ''
+    if (typeof date === 'string') return date
+    if (date instanceof Date) {
+        return date.toISOString().split('T')[0] // Convert to YYYY-MM-DD format
+    }
+    return date
+}
+
+const onFileSelect = (event) => {
+    screenshot.value = event.files[0];
+    updateProgress();
+};
+
+// Constants
+const totalInputs = 20; // 6 zones + 2 technicals + 4 fundamentals + 8 order entry fields
+
+// Computed properties
 const progressPercentage = computed(() => {
     return Math.round((progressCount.value / totalInputs) * 100);
 });
-const selectedZoneQualifiersCount = computed(() => checkedZoneQualifiers.value.filter(Boolean).length);
-const filteredZoneQualifiers = computed(() => zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]));
+const selectedZoneQualifiersCount = computed(() => selectedZoneQualifiers.value.length);
+const filteredZoneQualifiers = computed(() => selectedZoneQualifiers.value);
 const evaluationScore = computed(() => {
     // 1. Compute raw weighted score
     let raw = 0;
     const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
     zoneKeys.forEach((key, idx) => {
-        if (checkedZoneQualifiers.value[idx]) {
+        const qualifierName = zoneQualifiers[idx];
+        if (selectedZoneQualifiers.value.includes(qualifierName)) {
             raw += Number(props.settings[`zone_${key}_weight`] || 0);
         }
     });
@@ -414,7 +450,7 @@ const canSubmit = computed(() => {
 });
 
 function updateProgress() {
-    progressCount.value = checkedZoneQualifiers.value.filter(Boolean).length +
+    progressCount.value = selectedZoneQualifiers.value.length +
         (technicals.value.location ? 1 : 0) +
         (technicals.value.direction ? 1 : 0) +
         (fundamentals.value.valuation ? 1 : 0) +
@@ -434,7 +470,7 @@ function resetWizard() {
     currentStep.value = 1;
     technicals.value = { location: '', direction: '' };
     fundamentals.value = { valuation: '', seasonalConfluence: '', nonCommercials: '', cotIndex: '' };
-    checkedZoneQualifiers.value = Array(6).fill(false);
+    selectedZoneQualifiers.value = [];
     asset.value = '';
     notes.value = '';
     entryDate.value = '';
@@ -449,16 +485,15 @@ function resetWizard() {
 }
 function submitChecklist() {
     if (!canSubmit.value) return;
-    message.value = '';
-    messageType.value = '';
+
     router.post(route('checklists.store'), {
-        zone_qualifiers: zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]),
+        zone_qualifiers: selectedZoneQualifiers.value,
         technicals: technicals.value,
         fundamentals: fundamentals.value,
         score: evaluationScore.value,
         asset: asset.value,
         notes: notes.value,
-        entry_date: entryDate.value,
+        entry_date: formatDate(entryDate.value),
         entry_price: entryPrice.value,
         stop_price: stopPrice.value,
         target_price: targetPrice.value,
@@ -469,13 +504,21 @@ function submitChecklist() {
     }, {
         preserveState: true,
         onSuccess: () => {
-            message.value = 'Checklist saved successfully!';
-            messageType.value = 'success';
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Checklist saved successfully!',
+                life: 3000
+            });
             resetWizard();
         },
         onError: (errors) => {
-            message.value = 'Failed to save checklist: ' + (errors.message || Object.values(errors).join(', '));
-            messageType.value = 'error';
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to save checklist. Please try again.',
+                life: 3000
+            });
             console.error('Submission error:', errors);
         }
     });
@@ -484,13 +527,16 @@ function submitChecklist() {
 </script>
 
 <style scoped>
-/* Scoped styles for the component */
-.form-select {
-    transition: all 0.3s ease;
+/* Custom ProgressBar colors */
+:deep(.progress-danger .p-progressbar-value) {
+    background: #dc2626;
 }
 
-.form-select:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
+:deep(.progress-warning .p-progressbar-value) {
+    background: #eab308;
+}
+
+:deep(.progress-success .p-progressbar-value) {
+    background: #16a34a;
 }
 </style>
