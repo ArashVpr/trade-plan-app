@@ -25,26 +25,24 @@ class ChecklistFactory extends Factory
      */
     public function definition(): array
     {
+        $zoneQualifiers = ['Fresh', 'Original', 'Flip', 'LOL', 'Minimum 1:2 Profit Margin', 'Big Brother Coverage'];
+        $selectedQualifiers = $this->faker->randomElements($zoneQualifiers, $this->faker->numberBetween(1, 4));
+
         return [
-            'user_id' => User::factory(),
-            'zone_qualifiers' => [
-                'freshness' => $this->faker->boolean,
-                'strength' => $this->faker->boolean,
-                'profit_margin' => $this->faker->boolean,
-                'risk_reward' => $this->faker->boolean,
-            ],
+            'user_id' => 1, // Using static user ID for now, could use User::factory()
+            'zone_qualifiers' => $selectedQualifiers,
             'technicals' => [
-                'higher_time_frame_trend' => $this->faker->randomElement(['uptrend', 'downtrend', 'sideways']),
-                'higher_time_frame_level' => $this->faker->boolean,
-                'curve' => $this->faker->randomElement(['extreme', 'discount', 'premium']),
+                'location' => $this->faker->randomElement(['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']),
+                'direction' => $this->faker->randomElement(['Correction', 'Impulsion']),
             ],
             'fundamentals' => [
-                'cot_commercials' => $this->faker->randomElement(['net_long', 'net_short']),
-                'cot_index' => $this->faker->randomElement(['extreme_long', 'extreme_short', 'neutral']),
-                'seasonal_tendency' => $this->faker->boolean,
+                'valuation' => $this->faker->randomElement(['Overvalued', 'Neutral', 'Undervalued']),
+                'seasonalConfluence' => $this->faker->randomElement(['Yes', 'No']),
+                'nonCommercials' => $this->faker->randomElement(['Divergence', 'No-Divergence']),
+                'cotIndex' => $this->faker->randomElement(['Bullish', 'Neutral', 'Bearish']),
             ],
             'score' => $this->faker->numberBetween(0, 100),
-            'asset' => $this->faker->randomElement(['EURUSD', 'GBPUSD', 'AUDUSD', 'USDCAD', 'USDJPY', 'XAUUSD']),
+            'asset' => $this->faker->randomElement(['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']),
         ];
     }
 }

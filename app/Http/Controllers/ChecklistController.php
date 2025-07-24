@@ -72,10 +72,7 @@ class ChecklistController extends Controller
     }
     public function show(Checklist $checklist)
     {
-        // Ensure the checklist belongs to the authenticated user
-        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
-            abort(403, 'Unauthorized action.');
-        }
+        
 
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
@@ -87,9 +84,7 @@ class ChecklistController extends Controller
     }
     public function edit(Checklist $checklist)
     {
-        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
-            abort(403, 'Unauthorized');
-        }
+        
         $settings = UserSettings::firstOrCreate(
             ['user_id' => 1], // Replace with Auth::id() in production
         );

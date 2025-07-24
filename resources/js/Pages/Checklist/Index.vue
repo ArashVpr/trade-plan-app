@@ -77,12 +77,14 @@
                             <Column header="Actions" :style="{ width: '140px' }">
                                 <template #body="slotProps">
                                     <div class="flex gap-1">
+                                        <Link :href="route('checklists.show', slotProps.data.id)">
                                         <Button icon="pi pi-eye" size="small" severity="info" text
-                                            @click="router.get(`/checklists/${slotProps.data.id}`)"
                                             v-tooltip="'View Details'" />
+                                        </Link>
+                                        <Link :href="`/checklists/${slotProps.data.id}/edit`">
                                         <Button icon="pi pi-pencil" size="small" severity="success" text
-                                            @click="router.get(`/checklists/${slotProps.data.id}/edit`)"
                                             v-tooltip="'Edit'" />
+                                        </Link>
                                         <Button icon="pi pi-trash" size="small" severity="danger" text
                                             @click="confirmDelete(slotProps.data.id)" v-tooltip="'Delete'" />
                                     </div>
@@ -124,9 +126,10 @@
 </template>
 
 <script setup>
-import { router } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import { route } from 'ziggy-js'
 
 const confirm = useConfirm()
 const toast = useToast()
