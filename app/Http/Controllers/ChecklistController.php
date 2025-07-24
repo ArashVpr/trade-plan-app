@@ -18,7 +18,6 @@ class ChecklistController extends Controller
     public function index()
     {
         $checklists = Checklist::with('tradeEntry')
-            ->where('user_id', '=', 1)
             ->latest()
             ->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
         return Inertia::render('Checklist/Index', ['checklists' => $checklists]);
@@ -173,9 +172,6 @@ class ChecklistController extends Controller
 
     public function destroy(Checklist $checklist)
     {
-        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
-            abort(403, 'Unauthorized');
-        }
 
         $checklist->delete();
 

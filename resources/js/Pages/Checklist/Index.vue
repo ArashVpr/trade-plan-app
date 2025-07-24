@@ -1,129 +1,135 @@
 <template>
-    <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
-        <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist History</h1>
+    <div>
+        <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
+            <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
 
-        <Button label="Create New Checklist" icon="pi pi-plus" @click="$inertia.get('/')" class="mb-4" />
+            <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get('/')" class="mb-4" />
 
-        <Card>
-            <template #title>
-                <h2 class="text-xl font-semibold text-blue-900">Saved Checklists</h2>
-            </template>
-            <template #content>
-                <div v-if="checklists.data.length === 0">
-                    <Message severity="info" :closable="false">
-                        No checklists found.
-                    </Message>
-                </div>
-                <div v-else>
-                    <DataTable :value="checklists.data" :paginator="false" :rows="10" stripedRows class="p-datatable-sm"
-                        scrollable scrollHeight="600px">
-                        <Column header="Date" :style="{ width: '100px' }">
-                            <template #body="slotProps">
-                                <span class="text-sm">
-                                    {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
-                                </span>
-                            </template>
-                        </Column>
-
-                        <Column field="asset" header="Instrument" :style="{ width: '100px' }">
-                            <template #body="slotProps">
-                                <Chip :label="slotProps.data.asset || 'N/A'" size="small" />
-                            </template>
-                        </Column>
-
-                        <Column header="Score" :style="{ width: '80px' }">
-                            <template #body="slotProps">
-                                <Tag :value="`${slotProps.data.score}/100`"
-                                    :severity="getScoreSeverity(slotProps.data.score)" />
-                            </template>
-                        </Column>
-
-                        <Column header="Position" :style="{ width: '80px' }">
-                            <template #body="slotProps">
-                                <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
-                                    :severity="slotProps.data.trade_entry?.position_type === 'Long' ? 'success' : 'danger'"
-                                    v-if="slotProps.data.trade_entry?.position_type" />
-                                <span v-else class="text-gray-400 text-sm">N/A</span>
-                            </template>
-                        </Column>
-
-                        <Column header="Entry Date" :style="{ width: '100px' }">
-                            <template #body="slotProps">
-                                <span class="text-sm">
-                                    {{ slotProps.data.trade_entry?.entry_date ?
-                                        new Date(slotProps.data.trade_entry.entry_date).toLocaleDateString() : 'N/A' }}
-                                </span>
-                            </template>
-                        </Column>
-
-                        <Column header="Trade Status" :style="{ width: '100px' }">
-                            <template #body="slotProps">
-                                <Tag :value="getTradeStatus(slotProps.data)"
-                                    :severity="getTradeStatusSeverity(slotProps.data)" />
-                            </template>
-                        </Column>
-
-                        <Column header="R:R" :style="{ width: '70px' }">
-                            <template #body="slotProps">
-                                <span class="text-sm font-mono">
-                                    {{ slotProps.data.trade_entry?.rrr ?
-                                        Number(slotProps.data.trade_entry.rrr).toFixed(2) : 'N/A' }}
-                                </span>
-                            </template>
-                        </Column>
-
-                        <Column header="Actions" :style="{ width: '140px' }">
-                            <template #body="slotProps">
-                                <div class="flex gap-1">
-                                    <Button icon="pi pi-eye" size="small" severity="info" text
-                                        @click="$inertia.get(`/checklists/${slotProps.data.id}`)"
-                                        v-tooltip="'View Details'" />
-                                    <Button icon="pi pi-pencil" size="small" severity="success" text
-                                        @click="$inertia.get(`/checklists/${slotProps.data.id}/edit`)"
-                                        v-tooltip="'Edit'" />
-                                    <Button icon="pi pi-trash" size="small" severity="danger" text
-                                        @click="confirmDelete(slotProps.data.id)" v-tooltip="'Delete'" />
-                                </div>
-                            </template>
-                        </Column>
-                    </DataTable>
-                </div>
-
-                <!-- Custom Pagination -->
-                <div class="mt-6 flex justify-center" v-if="checklists.data.length > 0">
-                    <Paginator :first="(checklists.current_page - 1) * checklists.per_page" :rows="checklists.per_page"
-                        :totalRecords="checklists.total" @page="onPageChange"
-                        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink" />
-                </div>
-            </template>
-        </Card>
-
-        <!-- PrimeVue ConfirmDialog -->
-        <ConfirmDialog group="headless">
-            <template #container="{ message, acceptCallback, rejectCallback }">
-                <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
-                    <div
-                        class="rounded-full bg-red-500 text-white inline-flex justify-center items-center h-24 w-24 -mt-20">
-                        <i class="pi pi-trash !text-4xl"></i>
+            <Card>
+                <template #title>
+                    <h2 class="text-xl font-semibold text-blue-900">Saved Checklists</h2>
+                </template>
+                <template #content>
+                    <div v-if="checklists.data.length === 0">
+                        <Message severity="info" :closable="false">
+                            No checklists found.
+                        </Message>
                     </div>
-                    <span class="font-bold text-2xl block mb-2 mt-6">{{ message.header }}</span>
-                    <p class="mb-0 text-center">{{ message.message }}</p>
-                    <div class="flex items-center gap-2 mt-6">
-                        <Button label="Delete" @click="acceptCallback" severity="danger" class="w-32"></Button>
-                        <Button label="Cancel" outlined @click="rejectCallback" class="w-32"></Button>
+                    <div v-else>
+                        <DataTable :value="checklists.data" :paginator="false" :rows="10" stripedRows
+                            class="p-datatable-sm" scrollable scrollHeight="600px">
+                            <Column header="Date" :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <span class="text-sm">
+                                        {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+                                    </span>
+                                </template>
+                            </Column>
+
+                            <Column field="asset" header="Instrument" :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <Chip :label="slotProps.data.asset || 'N/A'" size="small" />
+                                </template>
+                            </Column>
+
+                            <Column header="Score" :style="{ width: '80px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="`${slotProps.data.score}/100`"
+                                        :severity="getScoreSeverity(slotProps.data.score)" />
+                                </template>
+                            </Column>
+
+                            <Column header="Position" :style="{ width: '80px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
+                                        :severity="slotProps.data.trade_entry?.position_type === 'Long' ? 'success' : 'danger'"
+                                        v-if="slotProps.data.trade_entry?.position_type" />
+                                    <span v-else class="text-gray-400 text-sm">N/A</span>
+                                </template>
+                            </Column>
+
+                            <Column header="Entry Date" :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <span class="text-sm">
+                                        {{ slotProps.data.trade_entry?.entry_date ?
+                                            new Date(slotProps.data.trade_entry.entry_date).toLocaleDateString() : 'N/A'
+                                        }}
+                                    </span>
+                                </template>
+                            </Column>
+
+                            <Column header="Trade Status" :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="getTradeStatus(slotProps.data)"
+                                        :severity="getTradeStatusSeverity(slotProps.data)" />
+                                </template>
+                            </Column>
+
+                            <Column header="R:R" :style="{ width: '70px' }">
+                                <template #body="slotProps">
+                                    <span class="text-sm font-mono">
+                                        {{ slotProps.data.trade_entry?.rrr ?
+                                            Number(slotProps.data.trade_entry.rrr).toFixed(2) : 'N/A' }}
+                                    </span>
+                                </template>
+                            </Column>
+
+                            <Column header="Actions" :style="{ width: '140px' }">
+                                <template #body="slotProps">
+                                    <div class="flex gap-1">
+                                        <Button icon="pi pi-eye" size="small" severity="info" text
+                                            @click="router.get(`/checklists/${slotProps.data.id}`)"
+                                            v-tooltip="'View Details'" />
+                                        <Button icon="pi pi-pencil" size="small" severity="success" text
+                                            @click="router.get(`/checklists/${slotProps.data.id}/edit`)"
+                                            v-tooltip="'Edit'" />
+                                        <Button icon="pi pi-trash" size="small" severity="danger" text
+                                            @click="confirmDelete(slotProps.data.id)" v-tooltip="'Delete'" />
+                                    </div>
+                                </template>
+                            </Column>
+                        </DataTable>
                     </div>
-                </div>
-            </template>
-        </ConfirmDialog>
+
+                    <!-- Custom Pagination -->
+                    <div class="mt-6 flex justify-center" v-if="checklists.data.length > 0">
+                        <Paginator :first="(checklists.current_page - 1) * checklists.per_page"
+                            :rows="checklists.per_page" :totalRecords="checklists.total" @page="onPageChange"
+                            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink" />
+                    </div>
+                </template>
+            </Card>
+
+            <!-- PrimeVue ConfirmDialog -->
+            <ConfirmDialog group="headless">
+                <template #container="{ message, acceptCallback, rejectCallback }">
+                    <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
+                        <div
+                            class="rounded-full bg-red-500 text-white inline-flex justify-center items-center h-24 w-24 -mt-20">
+                            <i class="pi pi-trash !text-4xl"></i>
+                        </div>
+                        <span class="font-bold text-2xl block mb-2 mt-6">{{ message.header }}</span>
+                        <p class="mb-0 text-center">{{ message.message }}</p>
+                        <div class="flex items-center gap-2 mt-6">
+                            <Button label="Delete" @click="acceptCallback" severity="danger" class="w-32"></Button>
+                            <Button label="Cancel" outlined @click="rejectCallback" class="w-32"></Button>
+                        </div>
+                    </div>
+                </template>
+            </ConfirmDialog>
+        </div>
+        <!-- Toast for notifications -->
+        <Toast position="top-right" />
     </div>
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
-import { Inertia } from '@inertiajs/inertia'
+import { router } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 
 const confirm = useConfirm()
+const toast = useToast()
 
 const props = defineProps({
     checklists: {
@@ -182,17 +188,34 @@ const confirmDelete = (checklistId, event) => {
         header: 'Delete Checklist',
         message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
         accept: () => {
-            Inertia.delete(`/checklists/${checklistId}`)
+            router.delete(`/checklists/${checklistId}`, {
+                onSuccess: () => {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Checklist has been deleted successfully',
+                        life: 3000
+                    })
+                },
+                onError: () => {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete checklist. Please try again.',
+                        life: 3000
+                    })
+                }
+            })
         }
     })
 }
 
 // Handle pagination
 const onPageChange = (event) => {
-    const page = (event.first / event.rows) + 1
-    // Assuming your Laravel pagination uses ?page= parameter
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', page)
-    window.$inertia.get(url.toString())
+    const page = (event.first / event.rows) + 1;
+    router.get(window.location.pathname, { page: page }, {
+        preserveState: true,
+        replace: true,
+    });
 }
 </script>
