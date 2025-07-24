@@ -6,6 +6,8 @@
         <Card class="mb-6">
             <template #content>
                 <Steps :model="stepItems" :readonly="false" class="mb-4" />
+
+
             </template>
         </Card>
 
@@ -43,12 +45,10 @@
                                     @click="submitChecklist" :disabled="!canSubmit" />
                             </div>
                         </div>
-
                         <!-- Progress Bar -->
-                        <div class="mt-6">
+                        <div class="mt-4">
                             <div class="flex justify-between text-sm mb-2">
                                 <span>Setup Progress</span>
-                                <span>{{ evaluationScore }}/100</span>
                             </div>
                             <ProgressBar :value="evaluationScore" :class="{
                                 'progress-danger': evaluationScore < 50,
@@ -108,13 +108,10 @@
                         </div>
 
                         <div>
-                            <h3 class="text-xl font-semibold text-blue-900 mb-2">Evaluation Score</h3>
-                            <Tag :value="`${evaluationScore}/100`" :severity="getScoreSeverity(evaluationScore)"
-                                class="text-2xl font-bold px-4 py-2" />
-                            <div v-if="evaluationScore === 100"
-                                class="text-yellow-500 mt-3 font-bold text-lg text-center">
-                                ★ All Stars Aligned ★
-                            </div>
+                            <EvaluationScore ref="evaluationScoreRef"
+                                :zone-qualifiers="zoneQualifiersData.selectedZoneQualifiers"
+                                :technicals="technicalsData" :fundamentals="fundamentalsData" :settings="settings"
+                                title="Evaluation Score" />
                         </div>
                     </div>
                 </template>
@@ -131,7 +128,7 @@
         </Message>
 
         <!-- Toast for notifications -->
-        <Toast />
+        <AppToast ref="toastRef" />
     </div>
 </template>
 
@@ -147,11 +144,17 @@ import TechnicalsStep from '@/Components/ChecklistSteps/TechnicalsStep.vue';
 import FundamentalsStep from '@/Components/ChecklistSteps/FundamentalsStep.vue';
 import OrderEntryStep from '@/Components/ChecklistSteps/OrderEntryStep.vue';
 
+// Import UI components
+import AppToast from '@/Components/UI/AppToast.vue';
+import EvaluationScore from '@/Components/UI/EvaluationScore.vue';
+
 const props = defineProps({
     settings: Object
 })
 
 const toast = useToast();
+const toastRef = ref(null);
+const evaluationScoreRef = ref(null);
 
 // Reactive data
 const currentStep = ref(1);
@@ -237,73 +240,6 @@ const progressPercentage = computed(() => {
 
 const selectedZoneQualifiersCount = computed(() => zoneQualifiersData.value.selectedZoneQualifiers.length);
 
-const evaluationScore = computed(() => {
-    // 1. Compute raw weighted score
-    let raw = 0;
-    const zoneKeys = ['fresh', 'original', 'flip', 'lol', 'min_profit_margin', 'big_brother'];
-    zoneKeys.forEach((key, idx) => {
-        const qualifierName = zoneQualifiers[idx];
-        if (zoneQualifiersData.value.selectedZoneQualifiers.includes(qualifierName)) {
-            raw += Number(props.settings[`zone_${key}_weight`] || 0);
-        }
-    });
-
-    // Technicals: Location
-    if (['Very Cheap', 'Very Expensive'].includes(technicalsData.value.location)) {
-        raw += Number(props.settings.technical_very_exp_chp_weight || 0);
-    } else if (['Cheap', 'Expensive'].includes(technicalsData.value.location)) {
-        raw += Number(props.settings.technical_exp_chp_weight || 0);
-    }
-
-    // Technicals: Direction
-    if (technicalsData.value.direction === 'Impulsion') {
-        raw += Number(props.settings.technical_direction_impulsive_weight || 0);
-    } else if (technicalsData.value.direction === 'Correction') {
-        raw += Number(props.settings.technical_direction_correction_weight || 0);
-    }
-
-    // Fundamentals
-    if (['Undervalued', 'Overvalued'].includes(fundamentalsData.value.valuation)) {
-        raw += Number(props.settings.fundamental_valuation_weight || 0);
-    }
-    if (fundamentalsData.value.seasonalConfluence === 'Yes') {
-        raw += Number(props.settings.fundamental_seasonal_weight || 0);
-    }
-    if (fundamentalsData.value.nonCommercials === 'Divergence') {
-        raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
-    }
-    if (['Bullish', 'Bearish'].includes(fundamentalsData.value.cotIndex)) {
-        raw += Number(props.settings.fundamental_cot_index_weight || 0);
-    }
-
-    // 2. Compute max possible score based on one selection per category
-    const zoneMax = zoneKeys.reduce((sum, key) => sum + Number(props.settings[`zone_${key}_weight`] || 0), 0);
-
-    // Technicals: Location (pick the higher of very_exp or exp)
-    const locHigh = Math.max(
-        Number(props.settings.technical_very_exp_chp_weight || 0),
-        Number(props.settings.technical_exp_chp_weight || 0)
-    );
-
-    // Technicals: Direction (pick the higher of impulsive or correction)
-    const dirHigh = Math.max(
-        Number(props.settings.technical_direction_impulsive_weight || 0),
-        Number(props.settings.technical_direction_correction_weight || 0)
-    );
-
-    // Fundamentals: sum of all criteria
-    const fundMax =
-        Number(props.settings.fundamental_valuation_weight || 0) +
-        Number(props.settings.fundamental_seasonal_weight || 0) +
-        Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
-        Number(props.settings.fundamental_cot_index_weight || 0);
-
-    const max = zoneMax + locHigh + dirHigh + fundMax;
-
-    // 3. Normalize to a 0–100 scale
-    return max > 0 ? Math.round((raw / max) * 100) : 0;
-});
-
 const canProceed = computed(() => {
     if (currentStep.value === 1) {
         return selectedZoneQualifiersCount.value > 0;
@@ -333,6 +269,10 @@ const canSubmit = computed(() => {
         fundamentalsData.value.seasonalConfluence &&
         fundamentalsData.value.nonCommercials &&
         fundamentalsData.value.cotIndex;
+});
+
+const evaluationScore = computed(() => {
+    return evaluationScoreRef.value?.calculatedScore || 0;
 });
 
 function updateProgress() {
@@ -390,7 +330,7 @@ function submitChecklist() {
         zone_qualifiers: zoneQualifiersData.value.selectedZoneQualifiers,
         technicals: technicalsData.value,
         fundamentals: fundamentalsData.value,
-        score: evaluationScore.value,
+        score: evaluationScoreRef.value?.calculatedScore || 0,
         asset: zoneQualifiersData.value.asset,
         notes: orderEntryData.value.notes,
         entry_date: formatDate(orderEntryData.value.entryDate),
@@ -404,21 +344,11 @@ function submitChecklist() {
     }, {
         preserveState: true,
         onSuccess: () => {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Checklist saved successfully!',
-                life: 3000
-            });
+            toastRef.value?.showSuccess('Success', 'Checklist saved successfully!')
             resetWizard();
         },
         onError: (errors) => {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to save checklist. Please try again.',
-                life: 3000
-            });
+            toastRef.value?.showError('Error', 'Failed to save checklist. Please try again.')
             console.error('Submission error:', errors);
         }
     });
