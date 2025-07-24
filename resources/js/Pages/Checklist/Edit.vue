@@ -5,10 +5,10 @@
         <!-- Action Buttons -->
         <div class="flex justify-between items-center mb-6">
             <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
-                @click="$inertia.get(`/checklists/${checklist.id}`)" />
+                @click="router.get(route('checklists.show', checklist.id))" />
             <div class="flex gap-3">
                 <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined
-                    @click="$inertia.get(`/checklists/${checklist.id}`)" />
+                    @click="router.get(route('checklists.show', checklist.id))" />
                 <Button label="Save Changes" icon="pi pi-save" severity="success" @click="submitForm"
                     :disabled="!canSubmit" />
             </div>
@@ -220,6 +220,8 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { computed, watch, onMounted, ref } from 'vue';
+import { router } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
 
 const orderEntryRef = ref(null)
 
@@ -288,7 +290,7 @@ const submitForm = () => {
     const originalDate = form.entry_date
     form.entry_date = formatDate(form.entry_date)
 
-    form.put(`/checklists/${props.checklist.id}`)
+    form.put(route('checklists.update', props.checklist.id))
 }
 
 const zoneQualifiers = [

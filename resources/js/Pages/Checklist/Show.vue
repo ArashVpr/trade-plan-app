@@ -4,10 +4,11 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-between mb-6">
-            <Button label="Back" icon="pi pi-arrow-left" severity="secondary" @click="$inertia.get('/checklists')" />
+            <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
+                @click="router.get(route('checklists.index'))" />
             <div class="flex gap-2">
                 <Button label="Edit" icon="pi pi-pencil" severity="success"
-                    @click="$inertia.get(`/checklists/${checklist.id}/edit`)" />
+                    @click="router.get(route('checklists.edit', checklist.id))" />
                 <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDelete" />
             </div>
         </div>
@@ -132,7 +133,7 @@
                         </p>
                         <div class="flex justify-center">
                             <Button label="Add Trade Details" icon="pi pi-plus" severity="info" outlined
-                                @click="$inertia.get(`/checklists/${checklist.id}/edit?focus=order-entry`)" />
+                                @click="router.get(route('checklists.edit', checklist.id) + '?focus=order-entry')" />
                         </div>
                     </div>
                 </template>
@@ -231,11 +232,11 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
 import { computed } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
+import { route } from 'ziggy-js'
 
 Chart.register(...registerables)
 
@@ -267,7 +268,7 @@ const getOutcomeSeverity = (outcome) => {
 const confirmDelete = () => {
     const result = confirm('Are you sure you want to delete this checklist? This action cannot be undone.');
     if (result) {
-        Inertia.delete(`/checklists/${props.checklist.id}`)
+        router.delete(route('checklists.destroy', props.checklist.id))
     }
 }
 

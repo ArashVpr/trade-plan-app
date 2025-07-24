@@ -3,7 +3,7 @@
         <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
             <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
 
-            <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get('/')" class="mb-4" />
+            <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get(route('home'))" class="mb-4" />
 
             <Card>
                 <template #title>
@@ -81,7 +81,7 @@
                                         <Button icon="pi pi-eye" size="small" severity="info" text
                                             v-tooltip="'View Details'" />
                                         </Link>
-                                        <Link :href="`/checklists/${slotProps.data.id}/edit`">
+                                        <Link :href="route('checklists.edit', slotProps.data.id)">
                                         <Button icon="pi pi-pencil" size="small" severity="success" text
                                             v-tooltip="'Edit'" />
                                         </Link>
@@ -191,7 +191,7 @@ const confirmDelete = (checklistId, event) => {
         header: 'Delete Checklist',
         message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
         accept: () => {
-            router.delete(`/checklists/${checklistId}`, {
+            router.delete(route('checklists.destroy', checklistId), {
                 onSuccess: () => {
                     toast.add({
                         severity: 'success',

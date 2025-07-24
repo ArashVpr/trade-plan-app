@@ -250,13 +250,13 @@
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Fundamentals</h3>
                         <p class="text-sm text-gray-600">Valuation: {{ fundamentals.valuation || 'Not selected' }}</p>
-                        <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence || "Not selected" }} </p>
-                        <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not selected' }} </p>
+                        <p class="text-sm text-gray-600">Seasonal Confluence: {{ fundamentals.seasonalConfluence || "Not                            selected" }} </p>
+                        <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentals.nonCommercials || 'Not                            selected' }} </p>
                         <p class="text-sm text-gray-600">CoT Index: {{ fundamentals.cotIndex || 'Not selected' }}</p>
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Zone Qualifiers ({{ selectedZoneQualifiersCount
-                            }})</h3>
+                        }})</h3>
                         <ul class="list-disc pl-5 text-sm text-gray-600">
                             <li v-for="qualifier in filteredZoneQualifiers" :key="qualifier">
                                 {{ qualifier }}
@@ -287,8 +287,8 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Inertia } from '@inertiajs/inertia';
-import { Link } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
 
 const props = defineProps({
     settings: Object
@@ -451,7 +451,7 @@ function submitChecklist() {
     if (!canSubmit.value) return;
     message.value = '';
     messageType.value = '';
-    Inertia.post('/checklists', {
+    router.post(route('checklists.store'), {
         zone_qualifiers: zoneQualifiers.filter((_, index) => checkedZoneQualifiers.value[index]),
         technicals: technicals.value,
         fundamentals: fundamentals.value,
