@@ -1,52 +1,63 @@
+
 <template>
-    <div class="card flex justify-center">
-        <Stepper value="1" linear class="basis-[50rem]">
-            <StepList>
-                <Step value="1">Header I</Step>
-                <Step value="2">Header II</Step>
-                <Step value="3">Header III</Step>
-            </StepList>
-            <StepPanels>
-                <StepPanel v-slot="{ activateCallback }" value="1">
-                    <div class="flex flex-col h-48">
-                        <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">Content I</div>
-                    </div>
-                    <div class="flex pt-6 justify-end">
-                        <Button label="Next" icon="pi pi-arrow-right" @click="activateCallback('2')" />
-                    </div>
-                </StepPanel>
-                <StepPanel v-slot="{ activateCallback }" value="2">
-                    <div class="flex flex-col h-48">
-                        <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">Content II</div>
-                    </div>
-                    <div class="flex pt-6 justify-between">
-                        <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="activateCallback('1')" />
-                        <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('3')" />
-                    </div>
-                </StepPanel>
-                <StepPanel v-slot="{ activateCallback }" value="3">
-                    <div class="flex flex-col h-48">
-                        <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">Content III</div>
-                    </div>
-                    <div class="pt-6">
-                        <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="activateCallback('2')" />
-                    </div>
-                </StepPanel>
-            </StepPanels>
-        </Stepper>
-    </div>
-    <Toast position="top-left"/>
-    <div class="card flex justify-center">
-        <Toast />
-        <Button label="Show" @click="show()" />
+    <Toast />
+    <ConfirmDialog></ConfirmDialog>
+    <div class="card flex flex-wrap gap-2 justify-center">
+        <Button @click="confirm1()" label="Save" outlined />
+        <Button @click="confirm2()" label="Delete" severity="danger" outlined />
     </div>
 </template>
 
 <script setup>
+import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+
+const confirm = useConfirm();
 const toast = useToast();
 
-const show = () => {
-    toast.add({ severity: 'info', summary: 'Info', detail: 'Message Content', life: 3000 });
+const confirm1 = () => {
+    confirm.require({
+        message: 'Are you sure you want to proceed?',
+        header: 'Confirmation',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Save'
+        },
+        accept: () => {
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
+        },
+        reject: () => {
+            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
+
+const confirm2 = () => {
+    confirm.require({
+        message: 'Do you want to delete this record?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
+        },
+        reject: () => {
+            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
 };
 </script>

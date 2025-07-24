@@ -74,6 +74,7 @@
                                 </template>
                             </Column>
 
+
                             <Column header="Actions" :style="{ width: '140px' }">
                                 <template #body="slotProps">
                                     <div class="flex gap-1">
@@ -103,7 +104,7 @@
             </Card>
 
             <!-- PrimeVue ConfirmDialog -->
-            <ConfirmDialog group="headless">
+            <!-- <ConfirmDialog group="headless">
                 <template #container="{ message, acceptCallback, rejectCallback }">
                     <div class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded">
                         <div
@@ -118,11 +119,11 @@
                         </div>
                     </div>
                 </template>
-            </ConfirmDialog>
+            </ConfirmDialog> -->
         </div>
-        <!-- Toast for notifications -->
-        <Toast position="top-right" />
     </div>
+    <ConfirmDialog></ConfirmDialog>
+    <Toast />
 </template>
 
 <script setup>
@@ -135,10 +136,7 @@ const confirm = useConfirm()
 const toast = useToast()
 
 const props = defineProps({
-    checklists: {
-        type: Object,
-        default: () => ({})
-    }
+    checklists: Object
 })
 
 // Helper function to determine score severity for Tag component
@@ -184,31 +182,46 @@ const getTradeStatusSeverity = (checklist) => {
     return checklist.trade_entry.position_type === 'Long' ? 'success' : 'danger'
 }
 
-// Handle delete confirmation
-const confirmDelete = (checklistId, event) => {
+const confirmDelete = (checklistId) => {
+    // confirm.require({
+    //     group: 'headless',
+    //     header: 'Delete Checklist',
+    //     message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
+    //     accept: () => {
+
+    //         router.delete(route('checklists.destroy', checklistId), {}, {
+    //             onSuccess: () => {
+    //                 toast.add({ severity: 'success', summary: 'Success', detail: 'Checklist deleted', life: 3000 })
+    //             },
+    //             onError: (errors) => {
+    //                 console.error('Delete error:', errors)
+    //                 toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete checklist.', life: 3000 })
+    //             }
+    //         }
+    //         )
+    //     }
+    // })
     confirm.require({
-        group: 'headless',
-        header: 'Delete Checklist',
-        message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
+        message: 'Do you want to delete this record?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+
         accept: () => {
-            router.delete(route('checklists.destroy', checklistId), {
-                onSuccess: () => {
-                    toast.add({
-                        severity: 'success',
-                        summary: 'Success',
-                        detail: 'Checklist has been deleted successfully',
-                        life: 3000
-                    })
-                },
-                onError: () => {
-                    toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Failed to delete checklist. Please try again.',
-                        life: 3000
-                    })
-                }
-            })
+            router.post(route('checklists.destroy', checklistId))
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Checklist deleted', life: 3000 });
+        },
+        reject: () => {
+            toast.add({ severity: 'info', summary: 'Cancelled', detail: 'Delete cancelled', life: 3000 });
         }
     })
 }

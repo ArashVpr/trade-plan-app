@@ -72,7 +72,7 @@ class ChecklistController extends Controller
     }
     public function show(Checklist $checklist)
     {
-        
+
 
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
@@ -84,7 +84,7 @@ class ChecklistController extends Controller
     }
     public function edit(Checklist $checklist)
     {
-        
+
         $settings = UserSettings::firstOrCreate(
             ['user_id' => 1], // Replace with Auth::id() in production
         );
@@ -167,10 +167,9 @@ class ChecklistController extends Controller
 
     public function destroy(Checklist $checklist)
     {
-
         $checklist->delete();
 
-        return Inertia::location(route('checklists.index'));
+        return back();
     }
 
     public function checklistWeights()
