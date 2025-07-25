@@ -202,7 +202,7 @@ const confirmDelete = (checklistId) => {
     //     }
     // })
     confirm.require({
-        message: 'Do you want to delete this record?',
+        message: 'Do you want to delete this checklist?',
         header: 'Danger Zone',
         icon: 'pi pi-info-circle',
         rejectLabel: 'Cancel',

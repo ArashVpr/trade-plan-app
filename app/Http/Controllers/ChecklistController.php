@@ -169,7 +169,7 @@ class ChecklistController extends Controller
     {
         $checklist->delete();
 
-        return back();
+        return to_route('checklists.index');
     }
 
     public function checklistWeights()

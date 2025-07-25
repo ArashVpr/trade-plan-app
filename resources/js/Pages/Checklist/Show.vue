@@ -229,6 +229,10 @@
             </Card>
         </div>
     </div>
+
+    <!-- PrimeVue Dialog Components -->
+    <ConfirmDialog></ConfirmDialog>
+    <Toast />
 </template>
 
 <script setup>
@@ -237,8 +241,13 @@ import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
 import { computed } from 'vue'
 import { route } from 'ziggy-js'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 
 Chart.register(...registerables)
+
+const confirm = useConfirm()
+const toast = useToast()
 
 const props = defineProps({
     checklist: Object,
@@ -266,10 +275,28 @@ const getOutcomeSeverity = (outcome) => {
 }
 
 const confirmDelete = () => {
-    const result = confirm('Are you sure you want to delete this checklist? This action cannot be undone.');
-    if (result) {
-        router.delete(route('checklists.destroy', props.checklist.id))
-    }
+    confirm.require({
+        message: 'Do you want to delete this checklist?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            router.post(route('checklists.destroy', props.checklist.id))
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Checklist deleted', life: 3000 });
+        },
+        reject: () => {
+            toast.add({ severity: 'info', summary: 'Cancelled', detail: 'Delete cancelled', life: 3000 });
+        }
+    })
 }
 
 // Calculate individual category scores with normalization
