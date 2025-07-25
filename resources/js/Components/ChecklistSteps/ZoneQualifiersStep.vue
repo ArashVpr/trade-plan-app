@@ -7,7 +7,7 @@
 
         <div class="field">
             <label class="block text-sm font-medium mb-2">Instrument</label>
-            <Dropdown :model-value="modelValue.asset" @update:model-value="updateData('asset', $event)"
+            <Select :model-value="modelValue.asset" @update:model-value="updateData('asset', $event)"
                 :options="assetOptions" placeholder="Select Instrument" class="w-full" />
         </div>
 

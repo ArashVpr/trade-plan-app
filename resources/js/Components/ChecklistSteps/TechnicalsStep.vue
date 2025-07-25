@@ -8,13 +8,13 @@
         <div class="grid grid-cols-1 gap-6">
             <div class="field">
                 <label class="block text-sm font-medium mb-2">Location</label>
-                <Dropdown :model-value="modelValue.location" @update:model-value="updateData('location', $event)"
+                <Select :model-value="modelValue.location" @update:model-value="updateData('location', $event)"
                     :options="locationOptions" placeholder="Select Location" class="w-full" />
             </div>
 
             <div class="field">
                 <label class="block text-sm font-medium mb-2">Direction</label>
-                <Dropdown :model-value="modelValue.direction" @update:model-value="updateData('direction', $event)"
+                <Select :model-value="modelValue.direction" @update:model-value="updateData('direction', $event)"
                     :options="directionOptions" placeholder="Select Direction" class="w-full" />
             </div>
         </div>

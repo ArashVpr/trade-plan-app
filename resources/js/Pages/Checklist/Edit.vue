@@ -37,7 +37,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Asset</label>
-                            <Dropdown v-model="form.asset" :options="['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']"
+                            <Select v-model="form.asset" :options="['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']"
                                 placeholder="Select Asset" class="w-full" />
                         </div>
                         <div class="field">
@@ -65,13 +65,13 @@
                                 <div class="grid grid-cols-1 gap-4">
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Location</label>
-                                        <Dropdown v-model="form.technicals.location"
+                                        <Select v-model="form.technicals.location"
                                             :options="['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
                                             placeholder="Select Location" class="w-full" />
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Direction</label>
-                                        <Dropdown v-model="form.technicals.direction"
+                                        <Select v-model="form.technicals.direction"
                                             :options="['Correction', 'Impulsion']" placeholder="Select Direction"
                                             class="w-full" />
                                     </div>
@@ -87,25 +87,24 @@
                                 <div class="grid grid-cols-1 gap-4">
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Valuation</label>
-                                        <Dropdown v-model="form.fundamentals.valuation"
+                                        <Select v-model="form.fundamentals.valuation"
                                             :options="['Overvalued', 'Neutral', 'Undervalued']"
                                             placeholder="Select Valuation" class="w-full" />
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Seasonal Confluence</label>
-                                        <Dropdown v-model="form.fundamentals.seasonalConfluence"
-                                            :options="['Yes', 'No']" placeholder="Select Seasonal Confluence"
-                                            class="w-full" />
+                                        <Select v-model="form.fundamentals.seasonalConfluence" :options="['Yes', 'No']"
+                                            placeholder="Select Seasonal Confluence" class="w-full" />
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Non-Commercials</label>
-                                        <Dropdown v-model="form.fundamentals.nonCommercials"
+                                        <Select v-model="form.fundamentals.nonCommercials"
                                             :options="['Divergence', 'No-Divergence']"
                                             placeholder="Select Non-Commercials" class="w-full" />
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">CoT Index</label>
-                                        <Dropdown v-model="form.fundamentals.cotIndex"
+                                        <Select v-model="form.fundamentals.cotIndex"
                                             :options="['Bullish', 'Neutral', 'Bearish']" placeholder="Select CoT Index"
                                             class="w-full" />
                                     </div>
@@ -145,12 +144,12 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Position Type</label>
-                                        <Dropdown v-model="form.position_type" :options="['Long', 'Short']"
+                                        <Select v-model="form.position_type" :options="['Long', 'Short']"
                                             placeholder="Select Position Type" class="w-full" />
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Trade Outcome</label>
-                                        <Dropdown v-model="form.outcome" :options="['win', 'loss', 'breakeven']"
+                                        <Select v-model="form.outcome" :options="['win', 'loss', 'breakeven']"
                                             placeholder="Select Outcome" class="w-full" />
                                     </div>
                                     <div class="field">

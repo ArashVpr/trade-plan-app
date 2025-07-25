@@ -23,9 +23,8 @@
 
             <div class="field">
                 <label class="block text-sm font-medium mb-2">Position Type</label>
-                <Dropdown :model-value="modelValue.positionType"
-                    @update:model-value="updateData('positionType', $event)" :options="positionOptions"
-                    placeholder="Select Position Type" class="w-full" />
+                <Select :model-value="modelValue.positionType" @update:model-value="updateData('positionType', $event)"
+                    :options="positionOptions" placeholder="Select Position Type" class="w-full" />
             </div>
 
             <div class="field">
@@ -55,7 +54,7 @@
 
         <div class="field">
             <label class="block text-sm font-medium mb-2">Outcome</label>
-            <Dropdown :model-value="modelValue.outcome" @update:model-value="updateData('outcome', $event)"
+            <Select :model-value="modelValue.outcome" @update:model-value="updateData('outcome', $event)"
                 :options="outcomeOptions" placeholder="Select Outcome" class="w-full" />
         </div>
 

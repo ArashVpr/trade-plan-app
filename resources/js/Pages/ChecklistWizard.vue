@@ -83,15 +83,12 @@
                         <div>
                             <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
                             <div class="space-y-1">
-                                <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not                                    selected'
-                                    }}</p>
+                                <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not                                    selected' }}</p>
                                 <p class="text-sm text-gray-600">Seasonal Confluence: {{
-                                    fundamentalsData.seasonalConfluence
-                                    || 'Not selected' }}</p>
+                                    fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
                                 <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials ||
                                     'Not selected' }}</p>
-                                <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not                                    selected'
-                                    }}</p>
+                                <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not                                    selected' }}</p>
                             </div>
                         </div>
 
