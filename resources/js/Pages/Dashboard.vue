@@ -238,21 +238,31 @@ const weeklyTrendData = computed(() => ({
 }))
 
 // Chart data for score distribution
-const scoreDistributionData = computed(() => ({
-    labels: props.stats.score_distribution.map(item => item.range),
-    datasets: [
-        {
-            data: props.stats.score_distribution.map(item => item.count),
-            backgroundColor: [
-                '#F59E0B', // Average - Yellow
-                '#EF4444', // Poor - Red
-                '#10B981', // Excellent - Green
-                '#3B82F6'  // Good - Blue
-            ],
-            borderWidth: 0
-        }
-    ]
-}))
+const scoreDistributionData = computed(() => {
+    // Define color mapping for each score range
+    const colorMap = {
+        'Excellent (80-100)': '#10B981', // Green
+        'Good (60-79)': '#3B82F6',       // Blue  
+        'Average (40-59)': '#F59E0B',    // Yellow
+        'Poor (0-39)': '#EF4444'         // Red
+    }
+
+    // Map colors to match the actual data order
+    const colors = props.stats.score_distribution.map(item =>
+        colorMap[item.range] || '#6B7280' // Default gray for unknown ranges
+    )
+
+    return {
+        labels: props.stats.score_distribution.map(item => item.range),
+        datasets: [
+            {
+                data: props.stats.score_distribution.map(item => item.count),
+                backgroundColor: colors,
+                borderWidth: 0
+            }
+        ]
+    }
+})
 
 // Chart options
 const chartOptions = {
