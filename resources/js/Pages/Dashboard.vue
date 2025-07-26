@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="max-w-7xl mx-auto p-6">
+        <div class="max-w-7xl mx-auto">
             <!-- Page Header -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-blue-900 mb-2">Trading Dashboard</h1>
@@ -124,7 +124,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -169,7 +169,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                        }}/100</span>
+                                            }}/100</span>
                                     </div>
                                 </template>
                             </Column>

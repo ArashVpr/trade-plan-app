@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="max-w-5xl mx-auto p-6">
+        <div class="max-w-5xl mx-auto">
             <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
 
             <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get(route('home'))" class="mb-4" />
@@ -195,7 +195,7 @@ const getTradeStatusSeverity = (checklist) => {
     // Check if we have the new trade_status field
     if (tradeEntry.trade_status) {
         switch (tradeEntry.trade_status) {
-            case 'pending': return 'info'   // Yellow  
+            case 'pending': return 'info'   // Blue
             case 'active': return 'warn'    // Yellow
             case 'completed': return getOutcomeSeverity(tradeEntry.outcome)
             case 'cancelled': return 'secondary' // Gray
