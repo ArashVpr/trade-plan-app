@@ -39,6 +39,12 @@ const page = usePage()
 // Navigation menu items
 const menuItems = computed(() => [
     {
+        label: 'Dashboard',
+        icon: 'pi pi-home',
+        command: () => navigateTo(route('dashboard')),
+        class: getCurrentRouteClass(route('dashboard'))
+    },
+    {
         label: 'New Checklist',
         icon: 'pi pi-plus',
         command: () => navigateTo(route('home')),
@@ -75,6 +81,9 @@ const navigateTo = (url) => {
 // Helper function to get active route styling
 const getCurrentRouteClass = (routeUrl) => {
     const currentUrl = page.url
+    if (routeUrl === route('dashboard') && currentUrl === '/dashboard') {
+        return 'text-blue-900 font-semibold'
+    }
     if (routeUrl === route('home') && (currentUrl === '/' || currentUrl === route('home'))) {
         return 'text-blue-900 font-semibold'
     }

@@ -9,7 +9,19 @@ class Checklist extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id',
+        'zone_qualifiers',
+        'technicals',
+        'fundamentals',
+        'score',
+        'asset',
+        'symbol',
+        'bias',
+        'overall_score',
+        'notes',
+        'status'
+    ];
 
     protected $casts = [
         'technicals' => 'array',

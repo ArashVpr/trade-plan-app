@@ -28,6 +28,9 @@ class ChecklistFactory extends Factory
         $zoneQualifiers = ['Fresh', 'Original', 'Flip', 'LOL', 'Minimum 1:2 Profit Margin', 'Big Brother Coverage'];
         $selectedQualifiers = $this->faker->randomElements($zoneQualifiers, $this->faker->numberBetween(1, 4));
 
+        $symbols = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY'];
+        $assets = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'NZD/USD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY'];
+
         return [
             'user_id' => 1, // Using static user ID for now, could use User::factory()
             'zone_qualifiers' => $selectedQualifiers,
@@ -42,7 +45,12 @@ class ChecklistFactory extends Factory
                 'cotIndex' => $this->faker->randomElement(['Bullish', 'Neutral', 'Bearish']),
             ],
             'score' => $this->faker->numberBetween(0, 100),
-            'asset' => $this->faker->randomElement(['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']),
+            'asset' => $this->faker->randomElement($assets),
+            'symbol' => $this->faker->randomElement($symbols),
+            'bias' => $this->faker->randomElement(['Long', 'Short']),
+            'notes' => $this->faker->optional(0.7)->sentence(),
+            'status' => $this->faker->randomElement(['planned', 'executed', 'cancelled']),
+            'created_at' => $this->faker->dateTimeBetween('-4 weeks', 'now'),
         ];
     }
 }
