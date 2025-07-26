@@ -147,9 +147,8 @@ class DashboardController extends Controller
         // Check if we have the new trade_status field (after migration)
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'planned' => 'Planned',
-                'pending' => 'Order Pending',
-                'active' => 'Position Open',
+                'pending' => 'Pending',
+                'active' => 'Open',
                 'completed' => $tradeEntry->outcome ? ucfirst($tradeEntry->outcome) : 'Completed',
                 'cancelled' => 'Cancelled',
                 default => 'Unknown'
@@ -176,7 +175,6 @@ class DashboardController extends Controller
         // Check if we have the new trade_status field
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'planned' => 'info',      // Blue
                 'pending' => 'warning',   // Yellow  
                 'active' => 'warning',    // Yellow
                 'completed' => $this->getOutcomeSeverity($tradeEntry->outcome),

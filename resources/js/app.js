@@ -24,59 +24,6 @@ const TradingTheme = definePreset(Aura, {
       900: '{blue.900}',
       950: '{blue.950}'
     },
-    // Trading-specific colors
-    success: {
-      50: '{green.50}',
-      100: '{green.100}',
-      200: '{green.200}',
-      300: '{green.300}',
-      400: '{green.400}',
-      500: '{green.500}',
-      600: '{green.600}',
-      700: '{green.700}',
-      800: '{green.800}',
-      900: '{green.900}',
-      950: '{green.950}'
-    },
-    warn: {
-      50: '{yellow.50}',
-      100: '{yellow.100}',
-      200: '{yellow.200}',
-      300: '{yellow.300}',
-      400: '{yellow.400}',
-      500: '{yellow.500}',
-      600: '{yellow.600}',
-      700: '{yellow.700}',
-      800: '{yellow.800}',
-      900: '{yellow.900}',
-      950: '{yellow.950}'
-    },
-    danger: {
-      50: '{red.50}',
-      100: '{red.100}',
-      200: '{red.200}',
-      300: '{red.300}',
-      400: '{red.400}',
-      500: '{red.500}',
-      600: '{red.600}',
-      700: '{red.700}',
-      800: '{red.800}',
-      900: '{red.900}',
-      950: '{red.950}'
-    },
-    info: {
-      50: '{sky.50}',
-      100: '{sky.100}',
-      200: '{sky.200}',
-      300: '{sky.300}',
-      400: '{sky.400}',
-      500: '{sky.500}',
-      600: '{sky.600}',
-      700: '{sky.700}',
-      800: '{sky.800}',
-      900: '{sky.900}',
-      950: '{sky.950}'
-    },
     colorScheme: {
       light: {
         primary: {
@@ -84,34 +31,6 @@ const TradingTheme = definePreset(Aura, {
           contrastColor: '#ffffff',
           hoverColor: '{blue.800}',
           activeColor: '{blue.700}'
-        },
-        // Success states (profit/wins)
-        success: {
-          color: '{green.600}',
-          contrastColor: '#ffffff',
-          hoverColor: '{green.700}',
-          activeColor: '{green.800}'
-        },
-        // Warning states (neutral/breakeven)
-        warn: {
-          color: '{yellow.500}',
-          contrastColor: '{yellow.950}',
-          hoverColor: '{yellow.600}',
-          activeColor: '{yellow.700}'
-        },
-        // Danger states (loss/risk)
-        danger: {
-          color: '{red.600}',
-          contrastColor: '#ffffff',
-          hoverColor: '{red.700}',
-          activeColor: '{red.800}'
-        },
-        // Info states (general information)
-        info: {
-          color: '{sky.600}',
-          contrastColor: '#ffffff',
-          hoverColor: '{sky.700}',
-          activeColor: '{sky.800}'
         },
         highlight: {
           background: '{blue.950}',

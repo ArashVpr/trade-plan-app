@@ -48,8 +48,79 @@ class ChecklistFactory extends Factory
             'asset' => $this->faker->randomElement($assets),
             'symbol' => $this->faker->randomElement($symbols),
             'bias' => $this->faker->randomElement(['Long', 'Short']),
-            'status' => $this->faker->randomElement(['planned', 'executed', 'cancelled', 'pending', 'active', 'completed']),
             'created_at' => $this->faker->dateTimeBetween('-4 weeks', 'now'),
         ];
+    }
+
+    /**
+     * Create checklist with no trade entry (analysis only)
+     */
+    public function analysisOnly()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                // Just the checklist, no trade entry will be created
+            ];
+        });
+    }
+
+    /**
+     * Create checklist with pending order
+     */
+    public function withPendingOrder()
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        })->afterCreating(function ($checklist) {
+            \App\Models\TradeEntry::factory()->pending()->create([
+                'checklist_id' => $checklist->id,
+                'instrument' => $checklist->asset,
+            ]);
+        });
+    }
+
+    /**
+     * Create checklist with active position
+     */
+    public function withActivePosition()
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        })->afterCreating(function ($checklist) {
+            \App\Models\TradeEntry::factory()->active()->create([
+                'checklist_id' => $checklist->id,
+                'instrument' => $checklist->asset,
+            ]);
+        });
+    }
+
+    /**
+     * Create checklist with completed trade
+     */
+    public function withCompletedTrade()
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        })->afterCreating(function ($checklist) {
+            \App\Models\TradeEntry::factory()->completed()->create([
+                'checklist_id' => $checklist->id,
+                'instrument' => $checklist->asset,
+            ]);
+        });
+    }
+
+    /**
+     * Create checklist with cancelled trade
+     */
+    public function withCancelledTrade()
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        })->afterCreating(function ($checklist) {
+            \App\Models\TradeEntry::factory()->cancelled()->create([
+                'checklist_id' => $checklist->id,
+                'instrument' => $checklist->asset,
+            ]);
+        });
     }
 }

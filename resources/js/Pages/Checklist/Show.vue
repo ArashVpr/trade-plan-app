@@ -164,6 +164,13 @@
                                     class="w-full" />
                             </div>
 
+                            <!-- Trade Status -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                <Tag :value="getTradeStatus(tradeEntry)"
+                                    :severity="getTradeStatusSeverity(tradeEntry)" />
+                            </div>
+
                             <!-- Prices -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Entry Price</label>
@@ -277,6 +284,60 @@ const getOutcomeSeverity = (outcome) => {
     if (outcome === 'loss') return 'danger'
     if (outcome === 'breakeven') return 'warning'
     return 'secondary'
+}
+
+/**
+ * Get human-readable trade status - matches DashboardController logic
+ */
+const getTradeStatus = (tradeEntry) => {
+    if (!tradeEntry) {
+        return 'Analysis Only'
+    }
+
+    // Check if we have the new trade_status field (after migration)
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'Pending'
+            case 'active': return 'Open'
+            case 'completed': return tradeEntry.outcome ? tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1) : 'Completed'
+            case 'cancelled': return 'Cancelled'
+            default: return 'Unknown'
+        }
+    }
+
+    // Fallback for existing data (before migration)
+    if (tradeEntry.outcome) {
+        return tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1)
+    }
+
+    return 'Trade Pending'
+}
+
+/**
+ * Get PrimeVue severity for trade status - matches DashboardController logic
+ */
+const getTradeStatusSeverity = (tradeEntry) => {
+    if (!tradeEntry) {
+        return 'info' // Blue for analysis only
+    }
+
+    // Check if we have the new trade_status field
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'warning'   // Yellow  
+            case 'active': return 'warning'    // Yellow
+            case 'completed': return getOutcomeSeverity(tradeEntry.outcome)
+            case 'cancelled': return 'secondary' // Gray
+            default: return 'secondary'
+        }
+    }
+
+    // Fallback for existing data
+    if (tradeEntry.outcome) {
+        return getOutcomeSeverity(tradeEntry.outcome)
+    }
+
+    return 'warning' // Yellow for pending
 }
 
 const confirmDelete = () => {

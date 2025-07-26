@@ -157,51 +157,61 @@ const getOutcomeSeverity = (outcome) => {
     }
 }
 
-// Helper function to get trade status
+// Helper function to get trade status - matches Dashboard and Show.vue
 const getTradeStatus = (checklist) => {
-    if (!checklist.trade_entry) {
+    const tradeEntry = checklist.trade_entry
+
+    if (!tradeEntry) {
         return 'Analysis Only'
     }
-    if (checklist.trade_entry.outcome) {
-        // Show the outcome (Win/Loss/Breakeven) if trade is completed
-        return checklist.trade_entry.outcome.charAt(0).toUpperCase() + checklist.trade_entry.outcome.slice(1)
+
+    // Check if we have the new trade_status field (after migration)
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'Pending'
+            case 'active': return 'Open'
+            case 'completed': return tradeEntry.outcome ? tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1) : 'Completed'
+            case 'cancelled': return 'Cancelled'
+            default: return 'Unknown'
+        }
     }
-    // Show position type if trade is taken but not completed
-    return checklist.trade_entry.position_type || 'Trade Pending'
+
+    // Fallback for existing data (before migration)
+    if (tradeEntry.outcome) {
+        return tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1)
+    }
+
+    return 'Trade Pending'
 }
 
-// Helper function to get trade status severity
+// Helper function to get trade status severity - matches Dashboard and Show.vue
 const getTradeStatusSeverity = (checklist) => {
-    if (!checklist.trade_entry) {
+    const tradeEntry = checklist.trade_entry
+
+    if (!tradeEntry) {
         return 'info'  // Blue for analysis only
     }
-    if (checklist.trade_entry.outcome) {
-        // Use outcome severity for completed trades
-        return getOutcomeSeverity(checklist.trade_entry.outcome)
+
+    // Check if we have the new trade_status field
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'info'   // Yellow  
+            case 'active': return 'warn'    // Yellow
+            case 'completed': return getOutcomeSeverity(tradeEntry.outcome)
+            case 'cancelled': return 'secondary' // Gray
+            default: return 'secondary'
+        }
     }
-    // Use position severity for pending trades
-    return checklist.trade_entry.position_type === 'Long' ? 'success' : 'danger'
+
+    // Fallback for existing data
+    if (tradeEntry.outcome) {
+        return getOutcomeSeverity(tradeEntry.outcome)
+    }
+
+    return 'warn' // Yellow for pending
 }
 
 const confirmDelete = (checklistId) => {
-    // confirm.require({
-    //     group: 'headless',
-    //     header: 'Delete Checklist',
-    //     message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
-    //     accept: () => {
-
-    //         router.delete(route('checklists.destroy', checklistId), {}, {
-    //             onSuccess: () => {
-    //                 toast.add({ severity: 'success', summary: 'Success', detail: 'Checklist deleted', life: 3000 })
-    //             },
-    //             onError: (errors) => {
-    //                 console.error('Delete error:', errors)
-    //                 toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete checklist.', life: 3000 })
-    //             }
-    //         }
-    //         )
-    //     }
-    // })
     confirm.require({
         message: 'Do you want to delete this checklist?',
         header: 'Danger Zone',
