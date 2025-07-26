@@ -40,7 +40,6 @@ class TradeEntryFactory extends Factory
             'target_price' => $targetPrice,
             'rrr' => round($targetDistance / $stopDistance, 2),
             'trade_status' => 'pending',
-            'outcome' => null,
             'notes' => $this->faker->optional(0.6)->sentence(),
         ];
     }
@@ -53,7 +52,6 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'pending',
-                'outcome' => null,
                 'notes' => $this->faker->optional(0.7)->sentence(),
             ];
         });
@@ -67,7 +65,6 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'active',
-                'outcome' => null,
                 'entry_date' => $this->faker->dateTimeBetween('-1 week', 'now'),
                 'notes' => $this->faker->optional(0.5)->sentence(),
             ];
@@ -82,15 +79,66 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             $outcome = $this->faker->randomElement(['win', 'loss', 'breakeven']);
 
+            // Map outcome to new status format
+            $statusMap = [
+                'win' => 'win',
+                'loss' => 'loss',
+                'breakeven' => 'breakeven'
+            ];
+
             // Calculate realistic R:R based on outcome
             $rrr = $this->calculateRRByOutcome($outcome);
 
             return [
-                'trade_status' => 'completed',
-                'outcome' => $outcome,
+                'trade_status' => $statusMap[$outcome],
                 'rrr' => $rrr,
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
                 'notes' => $this->getOutcomeNote($outcome),
+            ];
+        });
+    }
+
+    /**
+     * Trade completed with win
+     */
+    public function completedWin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'win',
+                'rrr' => $this->calculateRRByOutcome('win'),
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'notes' => $this->getOutcomeNote('win'),
+            ];
+        });
+    }
+
+    /**
+     * Trade completed with loss
+     */
+    public function completedLoss()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'loss',
+                'rrr' => $this->calculateRRByOutcome('loss'),
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'notes' => $this->getOutcomeNote('loss'),
+            ];
+        });
+    }
+
+    /**
+     * Trade completed at breakeven
+     */
+    public function completedBreakeven()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'breakeven',
+                'rrr' => $this->calculateRRByOutcome('breakeven'),
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'notes' => $this->getOutcomeNote('breakeven'),
             ];
         });
     }
@@ -103,7 +151,6 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'cancelled',
-                'outcome' => null,
                 'notes' => $this->faker->randomElement([
                     'Market conditions changed, cancelled order.',
                     'Better opportunity emerged, cancelled this trade.',

@@ -147,17 +147,14 @@ class DashboardController extends Controller
         // Check if we have the new trade_status field (after migration)
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'pending' => 'Pending',
-                'active' => 'Open',
-                'completed' => $tradeEntry->outcome ? ucfirst($tradeEntry->outcome) : 'Completed',
+                'pending' => 'Order Pending',
+                'active' => 'Position Open',
+                'completed_win' => 'Win',
+                'completed_loss' => 'Loss',
+                'completed_breakeven' => 'Breakeven',
                 'cancelled' => 'Cancelled',
                 default => 'Unknown'
             };
-        }
-
-        // Fallback for existing data (before migration)
-        if ($tradeEntry->outcome) {
-            return ucfirst($tradeEntry->outcome);
         }
 
         return 'Trade Pending';
@@ -177,30 +174,15 @@ class DashboardController extends Controller
             return match ($tradeEntry->trade_status) {
                 'pending' => 'warning',   // Yellow  
                 'active' => 'warning',    // Yellow
-                'completed' => $this->getOutcomeSeverity($tradeEntry->outcome),
+                'completed_win' => 'success',     // Green
+                'completed_loss' => 'danger',     // Red  
+                'completed_breakeven' => 'warning', // Yellow
                 'cancelled' => 'secondary', // Gray
                 default => 'secondary'
             };
         }
 
-        // Fallback for existing data
-        if ($tradeEntry->outcome) {
-            return $this->getOutcomeSeverity($tradeEntry->outcome);
-        }
-
         return 'warning'; // Yellow for pending
     }
 
-    /**
-     * Get severity based on trade outcome
-     */
-    private function getOutcomeSeverity($outcome)
-    {
-        return match ($outcome) {
-            'win' => 'success',     // Green
-            'loss' => 'danger',     // Red  
-            'breakeven' => 'warning', // Yellow
-            default => 'secondary'  // Gray
-        };
-    }
 }

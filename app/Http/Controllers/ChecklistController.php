@@ -36,8 +36,8 @@ class ChecklistController extends Controller
             'entry_price' => 'nullable|numeric',
             'stop_price' => 'nullable|numeric',
             'target_price' => 'nullable|numeric',
-            'outcome' => 'nullable|in:win,loss,breakeven',
-            'rrr' => 'nullable|numeric|min:0',
+            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
+            'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
         ]);
 
@@ -62,7 +62,7 @@ class ChecklistController extends Controller
                 'entry_price' => $validated['entry_price'],
                 'stop_price' => $validated['stop_price'],
                 'target_price' => $validated['target_price'],
-                'outcome' => $validated['outcome'],
+                'trade_status' => $validated['trade_status'],
                 'rrr' => $validated['rrr'],
                 'notes' => $validated['notes'],
             ]);
@@ -72,8 +72,6 @@ class ChecklistController extends Controller
     }
     public function show(Checklist $checklist)
     {
-
-
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
 
@@ -121,8 +119,8 @@ class ChecklistController extends Controller
             'entry_price' => 'nullable|numeric',
             'stop_price' => 'nullable|numeric',
             'target_price' => 'nullable|numeric',
-            'outcome' => 'nullable|in:win,loss,breakeven',
-            'rrr' => 'nullable|numeric|min:0',
+            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
+            'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
         ]);
 
@@ -147,21 +145,20 @@ class ChecklistController extends Controller
                     'stop_price',
                     'target_price',
                     'rrr',
-                    'outcome',
+                    'trade_status',
                     'notes'
                 ]);
-                // Ensure instrument sync
-                $tradeData['instrument'] = $validated['asset'] ?? $checklist->asset;
-                // Add user_id for new trade entries
-                $tradeData['user_id'] = 1; // Replace with auth()->id() in production
+
 
                 // Update or create the related trade entry
                 $checklist->tradeEntry()->updateOrCreate(
                     ['checklist_id' => $checklist->id],
                     $tradeData
                 );
+                // dd($tradeData);
             }
         });
+
         return Inertia::location(route('checklists.show', $checklist));
     }
 

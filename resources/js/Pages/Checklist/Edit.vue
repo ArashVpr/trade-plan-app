@@ -148,9 +148,16 @@
                                             placeholder="Select Position Type" class="w-full" />
                                     </div>
                                     <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Trade Outcome</label>
-                                        <Select v-model="form.outcome" :options="['win', 'loss', 'breakeven']"
-                                            placeholder="Select Outcome" class="w-full" />
+                                        <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                        <Select v-model="form.trade_status" :options="[
+                                            { label: 'Order Pending', value: 'pending' },
+                                            { label: 'Position Open', value: 'active' },
+                                            { label: 'Win', value: 'win' },
+                                            { label: 'Loss', value: 'loss' },
+                                            { label: 'Breakeven', value: 'breakeven' },
+                                            { label: 'Cancelled', value: 'cancelled' }
+                                        ]" option-label="label" option-value="value" placeholder="Select Status"
+                                            class="w-full" />
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Entry Price</label>
@@ -229,6 +236,8 @@ const props = defineProps({
     settings: Object,
     tradeEntry: Object
 })
+console.log(props.tradeEntry);
+
 
 // Check if we should focus on order entry section
 const shouldHighlightOrderEntry = ref(false)
@@ -308,7 +317,7 @@ const form = useForm({
     entry_price: props.tradeEntry?.entry_price || '',
     stop_price: props.tradeEntry?.stop_price || '',
     target_price: props.tradeEntry?.target_price || '',
-    outcome: props.tradeEntry?.outcome || '',
+    trade_status: props.tradeEntry?.trade_status || '',
     rrr: props.tradeEntry?.rrr || '',
     screenshot: null
 })
@@ -326,7 +335,7 @@ const canSubmit = computed(() => {
         form.entry_price &&
         form.stop_price &&
         form.target_price &&
-        form.outcome &&
+        form.trade_status &&
         form.rrr
 })
 

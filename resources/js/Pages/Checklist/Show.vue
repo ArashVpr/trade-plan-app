@@ -5,8 +5,7 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-between mb-6">
-                <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
-                    @click="router.get(route('checklists.index'))" />
+                <Button label="Back" icon="pi pi-arrow-left" severity="secondary" @click="router.get(route('checklists.index'))" />
                 <div class="flex gap-2">
                     <Button label="Edit" icon="pi pi-pencil" severity="success"
                         @click="router.get(route('checklists.edit', checklist.id))" />
@@ -164,13 +163,6 @@
                                     class="w-full" />
                             </div>
 
-                            <!-- Trade Status -->
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-1">Trade Status</label>
-                                <Tag :value="getTradeStatus(tradeEntry)"
-                                    :severity="getTradeStatusSeverity(tradeEntry)" />
-                            </div>
-
                             <!-- Prices -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Entry Price</label>
@@ -193,19 +185,19 @@
                                     readonly class="w-full" />
                             </div>
 
-                            <!-- Outcome -->
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-1">Outcome</label>
-                                <Tag :value="tradeEntry.outcome || 'N/A'"
-                                    :severity="getOutcomeSeverity(tradeEntry.outcome)" />
-                            </div>
-
+                            
                             <!-- R:R -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Risk:Reward</label>
                                 <InputText :value="tradeEntry.rrr ? Number(tradeEntry.rrr).toFixed(2) : 'N/A'" readonly
                                     class="w-full" />
                             </div>
+                                <!-- Trade Status -->
+                                <div class="field">
+                                    <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                    <Tag :value="getTradeStatus(tradeEntry)"
+                                        :severity="getTradeStatusSeverity(tradeEntry)" />
+                                </div>
                         </div>
 
                         <!-- Notes -->
@@ -279,13 +271,6 @@ const getPositionDisplay = (positionType) => {
     return 'N/A'
 }
 
-const getOutcomeSeverity = (outcome) => {
-    if (outcome === 'win') return 'success'
-    if (outcome === 'loss') return 'danger'
-    if (outcome === 'breakeven') return 'warning'
-    return 'secondary'
-}
-
 /**
  * Get human-readable trade status - matches DashboardController logic
  */
@@ -299,15 +284,12 @@ const getTradeStatus = (tradeEntry) => {
         switch (tradeEntry.trade_status) {
             case 'pending': return 'Pending'
             case 'active': return 'Open'
-            case 'completed': return tradeEntry.outcome ? tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1) : 'Completed'
+            case 'win': return 'Win'
+            case 'loss': return 'Loss'
+            case 'breakeven': return 'Breakeven'
             case 'cancelled': return 'Cancelled'
             default: return 'Unknown'
         }
-    }
-
-    // Fallback for existing data (before migration)
-    if (tradeEntry.outcome) {
-        return tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1)
     }
 
     return 'Trade Pending'
@@ -324,20 +306,17 @@ const getTradeStatusSeverity = (tradeEntry) => {
     // Check if we have the new trade_status field
     if (tradeEntry.trade_status) {
         switch (tradeEntry.trade_status) {
-            case 'pending': return 'warning'   // Yellow  
-            case 'active': return 'warning'    // Yellow
-            case 'completed': return getOutcomeSeverity(tradeEntry.outcome)
+            case 'pending': return 'warn'   // Yellow  
+            case 'active': return 'info'    // Yellow
+            case 'win': return 'success'     // Green
+            case 'loss': return 'danger'     // Red  
+            case 'breakeven': return 'warn' // Yellow
             case 'cancelled': return 'secondary' // Gray
             default: return 'secondary'
         }
     }
 
-    // Fallback for existing data
-    if (tradeEntry.outcome) {
-        return getOutcomeSeverity(tradeEntry.outcome)
-    }
-
-    return 'warning' // Yellow for pending
+    return 'warn' // Yellow for pending
 }
 
 const confirmDelete = () => {

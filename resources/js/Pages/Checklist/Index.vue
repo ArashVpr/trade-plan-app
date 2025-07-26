@@ -2,9 +2,6 @@
     <AppLayout>
         <div class="max-w-5xl mx-auto">
             <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
-
-            <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get(route('home'))" class="mb-4" />
-
             <Card>
                 <template #title>
                     <h2 class="text-xl font-semibold text-blue-900">Saved Checklists</h2>
@@ -143,18 +140,8 @@ const props = defineProps({
 // Helper function to determine score severity for Tag component
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
-    if (score <= 80) return 'warning'
+    if (score <= 80) return 'warn'
     return 'success'
-}
-
-// Helper function to determine outcome severity
-const getOutcomeSeverity = (outcome) => {
-    switch (outcome) {
-        case 'win': return 'success'
-        case 'loss': return 'danger'
-        case 'breakeven': return 'warning'
-        default: return 'secondary'
-    }
 }
 
 // Helper function to get trade status - matches Dashboard and Show.vue
@@ -170,15 +157,12 @@ const getTradeStatus = (checklist) => {
         switch (tradeEntry.trade_status) {
             case 'pending': return 'Pending'
             case 'active': return 'Open'
-            case 'completed': return tradeEntry.outcome ? tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1) : 'Completed'
+            case 'win': return 'Win'
+            case 'loss': return 'Loss'
+            case 'breakeven': return 'Open'
             case 'cancelled': return 'Cancelled'
             default: return 'Unknown'
         }
-    }
-
-    // Fallback for existing data (before migration)
-    if (tradeEntry.outcome) {
-        return tradeEntry.outcome.charAt(0).toUpperCase() + tradeEntry.outcome.slice(1)
     }
 
     return 'Trade Pending'
@@ -197,18 +181,13 @@ const getTradeStatusSeverity = (checklist) => {
         switch (tradeEntry.trade_status) {
             case 'pending': return 'info'   // Blue
             case 'active': return 'warn'    // Yellow
-            case 'completed': return getOutcomeSeverity(tradeEntry.outcome)
+            case 'win': return 'success' // Green
+            case 'loss': return 'danger'  // Red
+            case 'breakeven': return 'info' // Yellow
             case 'cancelled': return 'secondary' // Gray
             default: return 'secondary'
         }
     }
-
-    // Fallback for existing data
-    if (tradeEntry.outcome) {
-        return getOutcomeSeverity(tradeEntry.outcome)
-    }
-
-    return 'warn' // Yellow for pending
 }
 
 const confirmDelete = (checklistId) => {
