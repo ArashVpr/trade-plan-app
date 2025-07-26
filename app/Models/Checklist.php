@@ -18,9 +18,6 @@ class Checklist extends Model
         'asset',
         'symbol',
         'bias',
-        'overall_score',
-        'notes',
-        'status'
     ];
 
     protected $casts = [

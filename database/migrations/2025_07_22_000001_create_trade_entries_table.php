@@ -19,6 +19,13 @@ return new class extends Migration
             $table->decimal('stop_price', 12, 4);
             $table->decimal('target_price', 12, 4);
             $table->enum('outcome', ['win', 'loss', 'breakeven'])->nullable();
+            $table->enum('trade_status', [
+                'planned',      // Order planned but not placed
+                'pending',      // Order placed, awaiting execution
+                'active',       // Position opened, trade running
+                'completed',    // Trade closed with outcome
+                'cancelled'     // Order cancelled before execution
+            ])->default('planned');
             $table->decimal('rrr', 4, 2)->nullable(); // Risk-Reward Ratio
             $table->string('screenshot_path')->nullable();
             $table->text('notes')->nullable();

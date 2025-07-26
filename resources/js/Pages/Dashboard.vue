@@ -124,7 +124,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -169,7 +169,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
@@ -180,8 +180,8 @@
                             </Column>
                             <Column field="has_trade_entry" header="Status">
                                 <template #body="slotProps">
-                                    <Tag :severity="slotProps.data.has_trade_entry ? 'success' : 'warning'"
-                                        :value="slotProps.data.has_trade_entry ? 'Executed' : 'Planned'" />
+                                    <Tag :severity="slotProps.data.status_severity"
+                                        :value="slotProps.data.trade_status" />
                                 </template>
                             </Column>
                             <Column header="Actions">

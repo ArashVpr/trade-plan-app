@@ -36,18 +36,22 @@ class DashboardController extends Controller
         $monthlyChecklists = Checklist::where('created_at', '>=', $startOfMonth)->count();
 
         // Recent activity (last 7 days)
-        $recentActivity = Checklist::where('created_at', '>=', $now->subDays(7))
+        $recentActivity = Checklist::with('tradeEntry')
+            ->where('created_at', '>=', $now->subDays(7))
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
             ->map(function ($checklist) {
+                $tradeEntry = $checklist->tradeEntry;
+
                 return [
                     'id' => $checklist->id,
                     'symbol' => $checklist->symbol ?? $checklist->asset ?? 'Unknown',
                     'bias' => $checklist->bias ?? 'N/A',
-                    'overall_score' => $checklist->score ?? 0, // Use original 0-100 score
+                    'overall_score' => $checklist->score ?? 0,
                     'created_at' => $checklist->created_at->format('M j, Y g:i A'),
-                    'has_trade_entry' => $checklist->status === 'executed'
+                    'trade_status' => $this->getTradeStatus($tradeEntry),
+                    'status_severity' => $this->getStatusSeverity($tradeEntry)
                 ];
             });
 
@@ -129,5 +133,76 @@ class DashboardController extends Controller
             'top_symbols' => $topSymbols,
             'score_distribution' => $scoreDistribution
         ];
+    }
+
+    /**
+     * Get human-readable trade status
+     */
+    private function getTradeStatus($tradeEntry)
+    {
+        if (!$tradeEntry) {
+            return 'Analysis Only';
+        }
+
+        // Check if we have the new trade_status field (after migration)
+        if (isset($tradeEntry->trade_status)) {
+            return match ($tradeEntry->trade_status) {
+                'planned' => 'Planned',
+                'pending' => 'Order Pending',
+                'active' => 'Position Open',
+                'completed' => $tradeEntry->outcome ? ucfirst($tradeEntry->outcome) : 'Completed',
+                'cancelled' => 'Cancelled',
+                default => 'Unknown'
+            };
+        }
+
+        // Fallback for existing data (before migration)
+        if ($tradeEntry->outcome) {
+            return ucfirst($tradeEntry->outcome);
+        }
+
+        return 'Trade Pending';
+    }
+
+    /**
+     * Get PrimeVue severity for trade status
+     */
+    private function getStatusSeverity($tradeEntry)
+    {
+        if (!$tradeEntry) {
+            return 'info'; // Blue for analysis only
+        }
+
+        // Check if we have the new trade_status field
+        if (isset($tradeEntry->trade_status)) {
+            return match ($tradeEntry->trade_status) {
+                'planned' => 'info',      // Blue
+                'pending' => 'warning',   // Yellow  
+                'active' => 'warning',    // Yellow
+                'completed' => $this->getOutcomeSeverity($tradeEntry->outcome),
+                'cancelled' => 'secondary', // Gray
+                default => 'secondary'
+            };
+        }
+
+        // Fallback for existing data
+        if ($tradeEntry->outcome) {
+            return $this->getOutcomeSeverity($tradeEntry->outcome);
+        }
+
+        return 'warning'; // Yellow for pending
+    }
+
+    /**
+     * Get severity based on trade outcome
+     */
+    private function getOutcomeSeverity($outcome)
+    {
+        return match ($outcome) {
+            'win' => 'success',     // Green
+            'loss' => 'danger',     // Red  
+            'breakeven' => 'warning', // Yellow
+            default => 'secondary'  // Gray
+        };
     }
 }
