@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <AppLayout>
+        <div class="max-w-5xl mx-auto p-6">
             <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
 
             <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get(route('home'))" class="mb-4" />
@@ -121,12 +121,13 @@
                 </template>
             </ConfirmDialog> -->
         </div>
-    </div>
-    <ConfirmDialog></ConfirmDialog>
-    <Toast />
+        <ConfirmDialog></ConfirmDialog>
+        <Toast />
+    </AppLayout>
 </template>
 
 <script setup>
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { router, Link } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'

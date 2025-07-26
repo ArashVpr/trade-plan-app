@@ -1,132 +1,136 @@
 <template>
-    <div class="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-        <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Trade Setup Checklist</h1>
+    <AppLayout>
+        <div class="max-w-6xl mx-auto p-6">
+            <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Trade Setup Checklist</h1>
 
-        <!-- Step Indicator -->
-        <Card class="mb-6">
-            <template #content>
-                <Steps :model="stepItems" :readonly="false" class="mb-4" />
-
-
-            </template>
-        </Card>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Wizard Steps -->
-            <div class="col-span-2">
-                <Card>
-                    <template #content>
-                        <!-- Step 1: Zone Qualifiers -->
-                        <ZoneQualifiersStep v-if="currentStep === 1" v-model="zoneQualifiersData"
-                            @progress-updated="updateProgress" />
-
-                        <!-- Step 2: Technicals -->
-                        <TechnicalsStep v-if="currentStep === 2" v-model="technicalsData"
-                            @progress-updated="updateProgress" />
-
-                        <!-- Step 3: Fundamentals -->
-                        <FundamentalsStep v-if="currentStep === 3" v-model="fundamentalsData"
-                            @progress-updated="updateProgress" />
-
-                        <!-- Step 4: Order Entry -->
-                        <OrderEntryStep v-if="currentStep === 4" v-model="orderEntryData"
-                            :asset="zoneQualifiersData.asset" @progress-updated="updateProgress" />
-
-                        <!-- Navigation Buttons -->
-                        <div class="mt-8 flex justify-between items-center">
-                            <Button label="Reset" icon="pi pi-refresh" severity="secondary" @click="resetWizard" />
-
-                            <div class="flex gap-2">
-                                <Button v-if="currentStep > 1" label="Previous" icon="pi pi-arrow-left"
-                                    severity="secondary" @click="currentStep--" />
-                                <Button v-if="currentStep < steps.length" label="Next" icon="pi pi-arrow-right"
-                                    iconPos="right" @click="currentStep++" :disabled="!canProceed" />
-                                <Button v-if="currentStep === steps.length" label="Submit Checklist" icon="pi pi-check"
-                                    @click="submitChecklist" :disabled="!canSubmit" />
-                            </div>
-                        </div>
-                        <!-- Progress Bar -->
-                        <div class="mt-4">
-                            <div class="flex justify-between text-sm mb-2">
-                                <span>Setup Progress</span>
-                            </div>
-                            <ProgressBar :value="evaluationScore" :class="{
-                                'progress-danger': evaluationScore < 50,
-                                'progress-warning': evaluationScore >= 50 && evaluationScore <= 80,
-                                'progress-success': evaluationScore > 80
-                            }" />
-                        </div>
-                    </template>
-                </Card>
-            </div>
-            <!-- Summary Section -->
-            <Card>
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-chart-bar text-blue-900"></i>
-                        <span class="text-blue-900">Trade Setup Summary</span>
-                    </div>
-                </template>
+            <!-- Step Indicator -->
+            <Card class="mb-6">
                 <template #content>
-                    <div class="space-y-6">
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
-                            <div class="space-y-1">
-                                <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not selected'
-                                    }}
-                                </p>
-                                <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not                                    selected' }}
-                                </p>
-                            </div>
-                        </div>
+                    <Steps :model="stepItems" :readonly="false" class="mb-4" />
 
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
-                            <div class="space-y-1">
-                                <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not                                    selected' }}</p>
-                                <p class="text-sm text-gray-600">Seasonal Confluence: {{
-                                    fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
-                                <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials ||
-                                    'Not selected' }}</p>
-                                <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not                                    selected' }}</p>
-                            </div>
-                        </div>
 
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{
-                                selectedZoneQualifiersCount }})</h3>
-                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                                <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
-                                    {{ qualifier }}
-                                </li>
-                                <li v-if="zoneQualifiersData.selectedZoneQualifiers.length === 0" class="text-gray-500">
-                                    None selected</li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <EvaluationScore ref="evaluationScoreRef"
-                                :zone-qualifiers="zoneQualifiersData.selectedZoneQualifiers"
-                                :technicals="technicalsData" :fundamentals="fundamentalsData" :settings="settings"
-                                title="Evaluation Score" />
-                        </div>
-                    </div>
                 </template>
             </Card>
 
-            <!-- Settings Link -->
-            <Button label="Modify Weights" icon="pi pi-cog" severity="secondary" outlined
-                @click="router.get(route('user-settings.index'))" class="w-full" />
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Wizard Steps -->
+                <div class="col-span-2">
+                    <Card>
+                        <template #content>
+                            <!-- Step 1: Zone Qualifiers -->
+                            <ZoneQualifiersStep v-if="currentStep === 1" v-model="zoneQualifiersData"
+                                @progress-updated="updateProgress" />
+
+                            <!-- Step 2: Technicals -->
+                            <TechnicalsStep v-if="currentStep === 2" v-model="technicalsData"
+                                @progress-updated="updateProgress" />
+
+                            <!-- Step 3: Fundamentals -->
+                            <FundamentalsStep v-if="currentStep === 3" v-model="fundamentalsData"
+                                @progress-updated="updateProgress" />
+
+                            <!-- Step 4: Order Entry -->
+                            <OrderEntryStep v-if="currentStep === 4" v-model="orderEntryData"
+                                :asset="zoneQualifiersData.asset" @progress-updated="updateProgress" />
+
+                            <!-- Navigation Buttons -->
+                            <div class="mt-8 flex justify-between items-center">
+                                <Button label="Reset" icon="pi pi-refresh" severity="secondary" @click="resetWizard" />
+
+                                <div class="flex gap-2">
+                                    <Button v-if="currentStep > 1" label="Previous" icon="pi pi-arrow-left"
+                                        severity="secondary" @click="currentStep--" />
+                                    <Button v-if="currentStep < steps.length" label="Next" icon="pi pi-arrow-right"
+                                        iconPos="right" @click="currentStep++" :disabled="!canProceed" />
+                                    <Button v-if="currentStep === steps.length" label="Submit Checklist"
+                                        icon="pi pi-check" @click="submitChecklist" :disabled="!canSubmit" />
+                                </div>
+                            </div>
+                            <!-- Progress Bar -->
+                            <div class="mt-4">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>Setup Progress</span>
+                                </div>
+                                <ProgressBar :value="evaluationScore" :class="{
+                                    'progress-danger': evaluationScore < 50,
+                                    'progress-warning': evaluationScore >= 50 && evaluationScore <= 80,
+                                    'progress-success': evaluationScore > 80
+                                }" />
+                            </div>
+                        </template>
+                    </Card>
+                </div>
+                <!-- Summary Section -->
+                <Card>
+                    <template #title>
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-chart-bar text-blue-900"></i>
+                            <span class="text-blue-900">Trade Setup Summary</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not                                        selected'
+                                        }}
+                                    </p>
+                                    <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not                                        selected' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not                                        selected' }}</p>
+                                    <p class="text-sm text-gray-600">Seasonal Confluence: {{
+                                        fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials
+                                        ||
+                                        'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not                                        selected' }}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{
+                                    selectedZoneQualifiersCount }})</h3>
+                                <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                                    <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
+                                        {{ qualifier }}
+                                    </li>
+                                    <li v-if="zoneQualifiersData.selectedZoneQualifiers.length === 0"
+                                        class="text-gray-500">
+                                        None selected</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <EvaluationScore ref="evaluationScoreRef"
+                                    :zone-qualifiers="zoneQualifiersData.selectedZoneQualifiers"
+                                    :technicals="technicalsData" :fundamentals="fundamentalsData" :settings="settings"
+                                    title="Evaluation Score" />
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+
+                <!-- Settings Link -->
+                <Button label="Modify Weights" icon="pi pi-cog" severity="secondary" outlined
+                    @click="router.get(route('user-settings.index'))" class="w-full" />
+            </div>
+
+            <!-- Success/Error Messages -->
+            <Message v-if="message" :severity="messageType" :closable="true" class="mt-6">
+                {{ message }}
+            </Message>
+
+            <!-- Toast for notifications -->
+            <AppToast ref="toastRef" />
         </div>
-
-        <!-- Success/Error Messages -->
-        <Message v-if="message" :severity="messageType" :closable="true" class="mt-6">
-            {{ message }}
-        </Message>
-
-        <!-- Toast for notifications -->
-        <AppToast ref="toastRef" />
-    </div>
+    </AppLayout>
 </template>
 
 <script setup>
@@ -142,6 +146,7 @@ import FundamentalsStep from '@/Components/ChecklistSteps/FundamentalsStep.vue';
 import OrderEntryStep from '@/Components/ChecklistSteps/OrderEntryStep.vue';
 
 // Import UI components
+import AppLayout from '@/Layouts/AppLayout.vue';
 import AppToast from '@/Components/UI/AppToast.vue';
 import EvaluationScore from '@/Components/UI/EvaluationScore.vue';
 
