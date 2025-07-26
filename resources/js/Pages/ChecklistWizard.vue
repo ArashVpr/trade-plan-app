@@ -116,10 +116,7 @@
                         </div>
                     </template>
                 </Card>
-
-                <!-- Settings Link -->
-                <Button label="Modify Weights" icon="pi pi-cog" severity="secondary" outlined
-                    @click="router.get(route('user-settings.index'))" class="w-full" />
+                
             </div>
 
             <!-- Success/Error Messages -->
