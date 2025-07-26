@@ -253,7 +253,6 @@ const scoreDistributionData = computed(() => ({
         }
     ]
 }))
-console.log(props.stats.score_distribution);
 
 // Chart options
 const chartOptions = {

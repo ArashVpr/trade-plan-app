@@ -48,7 +48,6 @@ class ChecklistFactory extends Factory
             'asset' => $this->faker->randomElement($assets),
             'symbol' => $this->faker->randomElement($symbols),
             'bias' => $this->faker->randomElement(['Long', 'Short']),
-            'notes' => $this->faker->optional(0.7)->sentence(),
             'status' => $this->faker->randomElement(['planned', 'executed', 'cancelled']),
             'created_at' => $this->faker->dateTimeBetween('-4 weeks', 'now'),
         ];
