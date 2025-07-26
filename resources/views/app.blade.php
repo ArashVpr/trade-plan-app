@@ -8,7 +8,12 @@
     @vite('resources/css/app.css')
     @inertiaHead
   </head>
-  <body>
-    @inertia
-  </body>
+  <body class="font-sans antialiased">
+        @inertia
+
+        <!-- Scripts -->
+        @routes
+        @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
+        @inertiaHead
+    </body>
 </html>

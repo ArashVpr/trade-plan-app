@@ -1,157 +1,307 @@
 <template>
-    <div class="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
-        <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist Details</h1>
-        <div class="flex justify-between">
-            <div>
-                <Link href="/checklists" method="get" as="button"
-                    class="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 transition-colors hover:cursor-pointer">
-                Back
-                </Link>
-            </div>
-            <div>
-                <Link :href="`/checklists/${checklist.id}/edit`" method="get" as="button"
-                    class="px-4 py-2 bg-emerald-600 text-white rounded-md mr-2 hover:bg-emerald-700 transition-colors hover:cursor-pointer">
-                Edit
-                </Link>
-                <Link :href="`/checklists/${checklist.id}`" as="button" @click="confirmDelete"
-                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors hover:cursor-pointer">
-                Delete
-                </Link>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-md mt-6">
-            <div v-if="tradeEntry" class="mb-6">
-                <h2 class="text-xl font-semibold text-blue-900 mb-4">Order Entry Details</h2>
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-700">Entry Date</h3>
-                        <p class="text-sm text-gray-600">{{ tradeEntry.entry_date || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-700">Position</h3>
-                        <p class="text-sm text-gray-600">{{ tradeEntry.position_type || 'N/A' }}</p>
-                    </div>
-                    <div class="flex space-x-4">
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Entry Price</h3>
-                            <p class="text-sm text-gray-600">{{ tradeEntry.entry_price }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Stop Price</h3>
-                            <p class="text-sm text-gray-600">{{ tradeEntry.stop_price }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Target Price</h3>
-                            <p class="text-sm text-gray-600">{{ tradeEntry.target_price }}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-700">Outcome</h3>
-                        <p class="text-sm text-gray-600">{{ tradeEntry.outcome || 'N/A' }}</p>
-                    </div>
-                    <div>
-                            <h3 class="text-lg font-medium text-gray-700">R:R</h3>
-                            <p class="text-sm text-gray-600">{{ tradeEntry.rrr }}</p>
-                        </div>
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-700">Notes</h3>
-                        <p class="text-sm text-gray-600">{{ tradeEntry.notes || 'None' }}</p>
-                    </div>
-                    <div v-if="tradeEntry.screenshot_path">
-                        <h3 class="text-lg font-medium text-gray-700">Screenshot</h3>
-                        <img :src="`/storage/${tradeEntry.screenshot_path}`" alt="screenshot"
-                            class="max-w-full h-auto rounded" />
-                    </div>
+    <AppLayout>
+        <div class="max-w-5xl mx-auto p-6">
+            <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist Details</h1>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between mb-6">
+                <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
+                    @click="router.get(route('checklists.index'))" />
+                <div class="flex gap-2">
+                    <Button label="Edit" icon="pi pi-pencil" severity="success"
+                        @click="router.get(route('checklists.edit', checklist.id))" />
+                    <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDelete" />
                 </div>
             </div>
-            <div class="flex flex-wrap">
-                <div class="w-full md:w-1/2">
-                    <h2 class="text-xl font-semibold text-blue-900 mb-4">Trade Setup Details</h2>
-                    <div class="space-y-6">
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Asset</h3>
-                            <p class="text-sm text-gray-600">{{ checklist.asset || 'N/A' }}</p>
+
+            <!-- Main Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Trade Setup Details -->
+                <Card>
+                    <template #title>
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-chart-line text-blue-900"></i>
+                            <span class="text-blue-900">Trade Setup Details</span>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Score</h3>
-                            <p :class="['text-xl font-bold px-4 py-2 rounded-md inline-block',
-                                checklist.score < 50 ? 'text-red-600 bg-red-100' :
-                                    checklist.score <= 80 ? 'text-yellow-600 bg-yellow-100' :
-                                        'text-emerald-600 bg-emerald-100']">
-                                {{ checklist.score }}/100
+                    </template>
+                    <template #content>
+                        <div class="space-y-4">
+                            <!-- Asset -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Asset</label>
+                                <Chip :label="checklist.asset || 'N/A'" />
+                            </div>
+
+                            <!-- Score -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Score</label>
+                                <div class="flex items-center gap-2">
+                                    <Tag :value="`${checklist.score}/100`" :severity="getScoreSeverity(checklist.score)"
+                                        class="text-lg font-bold px-4 py-2" />
+                                    <div v-if="checklist.score === 100" class="text-yellow-500 font-bold">
+                                        ★ All Stars Aligned ★
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Created Date -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Created</label>
+                                <span class="text-sm text-gray-600">
+                                    {{ new Date(checklist.created_at).toLocaleDateString() }}
+                                </span>
+                            </div>
+
+                            <!-- Zone Qualifiers -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">
+                                    Zone Qualifiers ({{ checklist.zone_qualifiers.length }})
+                                </label>
+                                <div class="flex flex-wrap gap-2">
+                                    <Chip v-for="qualifier in checklist.zone_qualifiers" :key="qualifier"
+                                        :label="qualifier" class="mb-1" />
+                                    <span v-if="checklist.zone_qualifiers.length === 0" class="text-gray-500 text-sm">
+                                        None selected
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Technicals -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Technicals</label>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">Location:</span>
+                                        <Tag :value="checklist.technicals?.location || 'Not selected'"
+                                            :severity="checklist.technicals?.location ? 'info' : 'secondary'" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">Direction:</span>
+                                        <Tag :value="checklist.technicals?.direction || 'Not selected'"
+                                            :severity="checklist.technicals?.direction ? 'info' : 'secondary'" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fundamentals -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Fundamentals</label>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">Valuation:</span>
+                                        <Tag :value="checklist.fundamentals?.valuation || 'Not selected'"
+                                            :severity="checklist.fundamentals?.valuation ? 'info' : 'secondary'" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">Seasonal Confluence:</span>
+                                        <Tag :value="checklist.fundamentals?.seasonalConfluence || 'Not selected'"
+                                            :severity="checklist.fundamentals?.seasonalConfluence ? 'info' : 'secondary'" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">Non-Commercials:</span>
+                                        <Tag :value="checklist.fundamentals?.nonCommercials || 'Not selected'"
+                                            :severity="checklist.fundamentals?.nonCommercials ? 'info' : 'secondary'" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">CoT Index:</span>
+                                        <Tag :value="checklist.fundamentals?.cotIndex || 'Not selected'"
+                                            :severity="checklist.fundamentals?.cotIndex ? 'info' : 'secondary'" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+
+                <!-- Analysis Only Placeholder Card -->
+                <Card v-if="!tradeEntry">
+                    <template #title>
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-chart-line text-blue-900"></i>
+                            <span class="text-blue-900">Trade Status</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="text-center py-8">
+                            <div class="mb-4">
+                                <i class="pi pi-info-circle text-blue-900 text-6xl opacity-50"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Analysis Only</h3>
+                            <p class="text-gray-600 mb-4">
+                                This setup was analyzed but no trade was taken. You can edit this checklist to add order
+                                entry details if you decide to trade this setup.
                             </p>
+                            <div class="flex justify-center">
+                                <Button label="Add Trade Details" icon="pi pi-plus" severity="info" outlined
+                                    @click="router.get(route('checklists.edit', checklist.id) + '?focus=order-entry')" />
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Created</h3>
-                            <p class="text-sm text-gray-600">{{ new Date(checklist.created_at).toLocaleDateString() }}
-                            </p>
+                    </template>
+                </Card>
+
+                <!-- Order Entry Details -->
+                <Card v-if="tradeEntry">
+                    <template #title>
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-money-bill text-blue-900"></i>
+                            <span class="text-blue-900">Order Entry Details</span>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Zone Qualifiers ({{
-                                checklist.zone_qualifiers.length
-                            }})</h3>
-                            <ul class="list-disc pl-5 text-sm text-gray-600">
-                                <li v-for="qualifier in checklist.zone_qualifiers" :key="qualifier">
-                                    {{ qualifier }}
-                                </li>
-                                <li v-if="checklist.zone_qualifiers.length === 0" class="text-gray-500">None selected
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Technicals</h3>
-                            <p class="text-sm text-gray-600">Location: {{ checklist.technicals.location || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">Direction: {{ checklist.technicals.direction || 'Not selected' }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Fundamentals</h3>
-                            <p class="text-sm text-gray-600">Valuation: {{ checklist.fundamentals.valuation || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">Seasonal Confluence: {{ checklist.fundamentals.seasonalConfluence || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">Non-Commercials: {{ checklist.fundamentals.nonCommercials
-                                || 'Not selected' }}</p>
-                            <p class="text-sm text-gray-600">CoT Index: {{ checklist.fundamentals.cotIndex || 'Not selected' }}</p>
+                    </template>
+                    <template #content>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Entry Date -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Entry Date</label>
+                                <InputText :value="tradeEntry.entry_date || 'N/A'" readonly class="w-full" />
+                            </div>
+
+                            <!-- Position Type -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Position</label>
+                                <Tag :value="getPositionDisplay(tradeEntry.position_type)"
+                                    :severity="tradeEntry.position_type === 'Long' ? 'success' : 'danger'"
+                                    class="w-full" />
+                            </div>
+
+                            <!-- Prices -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Entry Price</label>
+                                <InputText
+                                    :value="tradeEntry.entry_price ? Number(tradeEntry.entry_price).toFixed(4) : 'N/A'"
+                                    readonly class="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Stop Price</label>
+                                <InputText
+                                    :value="tradeEntry.stop_price ? Number(tradeEntry.stop_price).toFixed(4) : 'N/A'"
+                                    readonly class="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Target Price</label>
+                                <InputText
+                                    :value="tradeEntry.target_price ? Number(tradeEntry.target_price).toFixed(4) : 'N/A'"
+                                    readonly class="w-full" />
+                            </div>
+
+                            <!-- Outcome -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Outcome</label>
+                                <Tag :value="tradeEntry.outcome || 'N/A'"
+                                    :severity="getOutcomeSeverity(tradeEntry.outcome)" />
+                            </div>
+
+                            <!-- R:R -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Risk:Reward</label>
+                                <InputText :value="tradeEntry.rrr ? Number(tradeEntry.rrr).toFixed(2) : 'N/A'" readonly
+                                    class="w-full" />
+                            </div>
                         </div>
 
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-700">Notes</h3>
-                            <p class="text-sm text-gray-600">{{ tradeEntry.notes || 'No notes provided' }}</p>
+                        <!-- Notes -->
+                        <div class="field mt-4">
+                            <label class="block text-sm font-medium mb-1">Notes</label>
+                            <Textarea :value="tradeEntry.notes || 'None'" readonly rows="3" class="w-full" />
                         </div>
-                    </div>
-                </div>
-                <div class="w-full md:w-1/2">
-                    <h3 class="text-lg font-medium text-gray-700 mb-4">Score Breakdown</h3>
-                    <div class="w-full h-80">
-                        <Radar :data="chartData" :options="chartOptions" />
-                    </div>
-                    <div v-if="checklist.score === 100" class="text-yellow-500 mt-2 font-bold text-lg text-center">
-                        ★ All Stars Aligned ★
-                    </div>
-                </div>
 
+                        <!-- Screenshot -->
+                        <div v-if="tradeEntry.screenshot_path" class="field mt-4">
+                            <label class="block text-sm font-medium mb-1">Screenshot</label>
+                            <Image :src="`/storage/${tradeEntry.screenshot_path}`" alt="Trading Screenshot" preview
+                                class="max-w-full h-auto rounded border" />
+                        </div>
+                    </template>
+                </Card>
+
+                <!-- Score Breakdown Chart -->
+                <Card class="lg:col-span-2">
+                    <template #title>
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-chart-pie text-blue-900"></i>
+                            <span class="text-blue-900">Score Breakdown</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="w-full h-80">
+                            <Radar :data="chartData" :options="chartOptions" />
+                        </div>
+                    </template>
+                </Card>
             </div>
         </div>
-    </div>
+
+        <!-- PrimeVue Dialog Components -->
+        <ConfirmDialog></ConfirmDialog>
+        <Toast />
+    </AppLayout>
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
 import { computed } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
+import { route } from 'ziggy-js'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 Chart.register(...registerables)
+
+const confirm = useConfirm()
+const toast = useToast()
 
 const props = defineProps({
     checklist: Object,
     tradeEntry: Object
 })
 
+// Helper functions for PrimeVue components
+const getScoreSeverity = (score) => {
+    if (score < 50) return 'danger'
+    if (score <= 80) return 'warning'
+    return 'success'
+}
+
+const getPositionDisplay = (positionType) => {
+    if (positionType === 'Long') return '📈 Long'
+    if (positionType === 'Short') return '📉 Short'
+    return 'N/A'
+}
+
+const getOutcomeSeverity = (outcome) => {
+    if (outcome === 'win') return 'success'
+    if (outcome === 'loss') return 'danger'
+    if (outcome === 'breakeven') return 'warning'
+    return 'secondary'
+}
+
 const confirmDelete = () => {
-    const result = confirm('Are you sure you want to delete this checklist? This action cannot be undone.');
-    if (result) {
-        Inertia.delete(`/checklists/${props.checklist.id}`)
-    }
+    confirm.require({
+        message: 'Do you want to delete this checklist?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            router.post(route('checklists.destroy', props.checklist.id))
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Checklist deleted', life: 3000 });
+        },
+        reject: () => {
+            toast.add({ severity: 'info', summary: 'Cancelled', detail: 'Delete cancelled', life: 3000 });
+        }
+    })
 }
 
 // Calculate individual category scores with normalization
