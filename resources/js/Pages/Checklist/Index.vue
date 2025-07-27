@@ -159,7 +159,7 @@ const getTradeStatus = (checklist) => {
             case 'active': return 'Open'
             case 'win': return 'Win'
             case 'loss': return 'Loss'
-            case 'breakeven': return 'Open'
+            case 'breakeven': return 'Breakeven'
             case 'cancelled': return 'Cancelled'
             default: return 'Unknown'
         }
@@ -188,6 +188,7 @@ const getTradeStatusSeverity = (checklist) => {
             default: return 'secondary'
         }
     }
+    return 'secondary'  // Default for unknown status
 }
 
 const confirmDelete = (checklistId) => {
