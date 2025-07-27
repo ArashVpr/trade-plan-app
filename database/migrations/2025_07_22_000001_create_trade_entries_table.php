@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('checklist_id')->constrained()->cascadeOnDelete();
-            $table->string('instrument');
             $table->date('entry_date');
             $table->enum('position_type', ['Long', 'Short'])->nullable();
             $table->decimal('entry_price', 12, 4);

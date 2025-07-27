@@ -31,7 +31,7 @@
 
                             <!-- Step 4: Order Entry -->
                             <OrderEntryStep v-if="currentStep === 4" v-model="orderEntryData"
-                                :asset="zoneQualifiersData.asset" @progress-updated="updateProgress" />
+                                :symbol="zoneQualifiersData.symbol" @progress-updated="updateProgress" />
 
                             <!-- Navigation Buttons -->
                             <div class="mt-8 flex justify-between items-center">
@@ -53,8 +53,8 @@
                                 </div>
                                 <ProgressBar :value="evaluationScore" :class="{
                                     'progress-danger': evaluationScore < 50,
-                                    'progress-warning': evaluationScore >= 50 && evaluationScore <= 80,
-                                    'progress-success': evaluationScore > 80
+                                    'progress-warning': evaluationScore >= 50 && evaluationScore < 80,
+                                    'progress-success': evaluationScore => 80
                                 }" />
                             </div>
                         </template>
@@ -161,7 +161,7 @@ const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals', 'Order Entry'];
 
 // Step data objects
 const zoneQualifiersData = ref({
-    asset: '',
+    symbol: '',
     selectedZoneQualifiers: []
 });
 
@@ -230,7 +230,7 @@ const formatDate = (date) => {
 }
 
 // Constants
-const totalInputs = 20; // 6 zones + 2 technicals + 4 fundamentals + 8 order entry fields
+const totalInputs = 12; // 6 zones + 2 technicals + 4 fundamentals
 
 // Computed properties
 const progressPercentage = computed(() => {
@@ -295,7 +295,7 @@ function updateProgress() {
 function resetWizard() {
     currentStep.value = 1;
     zoneQualifiersData.value = {
-        asset: '',
+        symbol: '',
         selectedZoneQualifiers: []
     };
     technicalsData.value = {
@@ -330,7 +330,7 @@ function submitChecklist() {
         technicals: technicalsData.value,
         fundamentals: fundamentalsData.value,
         score: evaluationScoreRef.value?.calculatedScore || 0,
-        asset: zoneQualifiersData.value.asset,
+        symbol: zoneQualifiersData.value.symbol,
         notes: orderEntryData.value.notes,
         entry_date: formatDate(orderEntryData.value.entryDate),
         entry_price: orderEntryData.value.entryPrice,
@@ -350,7 +350,9 @@ function submitChecklist() {
             toastRef.value?.showError('Error', 'Failed to save checklist. Please try again.')
             console.error('Submission error:', errors);
         }
+        
     });
+    console.log(zoneQualifiersData.value.symbol);
 }
 </script>
 

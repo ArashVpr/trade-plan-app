@@ -18,7 +18,6 @@ return new class extends Migration
             $table->json('technicals')->nullable(); // Location and Direction
             $table->json('fundamentals')->nullable(); // Valuation, Seasonal Confluence, Non-Commercials, CoT Index
             $table->integer('score')->default(0); // Calculated evaluation score
-            $table->string('asset')->nullable(); // Optional: Asset being evaluated (e.g., stock, forex pair)
             $table->string('symbol')->nullable();
             $table->enum('bias', ['Long', 'Short'])->nullable();
             $table->timestamps();

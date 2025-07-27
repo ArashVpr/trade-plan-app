@@ -29,7 +29,7 @@ class ChecklistController extends Controller
             'technicals' => 'array',
             'fundamentals' => 'array',
             'score' => 'integer|min:0|max:100',
-            'asset' => 'nullable|string|max:255',
+            'symbol' => 'nullable|string|max:255',
             // Order entry - now optional
             'entry_date' => 'nullable|date',
             'position_type' => 'nullable|in:Long,Short',
@@ -48,7 +48,7 @@ class ChecklistController extends Controller
             'technicals' => $validated['technicals'],
             'fundamentals' => $validated['fundamentals'],
             'score' => $validated['score'],
-            'asset' => $validated['asset'],
+            'symbol' => $validated['symbol'],
         ]);
 
         // Only create trade entry if order details are provided
@@ -56,7 +56,6 @@ class ChecklistController extends Controller
             TradeEntry::create([
                 'user_id' => 1, // replace with auth()->id() in production
                 'checklist_id' => $checklist->id,
-                'instrument' => $validated['asset'],
                 'entry_date' => $validated['entry_date'],
                 'position_type' => $validated['position_type'],
                 'entry_price' => $validated['entry_price'],
@@ -112,7 +111,7 @@ class ChecklistController extends Controller
             'fundamentals.nonCommercials' => 'required|string|in:Divergence,No-Divergence',
             'fundamentals.cotIndex' => 'required|string|in:Bullish,Neutral,Bearish',
             'score' => 'required|integer|min:0|max:170',
-            'asset' => 'nullable|string|max:255',
+            'symbol' => 'nullable|string|max:255',
             // Order entry - now optional for updates too
             'entry_date' => 'nullable|date',
             'position_type' => 'nullable|in:Long,Short',
@@ -132,7 +131,7 @@ class ChecklistController extends Controller
                 'technicals',
                 'fundamentals',
                 'score',
-                'asset',
+                'symbol',
             ]));
 
             // Only update/create trade entry if order details are provided
@@ -152,14 +151,13 @@ class ChecklistController extends Controller
 
                 // Update or create the related trade entry
                 $checklist->tradeEntry()->updateOrCreate(
-                    ['checklist_id' => $checklist->id],
+                    ['checklist_id' => $checklist->id,],
                     $tradeData
                 );
-                // dd($tradeData);
             }
         });
 
-        return Inertia::location(route('checklists.show', $checklist));
+        return to_route('checklists.show', $checklist->id)->with('success', 'Checklist updated successfully!');
     }
 
     public function destroy(Checklist $checklist)

@@ -5,7 +5,7 @@
                 <i class="pi pi-money-bill text-blue-900"></i>
                 Order Entry (Optional)
             </h2>
-            <Chip :label="`Instrument: ${asset || '—'}`" />
+            <Chip :label="`Symbol: ${symbol || '—'}`" />
         </div>
 
         <Message severity="info" :closable="false" class="mb-4">
@@ -78,7 +78,7 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    asset: {
+    symbol: {
         type: String,
         default: ''
     }

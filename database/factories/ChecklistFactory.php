@@ -29,7 +29,6 @@ class ChecklistFactory extends Factory
         $selectedQualifiers = $this->faker->randomElements($zoneQualifiers, $this->faker->numberBetween(1, 4));
 
         $symbols = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY'];
-        $assets = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'NZD/USD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'AUD/JPY'];
 
         return [
             'user_id' => 1, // Using static user ID for now, could use User::factory()
@@ -45,7 +44,6 @@ class ChecklistFactory extends Factory
                 'cotIndex' => $this->faker->randomElement(['Bullish', 'Neutral', 'Bearish']),
             ],
             'score' => $this->faker->numberBetween(0, 100),
-            'asset' => $this->faker->randomElement($assets),
             'symbol' => $this->faker->randomElement($symbols),
             'bias' => $this->faker->randomElement(['Long', 'Short']),
             'created_at' => $this->faker->dateTimeBetween('-4 weeks', 'now'),
@@ -74,7 +72,6 @@ class ChecklistFactory extends Factory
         })->afterCreating(function ($checklist) {
             \App\Models\TradeEntry::factory()->pending()->create([
                 'checklist_id' => $checklist->id,
-                'instrument' => $checklist->asset,
             ]);
         });
     }
@@ -89,7 +86,6 @@ class ChecklistFactory extends Factory
         })->afterCreating(function ($checklist) {
             \App\Models\TradeEntry::factory()->active()->create([
                 'checklist_id' => $checklist->id,
-                'instrument' => $checklist->asset,
             ]);
         });
     }
@@ -104,7 +100,6 @@ class ChecklistFactory extends Factory
         })->afterCreating(function ($checklist) {
             \App\Models\TradeEntry::factory()->completed()->create([
                 'checklist_id' => $checklist->id,
-                'instrument' => $checklist->asset,
             ]);
         });
     }
@@ -119,7 +114,6 @@ class ChecklistFactory extends Factory
         })->afterCreating(function ($checklist) {
             \App\Models\TradeEntry::factory()->cancelled()->create([
                 'checklist_id' => $checklist->id,
-                'instrument' => $checklist->asset,
             ]);
         });
     }

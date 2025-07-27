@@ -26,10 +26,10 @@
                     </template>
                     <template #content>
                         <div class="space-y-4">
-                            <!-- Asset -->
+                            <!-- Symbol -->
                             <div class="field">
-                                <label class="block text-sm font-medium mb-1">Asset</label>
-                                <Chip :label="checklist.asset || 'N/A'" />
+                                <label class="block text-sm font-medium mb-1">Symbol</label>
+                                <Chip :label="checklist.symbol || 'N/A'" />
                             </div>
 
                             <!-- Score -->

@@ -23,9 +23,9 @@
                                 </template>
                             </Column>
 
-                            <Column field="asset" header="Instrument" :style="{ width: '100px' }">
+                            <Column field="symbol" header="Symbol" :style="{ width: '100px' }">
                                 <template #body="slotProps">
-                                    <Chip :label="slotProps.data.asset || 'N/A'" size="small" />
+                                    <Chip :label="slotProps.data.symbol || 'N/A'" size="small" />
                                 </template>
                             </Column>
 

@@ -32,7 +32,6 @@ class TradeEntryFactory extends Factory
         return [
             'user_id' => 1,
             'checklist_id' => Checklist::factory(),
-            'instrument' => $this->faker->randomElement(['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD']),
             'entry_date' => $this->faker->dateTimeBetween('-2 weeks', 'now'),
             'position_type' => $isLong ? 'Long' : 'Short',
             'entry_price' => $entryPrice,
@@ -40,6 +39,7 @@ class TradeEntryFactory extends Factory
             'target_price' => $targetPrice,
             'rrr' => round($targetDistance / $stopDistance, 2),
             'trade_status' => 'pending',
+            'screenshot_path' => $this->faker->optional(0.3)->imageUrl(800, 600, 'business', true, 'Chart'),
             'notes' => $this->faker->optional(0.6)->sentence(),
         ];
     }
@@ -52,6 +52,7 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'pending',
+                'screenshot_path' => $this->faker->optional(0.4)->imageUrl(800, 600, 'business', true, 'Setup'),
                 'notes' => $this->faker->optional(0.7)->sentence(),
             ];
         });
@@ -66,6 +67,7 @@ class TradeEntryFactory extends Factory
             return [
                 'trade_status' => 'active',
                 'entry_date' => $this->faker->dateTimeBetween('-1 week', 'now'),
+                'screenshot_path' => $this->faker->optional(0.6)->imageUrl(800, 600, 'business', true, 'Active'),
                 'notes' => $this->faker->optional(0.5)->sentence(),
             ];
         });
@@ -77,23 +79,24 @@ class TradeEntryFactory extends Factory
     public function completed()
     {
         return $this->state(function (array $attributes) {
-            $outcome = $this->faker->randomElement(['win', 'loss', 'breakeven']);
+            $trade_status = $this->faker->randomElement(['win', 'loss', 'breakeven']);
 
-            // Map outcome to new status format
+            // Use current status format from migration
             $statusMap = [
                 'win' => 'win',
                 'loss' => 'loss',
-                'breakeven' => 'breakeven'
+                'breakeven' => 'breakeven',
             ];
 
             // Calculate realistic R:R based on outcome
-            $rrr = $this->calculateRRByOutcome($outcome);
+            $rrr = $this->calculateRRByOutcome($trade_status);
 
             return [
-                'trade_status' => $statusMap[$outcome],
+                'trade_status' => $statusMap[$trade_status],
                 'rrr' => $rrr,
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
-                'notes' => $this->getOutcomeNote($outcome),
+                'screenshot_path' => $this->faker->optional(0.7)->imageUrl(800, 600, 'business', true, 'Closed'),
+                'notes' => $this->getOutcomeNote($trade_status),
             ];
         });
     }
@@ -108,6 +111,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => 'win',
                 'rrr' => $this->calculateRRByOutcome('win'),
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.8)->imageUrl(800, 600, 'business', true, 'Win'),
                 'notes' => $this->getOutcomeNote('win'),
             ];
         });
@@ -123,6 +127,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => 'loss',
                 'rrr' => $this->calculateRRByOutcome('loss'),
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.6)->imageUrl(800, 600, 'business', true, 'Loss'),
                 'notes' => $this->getOutcomeNote('loss'),
             ];
         });
@@ -138,6 +143,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => 'breakeven',
                 'rrr' => $this->calculateRRByOutcome('breakeven'),
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.5)->imageUrl(800, 600, 'business', true, 'Breakeven'),
                 'notes' => $this->getOutcomeNote('breakeven'),
             ];
         });
@@ -151,6 +157,7 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'cancelled',
+                'screenshot_path' => $this->faker->optional(0.2)->imageUrl(800, 600, 'business', true, 'Cancelled'),
                 'notes' => $this->faker->randomElement([
                     'Market conditions changed, cancelled order.',
                     'Better opportunity emerged, cancelled this trade.',

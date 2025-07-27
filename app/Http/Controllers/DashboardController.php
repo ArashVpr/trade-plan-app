@@ -46,7 +46,7 @@ class DashboardController extends Controller
 
                 return [
                     'id' => $checklist->id,
-                    'symbol' => $checklist->symbol ?? $checklist->asset ?? 'Unknown',
+                    'symbol' => $checklist->symbol,
                     'bias' => $checklist->bias ?? 'N/A',
                     'overall_score' => $checklist->score ?? 0,
                     'created_at' => $checklist->created_at->format('M j, Y g:i A'),
@@ -54,6 +54,7 @@ class DashboardController extends Controller
                     'status_severity' => $this->getStatusSeverity($tradeEntry)
                 ];
             });
+            // dd($recentActivity);
 
         // Weekly checklist trend (last 4 weeks)
         $weeklyTrend = [];
@@ -84,12 +85,12 @@ class DashboardController extends Controller
 
         // Top performing symbols (by score)
         $topSymbols = Checklist::select(
-            DB::raw('COALESCE(symbol, asset) as symbol_key'),
+            DB::raw('COALESCE(symbol) as symbol_key'),
             DB::raw('count(*) as count'),
             DB::raw('avg(score) as avg_score')
         )
-            ->whereNotNull(DB::raw('COALESCE(symbol, asset)'))
-            ->groupBy(DB::raw('COALESCE(symbol, asset)'))
+            ->whereNotNull(DB::raw('COALESCE(symbol)'))
+            ->groupBy(DB::raw('COALESCE(symbol)'))
             ->having('count', '>=', 1) // Show all symbols for now
             ->orderBy('avg_score', 'desc')
             ->limit(5)
@@ -149,9 +150,9 @@ class DashboardController extends Controller
             return match ($tradeEntry->trade_status) {
                 'pending' => 'Order Pending',
                 'active' => 'Position Open',
-                'completed_win' => 'Win',
-                'completed_loss' => 'Loss',
-                'completed_breakeven' => 'Breakeven',
+                'win' => 'Win',
+                'loss' => 'Loss',
+                'breakeven' => 'Breakeven',
                 'cancelled' => 'Cancelled',
                 default => 'Unknown'
             };
@@ -172,17 +173,17 @@ class DashboardController extends Controller
         // Check if we have the new trade_status field
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'pending' => 'warning',   // Yellow  
-                'active' => 'warning',    // Yellow
-                'completed_win' => 'success',     // Green
-                'completed_loss' => 'danger',     // Red  
-                'completed_breakeven' => 'warning', // Yellow
+                'pending' => 'warn',   // Yellow  
+                'active' => 'warn',    // Yellow
+                'win' => 'success',     // Green
+                'loss' => 'danger',     // Red  
+                'breakeven' => 'warn', // Yellow
                 'cancelled' => 'secondary', // Gray
                 default => 'secondary'
             };
         }
 
-        return 'warning'; // Yellow for pending
+        return 'warn'; // Yellow for pending
     }
 
 }

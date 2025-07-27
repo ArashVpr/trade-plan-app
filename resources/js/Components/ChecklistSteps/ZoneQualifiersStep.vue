@@ -7,8 +7,8 @@
 
         <div class="field">
             <label class="block text-sm font-medium mb-2">Instrument</label>
-            <Select :model-value="modelValue.asset" @update:model-value="updateData('asset', $event)"
-                :options="assetOptions" placeholder="Select Instrument" class="w-full" />
+            <Select :model-value="modelValue.symbol" @update:model-value="updateData('symbol', $event)"
+                :options="symbolOptions" placeholder="Select Instrument" class="w-full" />
         </div>
 
         <div class="space-y-4">
@@ -43,7 +43,7 @@ const zoneQualifiers = [
     'Big Brother Coverage'
 ]
 
-const assetOptions = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']
+const symbolOptions = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']
 
 const updateData = (key, value) => {
     const updatedData = { ...props.modelValue, [key]: value }
