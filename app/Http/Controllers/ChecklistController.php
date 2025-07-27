@@ -148,6 +148,8 @@ class ChecklistController extends Controller
                     'notes'
                 ]);
 
+                // Add user_id for new record creation
+                $tradeData['user_id'] = 1; // Replace with Auth::id() in production
 
                 // Update or create the related trade entry
                 $checklist->tradeEntry()->updateOrCreate(
