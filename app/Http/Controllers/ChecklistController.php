@@ -67,7 +67,9 @@ class ChecklistController extends Controller
             ]);
         }
 
-        return Inertia::location(route('checklists.index'));
+        return to_route('checklists.index')->with('success', 'Checklist created successfully!');
+
+
     }
     public function show(Checklist $checklist)
     {
@@ -159,7 +161,8 @@ class ChecklistController extends Controller
             }
         });
 
-        return redirect()->route('checklists.show', $checklist->id, 303);
+        return to_route('checklists.index', $checklist->id, 303)->with('success', 'Checklist created successfully!');
+
     }
 
     public function destroy(Checklist $checklist)
