@@ -32,23 +32,23 @@
                 </div>
             </template>
             <template #content>
-                <Form @submit="submitForm" class="space-y-8">
+                <form @submit.prevent="submitForm" class="space-y-8">
                     <!-- Basic Information Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
-                        <FormField name="symbol" class="field">
+                        <div class="field">
                             <label class="block text-sm font-medium mb-2">Symbol</label>
                             <Select v-model="form.symbol" :options="['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']"
                                 placeholder="Select Symbol" class="w-full" :invalid="!!$errors.symbol" />
                             <Message v-if="$errors.symbol" severity="error" :closable="false">{{ $errors.symbol }}
                             </Message>
-                        </FormField>
-                        <FormField name="entry_date" class="field">
+                        </div>
+                        <div class="field">
                             <label class="block text-sm font-medium mb-2">Entry Date</label>
                             <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
                                 iconDisplay="input" :invalid="!!$errors.entry_date" />
                             <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
-                            }}</Message>
-                        </FormField>
+                                }}</Message>
+                        </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
                             <InputText :value="new Date(checklist.created_at).toLocaleDateString()" readonly
@@ -67,7 +67,7 @@
                                     Technical Analysis
                                 </h3>
                                 <div class="grid grid-cols-1 gap-4">
-                                    <FormField name="technicals.location" class="field">
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Location</label>
                                         <Select v-model="form.technicals.location"
                                             :options="['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
@@ -75,15 +75,15 @@
                                             :invalid="!!$errors['technicals.location']" />
                                         <Message v-if="$errors['technicals.location']" severity="error"
                                             :closable="false">{{ $errors['technicals.location'] }}</Message>
-                                    </FormField>
-                                    <FormField name="technicals.direction" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Direction</label>
                                         <Select v-model="form.technicals.direction"
                                             :options="['Correction', 'Impulsion']" placeholder="Select Direction"
                                             class="w-full" :invalid="!!$errors['technicals.direction']" />
                                         <Message v-if="$errors['technicals.direction']" severity="error"
                                             :closable="false">{{ $errors['technicals.direction'] }}</Message>
-                                    </FormField>
+                                    </div>
                                 </div>
                             </div>
 
@@ -94,7 +94,7 @@
                                     Fundamental Analysis
                                 </h3>
                                 <div class="grid grid-cols-1 gap-4">
-                                    <FormField name="fundamentals.valuation" class="field">
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Valuation</label>
                                         <Select v-model="form.fundamentals.valuation"
                                             :options="['Overvalued', 'Neutral', 'Undervalued']"
@@ -102,16 +102,16 @@
                                             :invalid="!!$errors['fundamentals.valuation']" />
                                         <Message v-if="$errors['fundamentals.valuation']" severity="error"
                                             :closable="false">{{ $errors['fundamentals.valuation'] }}</Message>
-                                    </FormField>
-                                    <FormField name="fundamentals.seasonalConfluence" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Seasonal Confluence</label>
                                         <Select v-model="form.fundamentals.seasonalConfluence" :options="['Yes', 'No']"
                                             placeholder="Select Seasonal Confluence" class="w-full"
                                             :invalid="!!$errors['fundamentals.seasonalConfluence']" />
                                         <Message v-if="$errors['fundamentals.seasonalConfluence']" severity="error"
                                             :closable="false">{{ $errors['fundamentals.seasonalConfluence'] }}</Message>
-                                    </FormField>
-                                    <FormField name="fundamentals.nonCommercials" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Non-Commercials</label>
                                         <Select v-model="form.fundamentals.nonCommercials"
                                             :options="['Divergence', 'No-Divergence']"
@@ -119,15 +119,15 @@
                                             :invalid="!!$errors['fundamentals.nonCommercials']" />
                                         <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
                                             :closable="false">{{ $errors['fundamentals.nonCommercials'] }}</Message>
-                                    </FormField>
-                                    <FormField name="fundamentals.cotIndex" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">CoT Index</label>
                                         <Select v-model="form.fundamentals.cotIndex"
                                             :options="['Bullish', 'Neutral', 'Bearish']" placeholder="Select CoT Index"
                                             class="w-full" :invalid="!!$errors['fundamentals.cotIndex']" />
                                         <Message v-if="$errors['fundamentals.cotIndex']" severity="error"
                                             :closable="false">{{ $errors['fundamentals.cotIndex'] }}</Message>
-                                    </FormField>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -140,7 +140,7 @@
                                     <i class="pi pi-map-marker text-blue-900"></i>
                                     Zone Qualifiers ({{ form.zone_qualifiers.length }})
                                 </h3>
-                                <FormField name="zone_qualifiers" class="grid grid-cols-1 gap-2">
+                                <div class="grid grid-cols-1 gap-2">
                                     <div v-for="(qualifier, index) in zoneQualifiers" :key="index"
                                         class="flex items-center">
                                         <Checkbox v-model="form.zone_qualifiers" :value="qualifier"
@@ -151,7 +151,7 @@
                                     </div>
                                     <Message v-if="$errors.zone_qualifiers" severity="error" :closable="false">{{
                                         $errors.zone_qualifiers }}</Message>
-                                </FormField>
+                                </div>
                             </div>
 
                             <!-- Order Entry Details -->
@@ -164,15 +164,15 @@
                                     <Tag v-if="shouldHighlightOrderEntry" value="Focus" severity="info" class="ml-2" />
                                 </h3>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <FormField name="position_type" class="field">
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Position Type</label>
                                         <Select v-model="form.position_type" :options="['Long', 'Short']"
                                             placeholder="Select Position Type" class="w-full"
                                             :invalid="!!$errors.position_type" />
                                         <Message v-if="$errors.position_type" severity="error" :closable="false">{{
                                             $errors.position_type }}</Message>
-                                    </FormField>
-                                    <FormField name="trade_status" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Trade Status</label>
                                         <Select v-model="form.trade_status" :options="[
                                             { label: 'Order Pending', value: 'pending' },
@@ -185,35 +185,35 @@
                                             class="w-full" :invalid="!!$errors.trade_status" />
                                         <Message v-if="$errors.trade_status" severity="error" :closable="false">{{
                                             $errors.trade_status }}</Message>
-                                    </FormField>
-                                    <FormField name="entry_price" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Entry Price</label>
                                         <InputText v-model="form.entry_price" type="number" step="0.0001"
                                             placeholder="0.0000" class="w-full" :invalid="!!$errors.entry_price" />
                                         <Message v-if="$errors.entry_price" severity="error" :closable="false">{{
                                             $errors.entry_price }}</Message>
-                                    </FormField>
-                                    <FormField name="stop_price" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Stop Loss</label>
                                         <InputText v-model="form.stop_price" type="number" step="0.0001"
                                             placeholder="0.0000" class="w-full" :invalid="!!$errors.stop_price" />
                                         <Message v-if="$errors.stop_price" severity="error" :closable="false">{{
                                             $errors.stop_price }}</Message>
-                                    </FormField>
-                                    <FormField name="target_price" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">Take Profit</label>
                                         <InputText v-model="form.target_price" type="number" step="0.0001"
                                             placeholder="0.0000" class="w-full" :invalid="!!$errors.target_price" />
                                         <Message v-if="$errors.target_price" severity="error" :closable="false">{{
                                             $errors.target_price }}</Message>
-                                    </FormField>
-                                    <FormField name="rrr" class="field">
+                                    </div>
+                                    <div class="field">
                                         <label class="block text-sm font-medium mb-1">R:R Ratio</label>
                                         <InputText v-model="form.rrr" type="number" step="0.01" placeholder="1.50"
                                             class="w-full" :invalid="!!$errors.rrr" />
                                         <Message v-if="$errors.rrr" severity="error" :closable="false">{{ $errors.rrr }}
                                         </Message>
-                                    </FormField>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -227,13 +227,13 @@
                                 <i class="pi pi-file-edit text-blue-900"></i>
                                 Trading Notes
                             </h3>
-                            <FormField name="notes" class="field">
+                            <div class="field">
                                 <Textarea v-model="form.notes" rows="6" class="w-full"
                                     placeholder="Document your analysis, reasoning, and any additional context for this trade..."
                                     :invalid="!!$errors.notes" />
                                 <Message v-if="$errors.notes" severity="error" :closable="false">{{ $errors.notes }}
                                 </Message>
-                            </FormField>
+                            </div>
                         </div>
 
                         <!-- Screenshot Upload -->
@@ -242,7 +242,7 @@
                                 <i class="pi pi-image text-blue-900"></i>
                                 Chart Screenshot
                             </h3>
-                            <FormField name="screenshot" class="field">
+                            <div class="field">
                                 <div
                                     class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
                                     <i class="pi pi-upload text-gray-400 text-2xl mb-2"></i>
@@ -254,10 +254,10 @@
                                 </div>
                                 <Message v-if="$errors.screenshot" severity="error" :closable="false">{{
                                     $errors.screenshot }}</Message>
-                            </FormField>
+                            </div>
                         </div>
                     </div>
-                </Form>
+                </form>
             </template>
         </Card>
     </div>
@@ -268,7 +268,6 @@ import { useForm } from '@inertiajs/vue3';
 import { computed, watch, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
-import { Form, FormField } from '@primevue/forms'
 
 const orderEntryRef = ref(null)
 
@@ -339,33 +338,15 @@ const onFileChange = (event) => {
 // Form submission handler
 const submitForm = (event) => {
     // Prevent default form submission
-    if (event && event.preventDefault) {
-        event.preventDefault()
-    }
-
-    // Don't submit if form is already processing
-    if (form.processing) {
-        return
-    }
+    event.preventDefault()
 
     // Format the entry_date before submission
-    const formData = { ...form.data() }
-    formData.entry_date = formatDate(formData.entry_date)
+    if (form.entry_date) {
+        form.entry_date = formatDate(form.entry_date)
+    }
 
-    // Use router.put instead of form.put to avoid potential issues
-    router.put(route('checklists.update', props.checklist.id), formData, {
-        preserveState: true,
-        preserveScroll: true,
-        onError: (errors) => {
-            console.log('Form submission errors:', errors)
-        },
-        onSuccess: (data) => {
-            console.log('Form submitted successfully')
-        },
-        onFinish: () => {
-            console.log('Form submission finished')
-        }
-    })
+    // Use the Inertia form submission
+    form.put(route('checklists.update', props.checklist.id))
 }
 
 const zoneQualifiers = [

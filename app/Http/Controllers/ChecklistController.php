@@ -159,7 +159,7 @@ class ChecklistController extends Controller
             }
         });
 
-        return to_route('checklists.show', $checklist->id)->with('success', 'Checklist updated successfully!');
+        return redirect()->route('checklists.show', $checklist->id, 303);
     }
 
     public function destroy(Checklist $checklist)
