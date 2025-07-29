@@ -19,7 +19,6 @@ return new class extends Migration
             $table->json('fundamentals')->nullable(); // Valuation, Seasonal Confluence, Non-Commercials, CoT Index
             $table->integer('score')->default(0); // Calculated evaluation score
             $table->string('symbol')->nullable();
-            $table->enum('bias', ['Long', 'Short'])->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Foreign key constraint to ensure checklist belongs to a user

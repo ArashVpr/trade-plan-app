@@ -45,7 +45,6 @@ class ChecklistFactory extends Factory
             ],
             'score' => $this->faker->numberBetween(0, 100),
             'symbol' => $this->faker->randomElement($symbols),
-            'bias' => $this->faker->randomElement(['Long', 'Short']),
             'created_at' => $this->faker->dateTimeBetween('-4 weeks', 'now'),
         ];
     }

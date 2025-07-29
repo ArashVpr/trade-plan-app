@@ -84,20 +84,20 @@
 
             <!-- Data Tables Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Bias Performance -->
+                <!-- Position Performance -->
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Performance by Bias</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">Performance by Position Type</h3>
                         </div>
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <DataTable :value="stats.bias_performance" class="p-datatable-sm">
-                                <Column field="bias" header="Bias">
+                            <DataTable :value="stats.position_type_performance" class="p-datatable-sm">
+                                <Column field="position_type" header="Position Type">
                                     <template #body="slotProps">
-                                        <Tag :severity="slotProps.data.bias === 'Long' ? 'success' : 'danger'"
-                                            :value="slotProps.data.bias" />
+                                        <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : 'danger'"
+                                            :value="slotProps.data.position_type" />
                                     </template>
                                 </Column>
                                 <Column field="count" header="Count" />
@@ -124,7 +124,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -157,10 +157,10 @@
                                     <span class="font-mono font-bold">{{ slotProps.data.symbol }}</span>
                                 </template>
                             </Column>
-                            <Column field="bias" header="Bias">
+                            <Column field="position_type" header="Position">
                                 <template #body="slotProps">
-                                    <Tag :severity="slotProps.data.bias === 'Long' ? 'success' : 'danger'"
-                                        :value="slotProps.data.bias" />
+                                    <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : slotProps.data.position_type === 'Short' ? 'danger' : 'secondary'"
+                                        :value="slotProps.data.position_type" />
                                 </template>
                             </Column>
                             <Column field="overall_score" header="Score">
@@ -169,7 +169,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>

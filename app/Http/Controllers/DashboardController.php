@@ -47,14 +47,13 @@ class DashboardController extends Controller
                 return [
                     'id' => $checklist->id,
                     'symbol' => $checklist->symbol,
-                    'bias' => $checklist->bias ?? 'N/A',
+                    'position_type' => $tradeEntry ? ucfirst($tradeEntry->position_type) : 'N/A',
                     'overall_score' => $checklist->score ?? 0,
                     'created_at' => $checklist->created_at->format('M j, Y g:i A'),
                     'trade_status' => $this->getTradeStatus($tradeEntry),
                     'status_severity' => $this->getStatusSeverity($tradeEntry)
                 ];
             });
-        // dd($recentActivity);
 
         // Weekly checklist trend (last 4 weeks)
         $weeklyTrend = [];
@@ -70,14 +69,20 @@ class DashboardController extends Controller
             ];
         }
 
-        // Performance by bias (Long vs Short)
-        $biasPerfomance = Checklist::select('bias', DB::raw('count(*) as count'), DB::raw('avg(score) as avg_score'))
-            ->whereNotNull('bias')
-            ->groupBy('bias')
+        // Performance by position type (Long vs Short) - from trade entries
+        $positionTypePerformance = DB::table('checklists')
+            ->join('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
+            ->select(
+                'trade_entries.position_type',
+                DB::raw('count(*) as count'),
+                DB::raw('avg(checklists.score) as avg_score')
+            )
+            ->whereNotNull('trade_entries.position_type')
+            ->groupBy('trade_entries.position_type')
             ->get()
             ->map(function ($item) {
                 return [
-                    'bias' => $item->bias,
+                    'position_type' => ucfirst($item->position_type), // Capitalize Long/Short
                     'count' => $item->count,
                     'avg_score' => round($item->avg_score, 1)
                 ];
@@ -142,7 +147,7 @@ class DashboardController extends Controller
             ],
             'recent_activity' => $recentActivity,
             'weekly_trend' => $weeklyTrend,
-            'bias_performance' => $biasPerfomance,
+            'position_type_performance' => $positionTypePerformance,
             'top_symbols' => $topSymbols,
             'score_distribution' => $scoreDistribution
         ];
