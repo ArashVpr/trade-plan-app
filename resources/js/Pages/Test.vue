@@ -1,63 +1,62 @@
 
 <template>
-    <Toast />
-    <ConfirmDialog></ConfirmDialog>
-    <div class="card flex flex-wrap gap-2 justify-center">
-        <Button @click="confirm1()" label="Save" outlined />
-        <Button @click="confirm2()" label="Delete" severity="danger" outlined />
+    <div class="card flex justify-center">
+        <Toast position="top-center" group="headless" @close="visible = false">
+            <template #container="{ message, closeCallback }">
+                <section class="flex flex-col p-4 gap-4 w-full bg-primary/70 rounded-xl">
+                    <div class="flex items-center gap-5">
+                        <i class="pi pi-cloud-upload text-white dark:text-black text-2xl"></i>
+                        <span class="font-bold text-base text-white dark:text-black">{{ message.summary }}</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <ProgressBar :value="progress" :showValue="false" :style="{ height: '4px' }" pt:value:class="!bg-primary-50 dark:!bg-primary-900" class="!bg-primary/80"></ProgressBar>
+                        <label class="text-sm font-bold text-white dark:text-black">{{ progress }}% uploaded</label>
+                    </div>
+                    <div class="flex gap-4 mb-4 justify-end">
+                        <Button label="Another Upload?" size="small" @click="closeCallback"></Button>
+                        <Button label="Cancel" size="small" @click="closeCallback"></Button>
+                    </div>
+                </section>
+            </template>
+        </Toast>
+        <Button @click="show" label="View" />
     </div>
 </template>
 
 <script setup>
-import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
-
-const confirm = useConfirm();
+import { ref, onUnmounted } from 'vue';
 const toast = useToast();
+const visible = ref(false);
+const progress = ref(0);
+const interval = ref();
 
-const confirm1 = () => {
-    confirm.require({
-        message: 'Are you sure you want to proceed?',
-        header: 'Confirmation',
-        icon: 'pi pi-exclamation-triangle',
-        rejectProps: {
-            label: 'Cancel',
-            severity: 'secondary',
-            outlined: true
-        },
-        acceptProps: {
-            label: 'Save'
-        },
-        accept: () => {
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
-        },
-        reject: () => {
-            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
-        }
-    });
-};
+onUnmounted(() => {
+    if (interval.value) {
+        clearInterval(interval.value);
+    }
+})
 
-const confirm2 = () => {
-    confirm.require({
-        message: 'Do you want to delete this record?',
-        header: 'Danger Zone',
-        icon: 'pi pi-info-circle',
-        rejectLabel: 'Cancel',
-        rejectProps: {
-            label: 'Cancel',
-            severity: 'secondary',
-            outlined: true
-        },
-        acceptProps: {
-            label: 'Delete',
-            severity: 'danger'
-        },
-        accept: () => {
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
-        },
-        reject: () => {
-            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+const show = () => {
+    if (!visible.value) {
+        toast.add({ severity: 'custom', summary: 'Uploading your files.', group: 'headless', styleClass: 'rounded-2xl' });
+        visible.value = true;
+        progress.value = 0;
+
+        if (interval.value) {
+            clearInterval(interval.value);
         }
-    });
+
+        interval.value = setInterval(() => {
+            if (progress.value <= 100) {
+                progress.value = progress.value + 20;
+            }
+
+            if (progress.value >= 100) {
+                progress.value = 100;
+                clearInterval(interval.value);
+            }
+        }, 1000);
+    }
 };
 </script>

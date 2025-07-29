@@ -124,8 +124,8 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { onMounted } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'

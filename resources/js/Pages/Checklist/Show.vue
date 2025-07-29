@@ -265,7 +265,7 @@ onMounted(() => {
             severity: 'success',
             summary: 'Success',
             detail: page.props.flash.success,
-            life: 3000
+            life: 3000,
         })
     }
 })
@@ -273,7 +273,7 @@ onMounted(() => {
 // Helper functions for PrimeVue components
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
-    if (score <= 80) return 'warning'
+    if (score <= 80) return 'warn'
     return 'success'
 }
 
