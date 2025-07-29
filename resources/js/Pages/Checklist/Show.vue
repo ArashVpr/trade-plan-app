@@ -5,7 +5,8 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-between mb-6">
-                <Button label="Back" icon="pi pi-arrow-left" severity="secondary" @click="router.get(route('checklists.index'))" />
+                <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
+                    @click="router.get(route('checklists.index'))" />
                 <div class="flex gap-2">
                     <Button label="Edit" icon="pi pi-pencil" severity="success"
                         @click="router.get(route('checklists.edit', checklist.id))" />
@@ -185,19 +186,19 @@
                                     readonly class="w-full" />
                             </div>
 
-                            
+
                             <!-- R:R -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Risk:Reward</label>
                                 <InputText :value="tradeEntry.rrr ? Number(tradeEntry.rrr).toFixed(2) : 'N/A'" readonly
                                     class="w-full" />
                             </div>
-                                <!-- Trade Status -->
-                                <div class="field">
-                                    <label class="block text-sm font-medium mb-1">Trade Status</label>
-                                    <Tag :value="getTradeStatus(tradeEntry)"
-                                        :severity="getTradeStatusSeverity(tradeEntry)" />
-                                </div>
+                            <!-- Trade Status -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                <Tag :value="getTradeStatus(tradeEntry)"
+                                    :severity="getTradeStatusSeverity(tradeEntry)" />
+                            </div>
                         </div>
 
                         <!-- Notes -->
@@ -233,16 +234,15 @@
         </div>
 
         <!-- PrimeVue Dialog Components -->
-        <ConfirmDialog></ConfirmDialog>
         <Toast />
     </AppLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { route } from 'ziggy-js'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
@@ -252,10 +252,22 @@ Chart.register(...registerables)
 
 const confirm = useConfirm()
 const toast = useToast()
+const page = usePage()
 
 const props = defineProps({
     checklist: Object,
-    tradeEntry: Object
+    tradeEntry: Object,
+})
+
+onMounted(() => {
+    if (page.props.flash?.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: page.props.flash.success,
+            life: 3000
+        })
+    }
 })
 
 // Helper functions for PrimeVue components

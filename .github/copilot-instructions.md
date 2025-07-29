@@ -4,6 +4,13 @@
 
 This is a Laravel 12 + Inertia.js + Vue 3 trading analysis application where traders create scored checklists to evaluate trade setups before execution. Think of it as a systematic approach to trade evaluation with optional order entry tracking.
 
+## Documentations
+
+- [Laravel Documentation](https://laravel.com/docs/12.x)
+- [Inertia.js Documentation](https://inertiajs.com/)
+- [Vue 3 Documentation](https://vuejs.org/guide/introduction.html)
+- [PrimeVue Documentation](https://primevue.org/)
+
 ## Core Architecture Pattern
 
 ### Data Flow: Checklist → TradeEntry (Optional)

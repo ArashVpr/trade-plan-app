@@ -43,7 +43,7 @@ const zoneQualifiers = [
     'Big Brother Coverage'
 ]
 
-const symbolOptions = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']
+const symbolOptions = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY']
 
 const updateData = (key, value) => {
     const updatedData = { ...props.modelValue, [key]: value }

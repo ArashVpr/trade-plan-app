@@ -37,7 +37,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Symbol</label>
-                            <Select v-model="form.symbol" :options="['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']"
+                            <Select v-model="form.symbol" :options="['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY']"
                                 placeholder="Select Symbol" class="w-full" :invalid="!!$errors.symbol" />
                             <Message v-if="$errors.symbol" severity="error" :closable="false">{{ $errors.symbol }}
                             </Message>
@@ -47,7 +47,7 @@
                             <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
                                 iconDisplay="input" :invalid="!!$errors.entry_date" />
                             <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
-                                }}</Message>
+                            }}</Message>
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
@@ -268,19 +268,20 @@ import { useForm } from '@inertiajs/vue3';
 import { computed, watch, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const orderEntryRef = ref(null)
 
 const props = defineProps({
     checklist: Object,
     settings: Object,
     tradeEntry: Object,
-    errors: Object
+    errors: Object,
 })
 
 // Computed property to access errors in template
 const $errors = computed(() => props.errors || {})
-
 
 // Check if we should focus on order entry section
 const shouldHighlightOrderEntry = ref(false)
@@ -346,7 +347,17 @@ const submitForm = (event) => {
     }
 
     // Use the Inertia form submission
-    form.put(route('checklists.update', props.checklist.id))
+    form.put(route('checklists.update', props.checklist.id), {
+        onError: () => {
+            // Handle validation or other errors
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Please check the form for errors',
+                life: 3000
+            });
+        }
+    })
 }
 
 const zoneQualifiers = [
