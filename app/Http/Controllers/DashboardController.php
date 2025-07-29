@@ -37,7 +37,7 @@ class DashboardController extends Controller
 
         // Recent activity (last 7 days)
         $recentActivity = Checklist::with('tradeEntry')
-            ->where('created_at', '>=', $now->subDays(7))
+            ->where('created_at', '>=', $now->copy()->subDays(7))
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
@@ -58,10 +58,10 @@ class DashboardController extends Controller
 
         // Weekly checklist trend (last 4 weeks)
         $weeklyTrend = [];
+        $currentWeek = Carbon::now(); // Fresh instance for weekly calculations
         for ($i = 3; $i >= 0; $i--) {
-            $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
+            $weekStart = $currentWeek->copy()->subWeeks($i)->startOfWeek();
             $weekEnd = $weekStart->copy()->endOfWeek();
-
             $count = Checklist::whereBetween('created_at', [$weekStart, $weekEnd])->count();
 
             $weeklyTrend[] = [
