@@ -124,14 +124,27 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { router, Link } from '@inertiajs/vue3'
+import { onMounted } from 'vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import { router, Link, usePage } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { route } from 'ziggy-js'
 
 const confirm = useConfirm()
 const toast = useToast()
+const page = usePage()
+
+onMounted(() => {
+    if (page.props.flash?.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: page.props.flash.success,
+            life: 3000
+        })
+    }
+})
 
 const props = defineProps({
     checklists: Object
