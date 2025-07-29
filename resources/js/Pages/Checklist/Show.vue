@@ -234,6 +234,7 @@
         </div>
 
         <!-- PrimeVue Dialog Components -->
+        <ConfirmDialog />
         <Toast />
     </AppLayout>
 </template>

@@ -144,6 +144,14 @@ onMounted(() => {
             life: 3000
         })
     }
+    if (page.props.flash?.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: page.props.flash.success,
+            life: 3000
+        })
+    }
 })
 
 const props = defineProps({

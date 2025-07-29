@@ -239,10 +239,10 @@ const weeklyTrendData = computed(() => ({
 
 // Chart data for score distribution
 const scoreDistributionData = computed(() => {
-    // Define color mapping for each score range
+    // Define color mapping for each score range    
     const colorMap = {
         'Excellent (80-100)': '#10B981', // Green
-        'Good (60-79)': '#3B82F6',       // Blue  
+        'Good (60-79)': '#3B82F6',       // Blue
         'Average (40-59)': '#F59E0B',    // Yellow
         'Poor (0-39)': '#EF4444'         // Red
     }
@@ -288,7 +288,7 @@ const doughnutOptions = {
     maintainAspectRatio: false,
     plugins: {
         legend: {
-            position: 'bottom'
+            position: 'bottom',
         }
     }
 }

@@ -54,7 +54,7 @@ class DashboardController extends Controller
                     'status_severity' => $this->getStatusSeverity($tradeEntry)
                 ];
             });
-            // dd($recentActivity);
+        // dd($recentActivity);
 
         // Weekly checklist trend (last 4 weeks)
         $weeklyTrend = [];
@@ -113,7 +113,18 @@ class DashboardController extends Controller
             END as score_range'),
             DB::raw('count(*) as count')
         )
-            ->groupBy('score_range')
+            ->groupBy(DB::raw('CASE 
+                WHEN score >= 80 THEN "Excellent (80-100)"
+                WHEN score >= 60 THEN "Good (60-79)"
+                WHEN score >= 40 THEN "Average (40-59)"
+                ELSE "Poor (0-39)"
+            END'))
+            ->orderBy(DB::raw('CASE 
+                WHEN score_range = "Poor (0-39)" THEN 1
+                WHEN score_range = "Average (40-59)" THEN 2
+                WHEN score_range = "Good (60-79)" THEN 3
+                WHEN score_range = "Excellent (80-100)" THEN 4
+            END'), 'asc')
             ->get()
             ->map(function ($item) {
                 return [
@@ -121,6 +132,7 @@ class DashboardController extends Controller
                     'count' => $item->count
                 ];
             });
+
         return [
             'overview' => [
                 'total_checklists' => $totalChecklists,
@@ -185,5 +197,4 @@ class DashboardController extends Controller
 
         return 'warn'; // Yellow for pending
     }
-
 }
