@@ -1,5 +1,8 @@
 <template>
     <AppLayout>
+        <!-- Toast for notifications -->
+        <Toast />
+
         <div class="max-w-7xl mx-auto">
             <!-- Page Header -->
             <div class="mb-8">
@@ -124,7 +127,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -169,7 +172,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                        }}/100</span>
+                                            }}/100</span>
                                     </div>
                                 </template>
                             </Column>
@@ -209,10 +212,36 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { computed, onMounted } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import { useToast } from 'primevue/usetoast'
 import AppLayout from '@/Layouts/AppLayout.vue'
+
+// Toast setup
+const toast = useToast()
+const page = usePage()
+
+// Show toast for flash messages
+onMounted(() => {
+    if (page.props.flash?.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: page.props.flash.success,
+            life: 5000
+        })
+    }
+
+    if (page.props.flash?.error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: page.props.flash.error,
+            life: 5000
+        })
+    }
+})
 
 // Props
 const props = defineProps({
