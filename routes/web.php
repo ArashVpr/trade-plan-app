@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checklists/{checklist}', [ChecklistController::class, 'show'])->name('checklists.show');
     Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])->name('checklists.edit');
     Route::put('/checklists/{checklist}', [ChecklistController::class, 'update'])->name('checklists.update');
-    Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
+    Route::post('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
 });
 
 // Development/Test routes
