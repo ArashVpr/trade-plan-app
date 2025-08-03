@@ -18,8 +18,9 @@ class ChecklistController extends Controller
     public function index()
     {
         $checklists = Checklist::with('tradeEntry')
+            ->where('user_id', Auth::id())
             ->latest()
-            ->paginate(10);  // Assuming a static user ID for now; replace with auth()->id() in production
+            ->paginate(10);
         return Inertia::render('Checklist/Index', ['checklists' => $checklists]);
     }
     public function store(Request $request)
@@ -36,14 +37,14 @@ class ChecklistController extends Controller
             'entry_price' => 'nullable|numeric',
             'stop_price' => 'nullable|numeric',
             'target_price' => 'nullable|numeric',
-            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
+            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled,',
             'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
         ]);
 
         // Persist checklist and capture its ID
         $checklist = Checklist::create([
-            'user_id' => 1, // replace with auth()->id() in production
+            'user_id' => Auth::id(),
             'zone_qualifiers' => $validated['zone_qualifiers'],
             'technicals' => $validated['technicals'],
             'fundamentals' => $validated['fundamentals'],
@@ -53,23 +54,27 @@ class ChecklistController extends Controller
 
         // Only create trade entry if order details are provided
         if ($validated['entry_date'] && $validated['position_type'] && $validated['entry_price'] && $validated['stop_price'] && $validated['target_price']) {
-            TradeEntry::create([
-                'user_id' => 1, // replace with auth()->id() in production
+            $tradeEntryData = [
+                'user_id' => Auth::id(),
                 'checklist_id' => $checklist->id,
                 'entry_date' => $validated['entry_date'],
                 'position_type' => $validated['position_type'],
                 'entry_price' => $validated['entry_price'],
                 'stop_price' => $validated['stop_price'],
                 'target_price' => $validated['target_price'],
-                'trade_status' => $validated['trade_status'],
                 'rrr' => $validated['rrr'],
                 'notes' => $validated['notes'],
-            ]);
+            ];
+
+            // Only include trade_status if it has a value, otherwise let DB default to 'pending'
+            if (!empty($validated['trade_status'])) {
+                $tradeEntryData['trade_status'] = $validated['trade_status'];
+            }
+
+            TradeEntry::create($tradeEntryData);
         }
 
         return to_route('checklists.index')->with('success', 'Checklist created successfully!');
-
-
     }
     public function show(Checklist $checklist)
     {
@@ -85,7 +90,7 @@ class ChecklistController extends Controller
     {
 
         $settings = UserSettings::firstOrCreate(
-            ['user_id' => 1], // Replace with Auth::id() in production
+            ['user_id' => Auth::id()],
         );
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
@@ -98,7 +103,7 @@ class ChecklistController extends Controller
     }
     public function update(Request $request, Checklist $checklist)
     {
-        if ($checklist->user_id !== 1) { // Replace with auth()->id() in production
+        if ($checklist->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
 
@@ -120,7 +125,7 @@ class ChecklistController extends Controller
             'entry_price' => 'nullable|numeric',
             'stop_price' => 'nullable|numeric',
             'target_price' => 'nullable|numeric',
-            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
+            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled,',
             'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
         ]);
@@ -146,12 +151,16 @@ class ChecklistController extends Controller
                     'stop_price',
                     'target_price',
                     'rrr',
-                    'trade_status',
                     'notes'
                 ]);
 
+                // Only include trade_status if it has a value, otherwise let DB default to 'pending'
+                if (!empty($validated['trade_status'])) {
+                    $tradeData['trade_status'] = $validated['trade_status'];
+                }
+
                 // Add user_id for new record creation
-                $tradeData['user_id'] = 1; // Replace with Auth::id() in production
+                $tradeData['user_id'] = Auth::id();
 
                 // Update or create the related trade entry
                 $checklist->tradeEntry()->updateOrCreate(
@@ -162,7 +171,6 @@ class ChecklistController extends Controller
         });
 
         return to_route('checklists.show', $checklist->id, 303)->with('success', 'Checklist updated successfully!');
-
     }
 
     public function destroy(Checklist $checklist)
@@ -175,7 +183,7 @@ class ChecklistController extends Controller
     public function checklistWeights()
     {
         $settings = UserSettings::firstOrCreate(
-            ['user_id' => 1], // Replace with Auth::id() in production
+            ['user_id' => Auth::id()],
         );
         return Inertia::render('ChecklistWizard', [
             'settings' => $settings,

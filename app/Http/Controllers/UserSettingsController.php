@@ -15,7 +15,7 @@ class UserSettingsController extends Controller
         $defaults = (new UserSettings)->getAttributes();
         // Create or fetch user settings, using defaults on create
         $settings = UserSettings::firstOrCreate(
-            ['user_id' => 1], // Replace with Auth::id() in production
+            ['user_id' => Auth::id()],
             $defaults
         );
 
@@ -48,7 +48,7 @@ class UserSettingsController extends Controller
         $totalWeight = array_sum($validated);
 
         $settings = UserSettings::updateOrCreate(
-            ['user_id' => 1], // Replace with Auth::id() in production
+            ['user_id' => Auth::id()],
             $validated
         );
 

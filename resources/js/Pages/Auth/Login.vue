@@ -6,26 +6,16 @@
                     <i class="pi pi-chart-line text-2xl text-blue-600"></i>
                 </div>
                 <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Create your account
+                    Sign in to your account
                 </h2>
                 <p class="mt-2 text-center text-sm text-gray-600">
-                    Join Trade Plan App and start improving your trading
+                    Welcome back to Trade Plan App
                 </p>
             </div>
 
             <Card class="p-6">
                 <template #content>
                     <form @submit.prevent="submit" class="space-y-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name
-                            </label>
-                            <InputText id="name" v-model="form.name" type="text" autocomplete="name" required
-                                class="w-full" :class="{ 'p-invalid': form.errors.name }"
-                                placeholder="Enter your full name" />
-                            <small v-if="form.errors.name" class="p-error">{{ form.errors.name }}</small>
-                        </div>
-
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
@@ -40,33 +30,37 @@
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                                 Password
                             </label>
-                            <Password id="password" v-model="form.password" toggleMask class="w-full"
-                                :class="{ 'p-invalid': form.errors.password }" placeholder="Choose a strong password"
+                            <Password id="password" v-model="form.password" :feedback="false" toggleMask class="w-full"
+                                :class="{ 'p-invalid': form.errors.password }" placeholder="Enter your password"
                                 :pt="{ input: { class: 'w-full' } }" />
                             <small v-if="form.errors.password" class="p-error">{{ form.errors.password }}</small>
                         </div>
 
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
-                                Confirm Password
-                            </label>
-                            <Password id="password_confirmation" v-model="form.password_confirmation" :feedback="false"
-                                toggleMask class="w-full" :class="{ 'p-invalid': form.errors.password_confirmation }"
-                                placeholder="Confirm your password" :pt="{ input: { class: 'w-full' } }" />
-                            <small v-if="form.errors.password_confirmation" class="p-error">{{
-                                form.errors.password_confirmation }}</small>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <Checkbox id="remember" v-model="form.remember" :binary="true" />
+                                <label for="remember" class="ml-2 block text-sm text-gray-900">
+                                    Remember me
+                                </label>
+                            </div>
+
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                                    Forgot your password?
+                                </a>
+                            </div>
                         </div>
 
                         <div>
-                            <Button type="submit" :loading="form.processing" label="Create Account" class="w-full"
+                            <Button type="submit" :loading="form.processing" label="Sign in" class="w-full"
                                 size="large" />
                         </div>
 
                         <div class="text-center">
                             <span class="text-sm text-gray-600">
-                                Already have an account?
-                                <Link :href="route('login')" class="font-medium text-blue-600 hover:text-blue-500">
-                                Sign in
+                                Don't have an account?
+                                <Link :href="route('register')" class="font-medium text-blue-600 hover:text-blue-500">
+                                Sign up
                                 </Link>
                             </span>
                         </div>
@@ -82,14 +76,13 @@ import { useForm, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const form = useForm({
-    name: '',
     email: '',
     password: '',
-    password_confirmation: '',
+    remember: false,
 })
 
 const submit = () => {
-    form.post(route('register'))
+    form.post(route('login'))
 }
 </script>
 

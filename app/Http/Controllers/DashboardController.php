@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Checklist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -27,16 +28,19 @@ class DashboardController extends Controller
         $startOfMonth = $now->startOfMonth();
 
         // Total checklists
-        $totalChecklists = Checklist::count();
+        $totalChecklists = Checklist::where('user_id', Auth::id())->count();
 
         // Checklists this week
-        $weeklyChecklists = Checklist::where('created_at', '>=', $startOfWeek)->count();
+        $weeklyChecklists = Checklist::where('user_id', Auth::id())
+            ->where('created_at', '>=', $startOfWeek)->count();
 
         // Checklists this month
-        $monthlyChecklists = Checklist::where('created_at', '>=', $startOfMonth)->count();
+        $monthlyChecklists = Checklist::where('user_id', Auth::id())
+            ->where('created_at', '>=', $startOfMonth)->count();
 
         // Recent activity (last 7 days)
         $recentActivity = Checklist::with('tradeEntry')
+            ->where('user_id', Auth::id())
             ->where('created_at', '>=', $now->copy()->subDays(7))
             ->orderBy('created_at', 'desc')
             ->limit(5)
@@ -61,7 +65,8 @@ class DashboardController extends Controller
         for ($i = 3; $i >= 0; $i--) {
             $weekStart = $currentWeek->copy()->subWeeks($i)->startOfWeek();
             $weekEnd = $weekStart->copy()->endOfWeek();
-            $count = Checklist::whereBetween('created_at', [$weekStart, $weekEnd])->count();
+            $count = Checklist::where('user_id', Auth::id())
+                ->whereBetween('created_at', [$weekStart, $weekEnd])->count();
 
             $weeklyTrend[] = [
                 'week' => $weekStart->format('M j'),
@@ -77,6 +82,7 @@ class DashboardController extends Controller
                 DB::raw('count(*) as count'),
                 DB::raw('avg(checklists.score) as avg_score')
             )
+            ->where('checklists.user_id', Auth::id())
             ->whereNotNull('trade_entries.position_type')
             ->groupBy('trade_entries.position_type')
             ->get()
@@ -94,6 +100,7 @@ class DashboardController extends Controller
             DB::raw('count(*) as count'),
             DB::raw('avg(score) as avg_score')
         )
+            ->where('user_id', Auth::id())
             ->whereNotNull(DB::raw('COALESCE(symbol)'))
             ->groupBy(DB::raw('COALESCE(symbol)'))
             ->having('count', '>=', 1) // Show all symbols for now
@@ -118,6 +125,7 @@ class DashboardController extends Controller
             END as score_range'),
             DB::raw('count(*) as count')
         )
+            ->where('user_id', Auth::id())
             ->groupBy(DB::raw('CASE 
                 WHEN score >= 80 THEN "Excellent (80-100)"
                 WHEN score >= 60 THEN "Good (60-79)"
@@ -143,7 +151,7 @@ class DashboardController extends Controller
                 'total_checklists' => $totalChecklists,
                 'weekly_checklists' => $weeklyChecklists,
                 'monthly_checklists' => $monthlyChecklists,
-                'avg_score' => round(Checklist::avg('score') ?? 0, 1)
+                'avg_score' => round(Checklist::where('user_id', Auth::id())->avg('score') ?? 0, 1)
             ],
             'recent_activity' => $recentActivity,
             'weekly_trend' => $weeklyTrend,

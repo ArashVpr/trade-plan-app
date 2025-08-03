@@ -184,7 +184,7 @@ const orderEntryData = ref({
     stopPrice: '',
     targetPrice: '',
     rrr: '',
-    outcome: '',
+    trade_status: '',
     screenshot: null,
     notes: ''
 });
@@ -287,7 +287,7 @@ function updateProgress() {
         (orderEntryData.value.stopPrice ? 1 : 0) +
         (orderEntryData.value.targetPrice ? 1 : 0) +
         (orderEntryData.value.positionType ? 1 : 0) +
-        (orderEntryData.value.outcome ? 1 : 0) +
+        (orderEntryData.value.trade_status ? 1 : 0) +
         (orderEntryData.value.rrr ? 1 : 0) +
         (orderEntryData.value.screenshot ? 1 : 0);
 }
@@ -315,7 +315,7 @@ function resetWizard() {
         stopPrice: '',
         targetPrice: '',
         rrr: '',
-        outcome: '',
+        trade_status: '',
         screenshot: null,
         notes: ''
     };
@@ -325,7 +325,7 @@ function resetWizard() {
 function submitChecklist() {
     if (!canSubmit.value) return;
 
-    router.post(route('checklists.store'), {
+    const submitData = {
         zone_qualifiers: zoneQualifiersData.value.selectedZoneQualifiers,
         technicals: technicalsData.value,
         fundamentals: fundamentalsData.value,
@@ -337,10 +337,12 @@ function submitChecklist() {
         stop_price: orderEntryData.value.stopPrice,
         target_price: orderEntryData.value.targetPrice,
         position_type: orderEntryData.value.positionType,
-        outcome: orderEntryData.value.outcome,
+        trade_status: orderEntryData.value.trade_status,
         rrr: orderEntryData.value.rrr,
         screenshot: orderEntryData.value.screenshot
-    }, {
+    };
+
+    router.post(route('checklists.store'), submitData, {
         preserveState: true,
         onSuccess: () => {
             toastRef.value?.showSuccess('Success', 'Checklist saved successfully!')

@@ -95,11 +95,13 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a v-ripple
-                                            class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple">
-                                            <i class="pi pi-sign-out mr-2"></i>
-                                            <span class="font-medium">Logout</span>
-                                        </a>
+                                        <form @submit.prevent="logout" class="w-full">
+                                            <button type="submit"
+                                                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple w-full text-left">
+                                                <i class="pi pi-sign-out mr-2"></i>
+                                                <span class="font-medium">Logout</span>
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </li>
@@ -111,7 +113,11 @@
                         <hr class="mb-4 mx-4 border-t border-0 border-surface-200 dark:border-surface-700" />
                         <div class="m-4 flex items-center p-4 gap-2 rounded text-surface-700 dark:text-surface-0">
                             <Avatar icon="pi pi-user" shape="circle" />
-                            <span class="font-bold">Trader</span>
+                            <div class="flex-1">
+                                <span class="font-bold block">{{ $page.props.auth.user?.name || 'Trader' }}</span>
+                                <small class="text-surface-500 dark:text-surface-400">{{ $page.props.auth.user?.email ||
+                                    'trader@example.com' }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,6 +162,11 @@ const navigateTo = (url) => {
         router.get(url)  // SPA navigation with Inertia.js
         sidebarVisible.value = false // Close sidebar after navigation
     }
+}
+
+// Logout function
+const logout = () => {
+    router.post(route('logout'))
 }
 
 // Helper function to check if route is active
