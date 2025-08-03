@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TradeJournalController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserSettingsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -37,6 +38,13 @@ Route::middleware('auth')->group(function () {
     // User settings
     Route::get('/user-settings', [UserSettingsController::class, 'index'])->name('user-settings.index');
     Route::post('/user-settings', [UserSettingsController::class, 'update'])->name('user-settings.update');
+
+    // User profile
+    Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [UserProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [UserProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/profile/notifications', [UserProfileController::class, 'updateNotifications'])->name('profile.notifications');
+    Route::delete('/profile', [UserProfileController::class, 'deleteAccount'])->name('profile.delete');
 
     // Checklists
     Route::get('/checklists', [ChecklistController::class, 'index'])->name('checklists.index');

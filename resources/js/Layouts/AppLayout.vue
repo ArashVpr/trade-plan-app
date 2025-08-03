@@ -86,12 +86,21 @@
                                 </div>
                                 <ul class="list-none p-0 m-0 overflow-hidden">
                                     <li>
+                                        <a v-ripple @click="navigateTo(route('profile.index'))" :class="[
+                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                            isActive(route('profile.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                        ]">
+                                            <i class="pi pi-user mr-2"></i>
+                                            <span class="font-medium">Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a v-ripple @click="navigateTo(route('user-settings.index'))" :class="[
                                             'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
                                             isActive(route('user-settings.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
                                         ]">
                                             <i class="pi pi-cog mr-2"></i>
-                                            <span class="font-medium">Settings</span>
+                                            <span class="font-medium">Trading Settings</span>
                                         </a>
                                     </li>
                                     <li>
@@ -184,6 +193,9 @@ const isActive = (routeUrl) => {
     if (routeUrl === route('user-settings.index') && currentUrl.includes('/user-settings')) {
         return true
     }
+    if (routeUrl === route('profile.index') && currentUrl.includes('/profile')) {
+        return true
+    }
     return false
 }
 
@@ -196,7 +208,8 @@ const pageTitle = computed(() => {
         if (currentUrl.includes('/checklists/')) return 'Checklist Details'
         return 'Trading History'
     }
-    if (currentUrl.includes('/user-settings')) return 'Settings'
+    if (currentUrl.includes('/user-settings')) return 'Trading Settings'
+    if (currentUrl.includes('/profile')) return 'User Profile'
     return 'TradePlan'
 })
 
