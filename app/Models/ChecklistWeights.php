@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserSettings extends Model
+class ChecklistWeights extends Model
 {
     use HasFactory;
 
     protected $guarded = [];
+
     /**
      * Default values for each weight attribute.
      * These are applied when a new model instance is created or attribute is missing.
@@ -32,4 +33,12 @@ class UserSettings extends Model
         'fundamental_cot_index_weight' => 12,
         'fundamental_noncommercial_divergence_weight' => 12,
     ];
+
+    /**
+     * Get the user that owns the checklist weights.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

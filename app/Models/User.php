@@ -51,11 +51,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user settings associated with the user.
+     * Get the checklist weights associated with the user.
      */
-    public function settings()
+    public function checklistWeights()
     {
-        return $this->hasOne(UserSettings::class);
+        return $this->hasOne(ChecklistWeights::class);
     }
 
     /**

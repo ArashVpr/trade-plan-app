@@ -158,23 +158,140 @@
                     </template>
                 </Card>
 
-                <!-- Trading Settings Tab -->
+                <!-- Checklist Weights Tab -->
                 <Card v-if="activeTab === 2" class="mb-6">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-line"></i>
-                            Trading Preferences
+                            <i class="pi pi-sliders-h"></i>
+                            Checklist Weights
                         </div>
                     </template>
                     <template #content>
-                        <div class="space-y-4">
-                            <Message severity="info" :closable="false">
-                                <p>Your trading checklist weights and scoring preferences are managed separately.</p>
-                                <div class="mt-2">
-                                    <Button label="Manage Trading Settings" icon="pi pi-cog" severity="info" outlined
-                                        @click="navigateToTradingSettings" />
+                        <div class="space-y-6">
+                            <!-- Description -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-start gap-3">
+                                    <i class="pi pi-info-circle text-blue-600 mt-1"></i>
+                                    <div>
+                                        <h3 class="font-medium text-blue-900 mb-1">About Checklist Weights</h3>
+                                        <p class="text-blue-800 text-sm">
+                                            Adjust the importance of each factor in your trade analysis. Higher weights
+                                            mean that factor has more influence on your overall checklist score.
+                                        </p>
+                                    </div>
                                 </div>
-                            </Message>
+                            </div>
+
+                            <form @submit.prevent="updateChecklistWeights" class="space-y-8">
+                                <!-- Zone Qualifiers Section -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-map-marker text-blue-600"></i>
+                                        Zone Qualifiers
+                                    </h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Fresh Zone</label>
+                                            <InputNumber v-model="weightsForm.zone_fresh_weight" :min="0" :max="100"
+                                                suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Original Zone</label>
+                                            <InputNumber v-model="weightsForm.zone_original_weight" :min="0" :max="100"
+                                                suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Flip Zone</label>
+                                            <InputNumber v-model="weightsForm.zone_flip_weight" :min="0" :max="100"
+                                                suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Liquidity Zone</label>
+                                            <InputNumber v-model="weightsForm.zone_lol_weight" :min="0" :max="100"
+                                                suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Min Profit Margin</label>
+                                            <InputNumber v-model="weightsForm.zone_min_profit_margin_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Big Brother</label>
+                                            <InputNumber v-model="weightsForm.zone_big_brother_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Technical Analysis Section -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-chart-line text-green-600"></i>
+                                        Technical Analysis
+                                    </h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Very Expensive CHP</label>
+                                            <InputNumber v-model="weightsForm.technical_very_exp_chp_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Expensive CHP</label>
+                                            <InputNumber v-model="weightsForm.technical_exp_chp_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Impulsive Direction</label>
+                                            <InputNumber v-model="weightsForm.technical_direction_impulsive_weight"
+                                                :min="0" :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Correction Direction</label>
+                                            <InputNumber v-model="weightsForm.technical_direction_correction_weight"
+                                                :min="0" :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fundamental Analysis Section -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-globe text-purple-600"></i>
+                                        Fundamental Analysis
+                                    </h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Valuation</label>
+                                            <InputNumber v-model="weightsForm.fundamental_valuation_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Seasonal</label>
+                                            <InputNumber v-model="weightsForm.fundamental_seasonal_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">COT Index</label>
+                                            <InputNumber v-model="weightsForm.fundamental_cot_index_weight" :min="0"
+                                                :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-medium">Non-Commercial Divergence</label>
+                                            <InputNumber
+                                                v-model="weightsForm.fundamental_noncommercial_divergence_weight"
+                                                :min="0" :max="100" suffix=" pts" class="w-full" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex justify-between items-center pt-4 border-t">
+                                    <Button type="button" label="Reset to Defaults" severity="secondary" outlined
+                                        icon="pi pi-refresh" @click="resetToDefaults" />
+                                    <Button type="submit" :loading="weightsForm.processing" icon="pi pi-save"
+                                        label="Save Weights" />
+                                </div>
+                            </form>
                         </div>
                     </template>
                 </Card>
@@ -251,7 +368,8 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 // Define props
 const props = defineProps({
     user: Object,
-    userSettings: Object,
+    checklistWeights: Object,
+    checklistDefaults: Object,
 })
 
 // Toast
@@ -262,7 +380,7 @@ const activeTab = ref(0)
 const tabItems = [
     { label: 'Profile', icon: 'pi pi-user' },
     { label: 'Security', icon: 'pi pi-shield' },
-    { label: 'Trading', icon: 'pi pi-chart-line' },
+    { label: 'Checklist Weights', icon: 'pi pi-sliders-h' },
     { label: 'Account', icon: 'pi pi-exclamation-triangle' },
 ]
 
@@ -279,6 +397,24 @@ const passwordForm = useForm({
     current_password: '',
     password: '',
     password_confirmation: '',
+})
+
+// Checklist weights form
+const weightsForm = useForm({
+    zone_fresh_weight: props.checklistWeights?.zone_fresh_weight || props.checklistDefaults?.zone_fresh_weight || 4,
+    zone_original_weight: props.checklistWeights?.zone_original_weight || props.checklistDefaults?.zone_original_weight || 4,
+    zone_flip_weight: props.checklistWeights?.zone_flip_weight || props.checklistDefaults?.zone_flip_weight || 4,
+    zone_lol_weight: props.checklistWeights?.zone_lol_weight || props.checklistDefaults?.zone_lol_weight || 4,
+    zone_min_profit_margin_weight: props.checklistWeights?.zone_min_profit_margin_weight || props.checklistDefaults?.zone_min_profit_margin_weight || 4,
+    zone_big_brother_weight: props.checklistWeights?.zone_big_brother_weight || props.checklistDefaults?.zone_big_brother_weight || 4,
+    technical_very_exp_chp_weight: props.checklistWeights?.technical_very_exp_chp_weight || props.checklistDefaults?.technical_very_exp_chp_weight || 12,
+    technical_exp_chp_weight: props.checklistWeights?.technical_exp_chp_weight || props.checklistDefaults?.technical_exp_chp_weight || 6,
+    technical_direction_impulsive_weight: props.checklistWeights?.technical_direction_impulsive_weight || props.checklistDefaults?.technical_direction_impulsive_weight || 12,
+    technical_direction_correction_weight: props.checklistWeights?.technical_direction_correction_weight || props.checklistDefaults?.technical_direction_correction_weight || 6,
+    fundamental_valuation_weight: props.checklistWeights?.fundamental_valuation_weight || props.checklistDefaults?.fundamental_valuation_weight || 10,
+    fundamental_seasonal_weight: props.checklistWeights?.fundamental_seasonal_weight || props.checklistDefaults?.fundamental_seasonal_weight || 6,
+    fundamental_cot_index_weight: props.checklistWeights?.fundamental_cot_index_weight || props.checklistDefaults?.fundamental_cot_index_weight || 12,
+    fundamental_noncommercial_divergence_weight: props.checklistWeights?.fundamental_noncommercial_divergence_weight || props.checklistDefaults?.fundamental_noncommercial_divergence_weight || 12,
 })
 
 // Delete form
@@ -346,6 +482,42 @@ const updatePassword = () => {
     })
 }
 
+const updateChecklistWeights = () => {
+    weightsForm.put(route('profile.checklist-weights'), {
+        onSuccess: () => {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Checklist weights updated successfully',
+                life: 3000,
+            })
+        },
+        onError: () => {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update checklist weights',
+                life: 3000,
+            })
+        },
+    })
+}
+
+const resetToDefaults = () => {
+    Object.keys(props.checklistDefaults).forEach(key => {
+        if (weightsForm.hasOwnProperty(key)) {
+            weightsForm[key] = props.checklistDefaults[key]
+        }
+    })
+    
+    toast.add({
+        severity: 'info',
+        summary: 'Reset',
+        detail: 'Weights reset to default values',
+        life: 3000,
+    })
+}
+
 const deleteAccount = () => {
     deleteForm.confirmation = deleteConfirmation.value
     deleteForm.delete(route('profile.delete'), {
@@ -372,10 +544,6 @@ const onAvatarUpload = (event) => {
         detail: 'Avatar upload functionality to be implemented',
         life: 3000,
     })
-}
-
-const navigateToTradingSettings = () => {
-    router.visit(route('user-settings.index'))
 }
 
 const formatDate = (date) => {

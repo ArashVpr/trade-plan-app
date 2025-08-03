@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChecklistWeights;
 use App\Models\User;
-use App\Models\UserSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,14 +18,23 @@ class UserProfileController extends Controller
      */
     public function index()
     {
-        $user = User::with('settings')->find(1); // Replace with auth()->user()
+        $user = User::find(1); // Replace with auth()->user()
+
+        // Get defaults for checklist weights
+        $defaults = (new ChecklistWeights)->getAttributes();
+
+        // Get or create checklist weights
+        $checklistWeights = ChecklistWeights::firstOrCreate(
+            ['user_id' => $user->id],
+            $defaults
+        );
 
         return Inertia::render('UserProfile', [
             'user' => $user,
-            'userSettings' => $user->settings,
+            'checklistWeights' => $checklistWeights,
+            'checklistDefaults' => $defaults,
         ]);
     }
-
     /**
      * Update user profile information
      */
@@ -113,18 +122,41 @@ class UserProfileController extends Controller
             'security_alerts' => ['boolean'],
         ]);
 
-        // For now, we'll store these in user settings
+        // For now, we'll just return success without storing notifications
         // In a real app, you might have a separate notifications table
-        $settings = UserSettings::firstOrCreate(['user_id' => Auth::id()]);
-
-        $settings->update([
-            'email_notifications' => $validated['email_notifications'] ?? false,
-            'trade_alerts' => $validated['trade_alerts'] ?? false,
-            'weekly_summary' => $validated['weekly_summary'] ?? false,
-            'security_alerts' => $validated['security_alerts'] ?? true,
-        ]);
+        // or add notification fields to the users table
 
         return back()->with('success', 'Notification preferences updated!');
+    }
+
+    /**
+     * Update the user's checklist weights.
+     */
+    public function updateChecklistWeights(Request $request)
+    {
+        $validated = $request->validate([
+            'zone_fresh_weight' => 'required|integer|min:0|max:100',
+            'zone_original_weight' => 'required|integer|min:0|max:100',
+            'zone_flip_weight' => 'required|integer|min:0|max:100',
+            'zone_lol_weight' => 'required|integer|min:0|max:100',
+            'zone_min_profit_margin_weight' => 'required|integer|min:0|max:100',
+            'zone_big_brother_weight' => 'required|integer|min:0|max:100',
+            'technical_very_exp_chp_weight' => 'required|integer|min:0|max:100',
+            'technical_exp_chp_weight' => 'required|integer|min:0|max:100',
+            'technical_direction_impulsive_weight' => 'required|integer|min:0|max:100',
+            'technical_direction_correction_weight' => 'required|integer|min:0|max:100',
+            'fundamental_valuation_weight' => 'required|integer|min:0|max:100',
+            'fundamental_seasonal_weight' => 'required|integer|min:0|max:100',
+            'fundamental_cot_index_weight' => 'required|integer|min:0|max:100',
+            'fundamental_noncommercial_divergence_weight' => 'required|integer|min:0|max:100',
+        ]);
+
+        $weights = ChecklistWeights::updateOrCreate(
+            ['user_id' => 1], // Replace with auth()->id()
+            $validated
+        );
+
+        return back()->with('success', 'Checklist weights updated successfully!');
     }
 
     /**

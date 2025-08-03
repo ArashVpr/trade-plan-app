@@ -95,12 +95,12 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a v-ripple @click="navigateTo(route('user-settings.index'))" :class="[
+                                        <a v-ripple @click="navigateTo(route('checklist-weights.index'))" :class="[
                                             'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('user-settings.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                            isActive(route('checklist-weights.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
                                         ]">
-                                            <i class="pi pi-cog mr-2"></i>
-                                            <span class="font-medium">Trading Settings</span>
+                                            <i class="pi pi-sliders-h mr-2"></i>
+                                            <span class="font-medium">Checklist Weights</span>
                                         </a>
                                     </li>
                                     <li>
@@ -190,7 +190,7 @@ const isActive = (routeUrl) => {
     if (routeUrl === route('checklists.index') && currentUrl.includes('/checklists')) {
         return true
     }
-    if (routeUrl === route('user-settings.index') && currentUrl.includes('/user-settings')) {
+    if (routeUrl === route('checklist-weights.index') && currentUrl.includes('/checklist-weights')) {
         return true
     }
     if (routeUrl === route('profile.index') && currentUrl.includes('/profile')) {
@@ -208,7 +208,7 @@ const pageTitle = computed(() => {
         if (currentUrl.includes('/checklists/')) return 'Checklist Details'
         return 'Trading History'
     }
-    if (currentUrl.includes('/user-settings')) return 'Trading Settings'
+    if (currentUrl.includes('/checklist-weights')) return 'Checklist Weights'
     if (currentUrl.includes('/profile')) return 'User Profile'
     return 'TradePlan'
 })

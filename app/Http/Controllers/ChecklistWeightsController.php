@@ -4,24 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\UserSettings;
+use App\Models\ChecklistWeights;
 use Inertia\Inertia;
 
-class UserSettingsController extends Controller
+class ChecklistWeightsController extends Controller
 {
     public function index()
     {
         // Retrieve default attribute values from the model
-        $defaults = (new UserSettings)->getAttributes();
-        // Create or fetch user settings, using defaults on create
-        $settings = UserSettings::firstOrCreate(
-            ['user_id' => Auth::id()],
+        $defaults = (new ChecklistWeights)->getAttributes();
+        // Create or fetch checklist weights, using defaults on create
+        $weights = ChecklistWeights::firstOrCreate(
+            ['user_id' => 1], // Replace with auth()->id()
             $defaults
         );
 
-        // Pass both persisted settings and defaults to the view
-        return Inertia::render('UserSettings', [
-            'settings' => $settings,
+        // Pass both persisted weights and defaults to the view
+        return Inertia::render('ChecklistWeights', [
+            'weights' => $weights,
             'defaults' => $defaults,
         ]);
     }
@@ -45,13 +45,11 @@ class UserSettingsController extends Controller
             'fundamental_noncommercial_divergence_weight' => 'required|integer|min:0|max:100',
         ]);
 
-        $totalWeight = array_sum($validated);
-
-        $settings = UserSettings::updateOrCreate(
-            ['user_id' => Auth::id()],
+        $weights = ChecklistWeights::updateOrCreate(
+            ['user_id' => 1], // Replace with auth()->id()
             $validated
         );
 
-        return redirect('/')->with('success', 'Settings updated successfully!');
+        return back()->with('success', 'Checklist weights updated successfully!');
     }
 }
