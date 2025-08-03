@@ -30,14 +30,12 @@
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                                 Password
                             </label>
-                            <Password id="password" v-model="form.password" :feedback="false" toggleMask class="w-full"
+                            <Password v-model="form.password" :feedback="false" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password }" placeholder="Enter your password"
-                                :pt="{ input: { class: 'w-full' } }" @input="form.clearErrors('password')" />
+                                @input="form.clearErrors('password')" />
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
                                 }}</small>
-                        </div>
-
-                        <div class="flex items-center justify-between">
+                        </div>                        <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <Checkbox id="remember" v-model="form.remember" :binary="true" />
                                 <label for="remember" class="ml-2 block text-sm text-gray-900">
@@ -101,6 +99,15 @@ const submit = () => {
 :deep(.p-password.p-invalid .p-inputtext) {
     border-color: #ef4444;
     box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.2);
+}
+
+/* Make password component full width */
+:deep(.p-password) {
+    width: 100%;
+}
+
+:deep(.p-password .p-inputtext) {
+    width: 100%;
 }
 
 .p-error {

@@ -40,20 +40,34 @@
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                                 Password
                             </label>
-                            <Password id="password" v-model="form.password" toggleMask class="w-full"
+                            <Password v-model="form.password" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password }" placeholder="Choose a strong password"
-                                :pt="{ input: { class: 'w-full' } }" @input="form.clearErrors('password')" />
+                                @input="form.clearErrors('password')">
+                                <template #header>
+                                    <div class="font-semibold text-sm mb-4">Create Password</div>
+                                </template>
+                                <template #footer>
+                                    <Divider />
+                                    <ul class="pl-2 my-0 leading-normal text-sm">
+                                        <li>At least one lowercase letter</li>
+                                        <li>At least one uppercase letter</li>
+                                        <li>At least one number</li>
+                                        <li>At least one symbol</li>
+                                        <li>Minimum 8 characters</li>
+                                    </ul>
+                                </template>
+                            </Password>
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                                }}</small>
+                            }}</small>
                         </div>
 
                         <div>
                             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
                                 Confirm Password
                             </label>
-                            <Password id="password_confirmation" v-model="form.password_confirmation" :feedback="false"
-                                toggleMask class="w-full" :class="{ 'p-invalid': form.errors.password_confirmation }"
-                                placeholder="Confirm your password" :pt="{ input: { class: 'w-full' } }"
+                            <Password v-model="form.password_confirmation" :feedback="false" toggleMask class="w-full"
+                                :class="{ 'p-invalid': form.errors.password_confirmation }"
+                                placeholder="Confirm your password"
                                 @input="form.clearErrors('password_confirmation')" />
                             <small v-if="form.errors.password_confirmation" class="p-error block mt-1">{{
                                 form.errors.password_confirmation }}</small>
@@ -109,6 +123,30 @@ const submit = () => {
 :deep(.p-password.p-invalid .p-inputtext) {
     border-color: #ef4444;
     box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.2);
+}
+
+/* Make password component full width */
+:deep(.p-password) {
+    width: 100%;
+}
+
+:deep(.p-password .p-inputtext) {
+    width: 100%;
+}
+
+/* Style password requirements */
+:deep(.p-password .p-password-panel) {
+    margin-top: 0.5rem;
+}
+
+:deep(.p-password .p-password-panel ul) {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+:deep(.p-password .p-password-panel li) {
+    color: #6b7280;
+    font-size: 0.875rem;
 }
 
 .p-error {
