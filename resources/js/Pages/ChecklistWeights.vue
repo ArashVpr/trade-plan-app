@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">User Settings</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Checklist Weights</h1>
             <form @submit.prevent="submit">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Zone Qualifiers Category -->
@@ -128,13 +128,13 @@ import { computed } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps({
-    settings: Object,
+    weights: Object,
     defaults: Object,
 })
 
-// Initialize form with persisted settings
+// Initialize form with persisted weights
 const form = useForm({
-    ...props.settings
+    ...props.weights
 })
 
 // Computed total weight
@@ -148,7 +148,7 @@ const totalWeight = computed(() =>
 )
 
 function submit() {
-    form.post('/user-settings')
+    form.post('/checklist-weights')
 }
 // Reset form values to initial defaults from model
 function resetDefaults() {

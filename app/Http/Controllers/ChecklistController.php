@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
-use App\Models\UserSettings;
+use App\Models\ChecklistWeights;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -89,8 +89,8 @@ class ChecklistController extends Controller
     public function edit(Checklist $checklist)
     {
 
-        $settings = UserSettings::firstOrCreate(
-            ['user_id' => Auth::id()],
+        $settings = ChecklistWeights::firstOrCreate(
+            ['user_id' => 1], // Replace with auth()->id()
         );
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
@@ -182,8 +182,8 @@ class ChecklistController extends Controller
 
     public function checklistWeights()
     {
-        $settings = UserSettings::firstOrCreate(
-            ['user_id' => Auth::id()],
+        $settings = ChecklistWeights::firstOrCreate(
+            ['user_id' => 1], // Replace with auth()->id()
         );
         return Inertia::render('ChecklistWizard', [
             'settings' => $settings,

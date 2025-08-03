@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChecklistWeights;
 use App\Models\User;
-use App\Models\UserSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -99,8 +99,8 @@ class RegisterController extends Controller
             'email_verified_at' => now(), // Auto-verify for now, implement email verification later
         ]);
 
-        // Create default user settings
-        UserSettings::create([
+        // Create default checklist weights
+        ChecklistWeights::create([
             'user_id' => $user->id,
             // Default scoring weights - using actual database column names
             'zone_fresh_weight' => 4,

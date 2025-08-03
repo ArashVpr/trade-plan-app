@@ -6,10 +6,10 @@ This is a Laravel 12 + Inertia.js + Vue 3 trading analysis application where tra
 
 ## Documentations
 
-- [Laravel Documentation](https://laravel.com/docs/12.x)
-- [Inertia.js Documentation](https://inertiajs.com/)
-- [Vue 3 Documentation](https://vuejs.org/guide/introduction.html)
-- [PrimeVue Documentation](https://primevue.org/)
+-   [Laravel Documentation](https://laravel.com/docs/12.x)
+-   [Inertia.js Documentation](https://inertiajs.com/)
+-   [Vue 3 Documentation](https://vuejs.org/guide/introduction.html)
+-   [PrimeVue Documentation](https://primevue.org/)
 
 ## Core Architecture Pattern
 
@@ -25,7 +25,7 @@ This is a Laravel 12 + Inertia.js + Vue 3 trading analysis application where tra
 // Core domain models
 Checklist: user_id, zone_qualifiers[], technicals{}, fundamentals{}, score, symbol
 TradeEntry: checklist_id, entry_date, position_type, entry_price, stop_price, target_price, trade_status, rrr
-UserSettings: Customizable scoring weights for checklist evaluation
+ChecklistWeights: Customizable scoring weights for checklist evaluation
 ```
 
 ### Frontend Stack
@@ -40,7 +40,7 @@ UserSettings: Customizable scoring weights for checklist evaluation
 
 ### Scoring System
 
-Checklists use weighted scoring based on `UserSettings`. The `EvaluationScore.vue` component calculates scores using these weights:
+Checklists use weighted scoring based on `ChecklistWeights`. The `EvaluationScore.vue` component calculates scores using these weights:
 
 -   Zone qualifiers (6 types): `zone_*_weight`
 -   Technical analysis: `technical_*_weight`
@@ -110,7 +110,7 @@ TradeEntry `trade_status` enum maps to display labels:
 ### Route Naming
 
 -   Resource routes: `checklists.index`, `checklists.show`, `checklists.edit`
--   Special routes: `home` (checklist wizard), `dashboard`, `user-settings.index`
+-   Special routes: `home` (checklist wizard), `dashboard`, `checklist-weights.index`
 
 ### Styling Conventions
 
