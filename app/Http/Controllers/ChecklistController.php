@@ -161,7 +161,7 @@ class ChecklistController extends Controller
             }
         });
 
-        return to_route('checklists.index', $checklist->id, 303)->with('success', 'Checklist created successfully!');
+        return to_route('checklists.show', $checklist->id, 303)->with('success', 'Checklist updated successfully!');
 
     }
 
