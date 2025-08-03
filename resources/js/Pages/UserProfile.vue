@@ -47,7 +47,7 @@
                                 <!-- Timezone -->
                                 <div class="flex flex-col gap-2">
                                     <label for="timezone" class="font-medium">Timezone</label>
-                                    <Dropdown id="timezone" v-model="profileForm.timezone" :options="timezones"
+                                    <Select id="timezone" v-model="profileForm.timezone" :options="timezones"
                                         option-label="label" option-value="value" placeholder="Select your timezone"
                                         :class="{ 'p-invalid': profileForm.errors.timezone }" filter showClear />
                                     <small v-if="profileForm.errors.timezone" class="p-error">
@@ -509,7 +509,7 @@ const resetToDefaults = () => {
             weightsForm[key] = props.checklistDefaults[key]
         }
     })
-    
+
     toast.add({
         severity: 'info',
         summary: 'Reset',
