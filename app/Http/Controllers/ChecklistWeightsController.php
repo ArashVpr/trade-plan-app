@@ -15,7 +15,7 @@ class ChecklistWeightsController extends Controller
         $defaults = (new ChecklistWeights)->getAttributes();
         // Create or fetch checklist weights, using defaults on create
         $weights = ChecklistWeights::firstOrCreate(
-            ['user_id' => 1], // Replace with auth()->id()
+            ['user_id' => Auth::id()],
             $defaults
         );
 
@@ -46,7 +46,7 @@ class ChecklistWeightsController extends Controller
         ]);
 
         $weights = ChecklistWeights::updateOrCreate(
-            ['user_id' => 1], // Replace with auth()->id()
+            ['user_id' => Auth::id()],
             $validated
         );
 

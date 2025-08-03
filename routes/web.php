@@ -45,7 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [UserProfileController::class, 'updatePassword'])->name('profile.password');
     Route::put('/profile/notifications', [UserProfileController::class, 'updateNotifications'])->name('profile.notifications');
     Route::put('/profile/checklist-weights', [UserProfileController::class, 'updateChecklistWeights'])->name('profile.checklist-weights');
-    Route::delete('/profile', [UserProfileController::class, 'deleteAccount'])->name('profile.delete');
+    Route::post('/profile', [UserProfileController::class, 'deleteAccount'])->name('profile.delete');
 
     // Checklists
     Route::get('/checklists', [ChecklistController::class, 'index'])->name('checklists.index');

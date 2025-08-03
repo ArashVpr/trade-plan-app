@@ -18,7 +18,7 @@ class UserProfileController extends Controller
      */
     public function index()
     {
-        $user = User::find(1); // Replace with auth()->user()
+        $user = Auth::user();
 
         // Get defaults for checklist weights
         $defaults = (new ChecklistWeights)->getAttributes();
@@ -152,7 +152,7 @@ class UserProfileController extends Controller
         ]);
 
         $weights = ChecklistWeights::updateOrCreate(
-            ['user_id' => 1], // Replace with auth()->id()
+            ['user_id' => Auth::id()],
             $validated
         );
 

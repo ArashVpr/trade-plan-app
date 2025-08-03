@@ -90,7 +90,7 @@ class ChecklistController extends Controller
     {
 
         $settings = ChecklistWeights::firstOrCreate(
-            ['user_id' => 1], // Replace with auth()->id()
+            ['user_id' => Auth::id()],
         );
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
@@ -183,7 +183,7 @@ class ChecklistController extends Controller
     public function checklistWeights()
     {
         $settings = ChecklistWeights::firstOrCreate(
-            ['user_id' => 1], // Replace with auth()->id()
+            ['user_id' => Auth::id()],
         );
         return Inertia::render('ChecklistWizard', [
             'settings' => $settings,
