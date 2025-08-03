@@ -22,8 +22,8 @@
                             </label>
                             <InputText id="name" v-model="form.name" type="text" autocomplete="name" required
                                 class="w-full" :class="{ 'p-invalid': form.errors.name }"
-                                placeholder="Enter your full name" />
-                            <small v-if="form.errors.name" class="p-error">{{ form.errors.name }}</small>
+                                placeholder="Enter your full name" @input="form.clearErrors('name')" />
+                            <small v-if="form.errors.name" class="p-error block mt-1">{{ form.errors.name }}</small>
                         </div>
 
                         <div>
@@ -32,8 +32,8 @@
                             </label>
                             <InputText id="email" v-model="form.email" type="email" autocomplete="email" required
                                 class="w-full" :class="{ 'p-invalid': form.errors.email }"
-                                placeholder="Enter your email" />
-                            <small v-if="form.errors.email" class="p-error">{{ form.errors.email }}</small>
+                                placeholder="Enter your email" @input="form.clearErrors('email')" />
+                            <small v-if="form.errors.email" class="p-error block mt-1">{{ form.errors.email }}</small>
                         </div>
 
                         <div>
@@ -42,8 +42,9 @@
                             </label>
                             <Password id="password" v-model="form.password" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password }" placeholder="Choose a strong password"
-                                :pt="{ input: { class: 'w-full' } }" />
-                            <small v-if="form.errors.password" class="p-error">{{ form.errors.password }}</small>
+                                :pt="{ input: { class: 'w-full' } }" @input="form.clearErrors('password')" />
+                            <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
+                                }}</small>
                         </div>
 
                         <div>
@@ -52,8 +53,9 @@
                             </label>
                             <Password id="password_confirmation" v-model="form.password_confirmation" :feedback="false"
                                 toggleMask class="w-full" :class="{ 'p-invalid': form.errors.password_confirmation }"
-                                placeholder="Confirm your password" :pt="{ input: { class: 'w-full' } }" />
-                            <small v-if="form.errors.password_confirmation" class="p-error">{{
+                                placeholder="Confirm your password" :pt="{ input: { class: 'w-full' } }"
+                                @input="form.clearErrors('password_confirmation')" />
+                            <small v-if="form.errors.password_confirmation" class="p-error block mt-1">{{
                                 form.errors.password_confirmation }}</small>
                         </div>
 
@@ -96,5 +98,33 @@ const submit = () => {
 <style scoped>
 :deep(.p-card-content) {
     padding: 0;
+}
+
+/* Enhanced error styling */
+:deep(.p-inputtext.p-invalid) {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.2);
+}
+
+:deep(.p-password.p-invalid .p-inputtext) {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.2);
+}
+
+.p-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Focus states for better UX */
+:deep(.p-inputtext:focus) {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+:deep(.p-password .p-inputtext:focus) {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
 }
 </style>
