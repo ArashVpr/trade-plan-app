@@ -107,13 +107,13 @@
                     </template>
                     <template #content>
                         <form @submit.prevent="updatePassword" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="max-w-md space-y-6">
                                 <!-- Current Password -->
                                 <div class="flex flex-col gap-2">
                                     <label for="current_password" class="font-medium">Current Password</label>
                                     <Password id="current_password" v-model="passwordForm.current_password"
                                         :class="{ 'p-invalid': passwordForm.errors.current_password }"
-                                        placeholder="Enter current password" :feedback="false" toggleMask />
+                                        placeholder="Enter current password" :feedback="false" toggleMask fluid />
                                     <small v-if="passwordForm.errors.current_password" class="p-error">
                                         {{ passwordForm.errors.current_password }}
                                     </small>
@@ -124,20 +124,18 @@
                                     <label for="password" class="font-medium">New Password</label>
                                     <Password id="password" v-model="passwordForm.password"
                                         :class="{ 'p-invalid': passwordForm.errors.password }"
-                                        placeholder="Enter new password" promptLabel="Choose a password"
-                                        weakLabel="Too simple" mediumLabel="Average complexity"
-                                        strongLabel="Complex password" toggleMask />
+                                        placeholder="Enter new password" :feedback="false" toggleMask fluid />
                                     <small v-if="passwordForm.errors.password" class="p-error">
                                         {{ passwordForm.errors.password }}
                                     </small>
                                 </div>
 
                                 <!-- Confirm Password -->
-                                <div class="flex flex-col gap-2 md:col-span-2">
+                                <div class="flex flex-col gap-2">
                                     <label for="password_confirmation" class="font-medium">Confirm New Password</label>
                                     <Password id="password_confirmation" v-model="passwordForm.password_confirmation"
                                         :class="{ 'p-invalid': passwordForm.errors.password_confirmation }"
-                                        placeholder="Confirm new password" :feedback="false" toggleMask />
+                                        placeholder="Confirm new password" :feedback="false" toggleMask fluid />
                                     <small v-if="passwordForm.errors.password_confirmation" class="p-error">
                                         {{ passwordForm.errors.password_confirmation }}
                                     </small>
