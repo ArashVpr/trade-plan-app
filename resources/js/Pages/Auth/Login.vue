@@ -18,13 +18,13 @@
 
             <Card class="p-6">
                 <template #content>
-                    <form @submit.prevent="submit" class="space-y-6">
+                    <form @submit.prevent="submit" class="space-y-6" method="post" action="/login">
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
                             </label>
-                            <InputText id="email" v-model="form.email" type="email" autocomplete="email" required
-                                class="w-full" :class="{ 'p-invalid': form.errors.email }"
+                            <InputText id="email" name="email" v-model="form.email" type="email" autocomplete="username"
+                                required class="w-full" :class="{ 'p-invalid': form.errors.email }"
                                 placeholder="Enter your email" @input="form.clearErrors('email')" />
                             <small v-if="form.errors.email" class="p-error block mt-1">{{ form.errors.email }}</small>
                         </div>
@@ -35,9 +35,10 @@
                             </label>
                             <Password v-model="form.password" :feedback="false" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password }" placeholder="Enter your password"
-                                @input="form.clearErrors('password')" />
+                                @input="form.clearErrors('password')" autocomplete="current-password" inputId="password"
+                                name="password" />
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                                }}</small>
+                            }}</small>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">

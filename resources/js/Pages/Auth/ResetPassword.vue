@@ -15,13 +15,16 @@
 
             <Card class="p-6">
                 <template #content>
-                    <form @submit.prevent="submit" class="space-y-6">
+                    <form @submit.prevent="submit" class="space-y-6" method="post" action="/reset-password">
+                        <!-- Hidden fields for password managers -->
+                        <input type="hidden" name="username" :value="form.email" autocomplete="username" />
+
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
                             </label>
-                            <InputText id="email" v-model="form.email" type="email" autocomplete="email" readonly
-                                class="w-full bg-gray-50" />
+                            <InputText id="email" name="email" v-model="form.email" type="email" autocomplete="username"
+                                readonly class="w-full bg-gray-50" />
                         </div>
 
                         <div>
@@ -30,7 +33,8 @@
                             </label>
                             <Password v-model="form.password" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password }" placeholder="Enter your new password"
-                                @input="form.clearErrors('password')">
+                                @input="form.clearErrors('password')" autocomplete="new-password" inputId="password"
+                                name="password">
                                 <template #header>
                                     <div class="font-semibold text-sm mb-4">Password Requirements</div>
                                 </template>
@@ -45,7 +49,7 @@
                                 </template>
                             </Password>
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                                }}</small>
+                            }}</small>
                         </div>
 
                         <div>
@@ -55,7 +59,8 @@
                             <Password v-model="form.password_confirmation" :feedback="false" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password_confirmation }"
                                 placeholder="Confirm your new password"
-                                @input="form.clearErrors('password_confirmation')" />
+                                @input="form.clearErrors('password_confirmation')" autocomplete="new-password"
+                                inputId="password_confirmation" name="password_confirmation" />
                             <small v-if="form.errors.password_confirmation" class="p-error block mt-1">{{
                                 form.errors.password_confirmation }}</small>
                         </div>

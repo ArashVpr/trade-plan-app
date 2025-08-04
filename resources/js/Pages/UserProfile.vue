@@ -20,14 +20,14 @@
                         </div>
                     </template>
                     <template #content>
-                        <form @submit.prevent="updateProfile" class="space-y-6">
+                        <form @submit.prevent="updateProfile" class="space-y-6" method="post" action="/profile/update">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Name -->
                                 <div class="flex flex-col gap-2">
                                     <label for="name" class="font-medium">Full Name</label>
-                                    <InputText id="name" v-model="profileForm.name"
+                                    <InputText id="name" name="name" v-model="profileForm.name"
                                         :class="{ 'p-invalid': profileForm.errors.name }"
-                                        placeholder="Enter your full name" />
+                                        placeholder="Enter your full name" autocomplete="name" />
                                     <small v-if="profileForm.errors.name" class="p-error">
                                         {{ profileForm.errors.name }}
                                     </small>
@@ -36,9 +36,9 @@
                                 <!-- Email -->
                                 <div class="flex flex-col gap-2">
                                     <label for="email" class="font-medium">Email Address</label>
-                                    <InputText id="email" v-model="profileForm.email"
+                                    <InputText id="email" name="email" v-model="profileForm.email"
                                         :class="{ 'p-invalid': profileForm.errors.email }"
-                                        placeholder="Enter your email" type="email" />
+                                        placeholder="Enter your email" type="email" autocomplete="email" />
                                     <small v-if="profileForm.errors.email" class="p-error">
                                         {{ profileForm.errors.email }}
                                     </small>
@@ -106,14 +106,20 @@
                         </div>
                     </template>
                     <template #content>
-                        <form @submit.prevent="updatePassword" class="space-y-6">
+                        <form @submit.prevent="updatePassword" class="space-y-6" method="post"
+                            action="/profile/password">
+                            <!-- Hidden username field for password managers -->
+                            <input type="hidden" name="username" :value="user.email" autocomplete="username" />
+
                             <div class="max-w-md space-y-6">
                                 <!-- Current Password -->
                                 <div class="flex flex-col gap-2">
                                     <label for="current_password" class="font-medium">Current Password</label>
-                                    <Password id="current_password" v-model="passwordForm.current_password"
+                                    <Password id="current_password" name="current_password"
+                                        v-model="passwordForm.current_password"
                                         :class="{ 'p-invalid': passwordForm.errors.current_password }"
-                                        placeholder="Enter current password" :feedback="false" toggleMask fluid />
+                                        placeholder="Enter current password" :feedback="false" toggleMask fluid
+                                        autocomplete="current-password" inputId="current_password" />
                                     <small v-if="passwordForm.errors.current_password" class="p-error">
                                         {{ passwordForm.errors.current_password }}
                                     </small>
@@ -122,9 +128,10 @@
                                 <!-- New Password -->
                                 <div class="flex flex-col gap-2">
                                     <label for="password" class="font-medium">New Password</label>
-                                    <Password id="password" v-model="passwordForm.password"
+                                    <Password id="password" name="password" v-model="passwordForm.password"
                                         :class="{ 'p-invalid': passwordForm.errors.password }"
-                                        placeholder="Enter new password" :feedback="false" toggleMask fluid />
+                                        placeholder="Enter new password" :feedback="false" toggleMask fluid
+                                        autocomplete="new-password" inputId="new_password" />
                                     <small v-if="passwordForm.errors.password" class="p-error">
                                         {{ passwordForm.errors.password }}
                                     </small>
@@ -133,9 +140,11 @@
                                 <!-- Confirm Password -->
                                 <div class="flex flex-col gap-2">
                                     <label for="password_confirmation" class="font-medium">Confirm New Password</label>
-                                    <Password id="password_confirmation" v-model="passwordForm.password_confirmation"
+                                    <Password id="password_confirmation" name="password_confirmation"
+                                        v-model="passwordForm.password_confirmation"
                                         :class="{ 'p-invalid': passwordForm.errors.password_confirmation }"
-                                        placeholder="Confirm new password" :feedback="false" toggleMask fluid />
+                                        placeholder="Confirm new password" :feedback="false" toggleMask fluid
+                                        autocomplete="new-password" inputId="password_confirmation" />
                                     <small v-if="passwordForm.errors.password_confirmation" class="p-error">
                                         {{ passwordForm.errors.password_confirmation }}
                                     </small>

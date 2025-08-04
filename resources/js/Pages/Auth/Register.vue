@@ -15,13 +15,13 @@
 
             <Card class="p-6">
                 <template #content>
-                    <form @submit.prevent="submit" class="space-y-6">
+                    <form @submit.prevent="submit" class="space-y-6" method="post" action="/register">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                                 Full Name
                             </label>
-                            <InputText id="name" v-model="form.name" type="text" autocomplete="name" required
-                                class="w-full" :class="{ 'p-invalid': form.errors.name }"
+                            <InputText id="name" name="name" v-model="form.name" type="text" autocomplete="name"
+                                required class="w-full" :class="{ 'p-invalid': form.errors.name }"
                                 placeholder="Enter your full name" @input="form.clearErrors('name')" />
                             <small v-if="form.errors.name" class="p-error block mt-1">{{ form.errors.name }}</small>
                         </div>
@@ -30,8 +30,8 @@
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
                             </label>
-                            <InputText id="email" v-model="form.email" type="email" autocomplete="email" required
-                                class="w-full" :class="{ 'p-invalid': form.errors.email }"
+                            <InputText id="email" name="email" v-model="form.email" type="email" autocomplete="username"
+                                required class="w-full" :class="{ 'p-invalid': form.errors.email }"
                                 placeholder="Enter your email" @input="form.clearErrors('email')" />
                             <small v-if="form.errors.email" class="p-error block mt-1">{{ form.errors.email }}</small>
                         </div>
@@ -42,7 +42,8 @@
                             </label>
                             <Password v-model="form.password" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password }" placeholder="Choose a strong password"
-                                @input="form.clearErrors('password')">
+                                @input="form.clearErrors('password')" autocomplete="new-password" inputId="password"
+                                name="password">
                                 <template #header>
                                     <div class="font-semibold text-sm mb-4">Create Password</div>
                                 </template>
@@ -58,7 +59,7 @@
                                 </template>
                             </Password>
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                            }}</small>
+                                }}</small>
                         </div>
 
                         <div>
@@ -67,8 +68,9 @@
                             </label>
                             <Password v-model="form.password_confirmation" :feedback="false" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password_confirmation }"
-                                placeholder="Confirm your password"
-                                @input="form.clearErrors('password_confirmation')" />
+                                placeholder="Confirm your password" @input="form.clearErrors('password_confirmation')"
+                                autocomplete="new-password" inputId="password_confirmation"
+                                name="password_confirmation" />
                             <small v-if="form.errors.password_confirmation" class="p-error block mt-1">{{
                                 form.errors.password_confirmation }}</small>
                         </div>
