@@ -1,73 +1,123 @@
 <template>
-    <Dialog :visible="visible" modal :header="`Management Items - ${trade?.checklist?.symbol}`"
-        :style="{ width: '50rem' }" :dismissableMask="true" @update:visible="$emit('update:visible', $event)">
-        <div v-if="trade?.management_items?.length > 0" class="space-y-4">
-            <div v-for="item in trade.management_items" :key="item.id" class="border rounded-lg p-4"
-                :class="getItemStatusClasses(item.status)">
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <div class="flex items-center mb-2">
-                            <Badge :value="item.priority.toUpperCase()" :severity="getPrioritySeverity(item.priority)"
-                                class="mr-2" />
-                            <Badge :value="item.type.toUpperCase()" severity="info" class="mr-2" />
-                            <Tag :value="item.status.toUpperCase()" :severity="getStatusSeverity(item.status)" />
-                        </div>
+    <Dialog :visible="visible" modal :style="{ width: '60rem', maxHeight: '90vh' }" :dismissableMask="true"
+        @update:visible="$emit('update:visible', $event)" class="management-items-dialog">
 
-                        <h4 class="font-semibold text-lg mb-1">{{ item.title }}</h4>
-
-                        <p v-if="item.description" class="text-gray-600 mb-2">
-                            {{ item.description }}
-                        </p>
-
-                        <div class="text-sm text-gray-500 space-y-1">
-                            <div v-if="item.due_date">
-                                <strong>Due:</strong> {{ formatDateTime(item.due_date) }}
-                                <span v-if="isOverdue(item)" class="text-red-600 ml-2">(Overdue)</span>
-                            </div>
-                            <div v-if="item.triggered_at">
-                                <strong>{{ item.status === 'completed' ? 'Completed' : 'Triggered' }}:</strong>
-                                {{ formatDateTime(item.triggered_at) }}
-                            </div>
-                            <div v-if="item.notes">
-                                <strong>Notes:</strong> {{ item.notes }}
-                            </div>
-                        </div>
+        <!-- Enhanced Header -->
+        <template #header>
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="pi pi-list text-blue-600"></i>
                     </div>
-
-                    <div class="flex flex-wrap gap-2 ml-4">
-                        <template v-if="item.status === 'pending'">
-                            <Button label="Complete" size="small" severity="success"
-                                @click="updateItemStatus(item.id, 'completed')" />
-                            <Button label="Trigger" size="small" severity="warning"
-                                @click="updateItemStatus(item.id, 'triggered')" />
-                            <Button label="Ignore" size="small" severity="secondary"
-                                @click="updateItemStatus(item.id, 'ignored')" />
-                        </template>
-
-                        <template v-else>
-                            <Button label="Reset" size="small" severity="secondary"
-                                @click="updateItemStatus(item.id, 'pending')" />
-                        </template>
-
-                        <Button icon="pi pi-pencil" size="small" severity="info" @click="editItem(item)"
-                            v-tooltip="'Edit'" />
-
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="deleteItem(item.id)"
-                            v-tooltip="'Delete'" />
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Management Items</h2>
+                        <p class="text-sm text-gray-600">{{ trade?.checklist?.symbol }}</p>
                     </div>
                 </div>
+                <div class="flex items-center space-x-2">
+                    <Badge :value="`${trade?.management_items?.length || 0} items`" severity="info" />
+                    <Badge v-if="pendingCount > 0" :value="`${pendingCount} pending`" severity="warning" />
+                </div>
             </div>
-        </div>
+        </template>
 
-        <div v-else class="text-center py-8 text-gray-500">
-            <i class="pi pi-info-circle text-4xl mb-4"></i>
-            <p>No management items found for this trade.</p>
-            <p class="text-sm">Add management items to track important events and reminders.</p>
+        <div class="max-h-96 overflow-y-auto pr-2">
+            <div v-if="trade?.management_items?.length > 0" class="space-y-4">
+                <Card v-for="item in trade.management_items" :key="item.id"
+                    class="shadow-sm hover:shadow-md transition-all duration-200"
+                    :class="getEnhancedItemClasses(item.status)">
+                    <template #content>
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-3">
+                                    <Badge :value="item.priority.toUpperCase()" size="large"
+                                        :severity="getPrioritySeverity(item.priority)" class="mr-3" />
+                                    <Badge :value="item.type.toUpperCase()" severity="info" class="mr-3" />
+                                    <Tag :value="item.status.toUpperCase()" :severity="getStatusSeverity(item.status)"
+                                        :icon="getStatusIcon(item.status)" />
+                                </div>
+
+                                <h4 class="font-bold text-lg mb-2 text-gray-800">{{ item.title }}</h4>
+
+                                <p v-if="item.description" class="text-gray-600 mb-3 leading-relaxed">
+                                    {{ item.description }}
+                                </p>
+
+                                <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                                    <div v-if="item.due_date" class="flex items-center">
+                                        <i class="pi pi-clock mr-2 text-gray-500"></i>
+                                        <span class="text-sm">
+                                            <strong>Due:</strong> {{ formatDateTime(item.due_date) }}
+                                            <span v-if="isOverdue(item)"
+                                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 ml-2">
+                                                <i class="pi pi-exclamation-triangle mr-1"></i>
+                                                Overdue
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div v-if="item.triggered_at" class="flex items-center">
+                                        <i class="pi pi-check-circle mr-2 text-gray-500"></i>
+                                        <span class="text-sm">
+                                            <strong>{{ item.status === 'completed' ? 'Completed' : 'Triggered'
+                                                }}:</strong>
+                                            {{ formatDateTime(item.triggered_at) }}
+                                        </span>
+                                    </div>
+                                    <div v-if="item.notes" class="flex items-start">
+                                        <i class="pi pi-comment mr-2 text-gray-500 mt-0.5"></i>
+                                        <span class="text-sm">
+                                            <strong>Notes:</strong> {{ item.notes }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2 ml-6">
+                                <template v-if="item.status === 'pending'">
+                                    <Button label="✅ Complete" size="small" severity="success" class="font-medium"
+                                        @click="updateItemStatus(item.id, 'completed')" />
+                                    <Button label="⚡ Trigger" size="small" severity="warning"
+                                        @click="updateItemStatus(item.id, 'triggered')" />
+                                    <Button label="⏸️ Ignore" size="small" severity="secondary" outlined
+                                        @click="updateItemStatus(item.id, 'ignored')" />
+                                </template>
+
+                                <template v-else>
+                                    <Button label="🔄 Reset" size="small" severity="secondary" outlined
+                                        @click="updateItemStatus(item.id, 'pending')" />
+                                </template>
+
+                                <Button icon="pi pi-pencil" size="small" severity="info" outlined
+                                    @click="editItem(item)" v-tooltip="'Edit Item'" />
+
+                                <Button icon="pi pi-trash" size="small" severity="danger" outlined
+                                    @click="deleteItem(item.id)" v-tooltip="'Delete Item'" />
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+            </div>
+
+            <Card v-else class="text-center">
+                <template #content>
+                    <div class="py-12">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="pi pi-list text-3xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">No Management Items</h3>
+                        <p class="text-gray-600 mb-6">This trade doesn't have any management items yet.</p>
+                        <Button label="+ Add Management Items" severity="info" @click="$emit('open-add-dialog')" />
+                    </div>
+                </template>
+            </Card>
         </div>
 
         <template #footer>
-            <div class="flex justify-end">
-                <Button label="Close" @click="$emit('update:visible', false)" />
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <Button label="+ Add Items" severity="info" outlined @click="$emit('open-add-dialog')" />
+                </div>
+                <Button label="Close" severity="secondary" @click="$emit('update:visible', false)" />
             </div>
         </template>
     </Dialog>
@@ -148,7 +198,12 @@ const props = defineProps({
     trade: Object,
 })
 
-const emit = defineEmits(['update:visible', 'item-updated'])
+const emit = defineEmits(['update:visible', 'item-updated', 'open-add-dialog'])
+
+// Computed properties
+const pendingCount = computed(() => {
+    return props.trade?.management_items?.filter(item => item.status === 'pending').length || 0
+})
 
 // State
 const editDialogVisible = ref(false)
@@ -188,6 +243,26 @@ const getItemStatusClasses = (status) => {
         'ignored': 'border-gray-200 bg-gray-50'
     }
     return classes[status] || classes.pending
+}
+
+const getEnhancedItemClasses = (status) => {
+    const classes = {
+        'pending': 'border-l-4 border-l-yellow-500',
+        'completed': 'border-l-4 border-l-green-500',
+        'triggered': 'border-l-4 border-l-orange-500',
+        'ignored': 'border-l-4 border-l-gray-400'
+    }
+    return classes[status] || classes.pending
+}
+
+const getStatusIcon = (status) => {
+    const icons = {
+        'pending': 'pi-clock',
+        'completed': 'pi-check-circle',
+        'triggered': 'pi-play-circle',
+        'ignored': 'pi-times-circle'
+    }
+    return icons[status] || 'pi-clock'
 }
 
 const getPrioritySeverity = (priority) => {

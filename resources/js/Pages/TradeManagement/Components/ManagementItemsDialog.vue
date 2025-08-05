@@ -1,74 +1,153 @@
 <template>
-    <Dialog :visible="visible" modal :header="`Add Management Items - ${trade?.checklist?.symbol}`"
-        :style="{ width: '50rem' }" @update:visible="$emit('update:visible', $event)">
-        <div class="space-y-6">
-            <!-- Predefined Items Section -->
-            <div>
-                <h3 class="text-lg font-semibold mb-4">Quick Add Predefined Items</h3>
-                <Accordion>
-                    <AccordionTab v-for="(items, category) in predefinedItems" :key="category"
-                        :header="formatCategoryName(category)">
-                        <div class="space-y-3">
-                            <div v-for="(item, index) in items" :key="index"
-                                class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                                <div class="flex-1">
-                                    <div class="flex items-center">
-                                        <Badge :value="item.priority.toUpperCase()"
-                                            :severity="getPrioritySeverity(item.priority)" class="mr-3" />
-                                        <div>
-                                            <h4 class="font-medium">{{ item.title }}</h4>
-                                            <p class="text-sm text-gray-600">{{ item.description }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <Button label="Add" size="small" @click="addPredefinedItem(category, item)" />
+    <Dialog :visible="visible" modal :style="{ width: '65rem', maxHeight: '90vh' }"
+        @update:visible="$emit('update:visible', $event)" class="add-management-dialog">
+
+        <!-- Enhanced Header -->
+        <template #header>
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="pi pi-plus text-green-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Add Management Items</h2>
+                        <p class="text-sm text-gray-600">{{ trade?.checklist?.symbol }}</p>
+                    </div>
+                </div>
+                <Badge v-if="selectedItems.length > 0" :value="`${selectedItems.length} selected`" severity="success" />
+            </div>
+        </template>
+
+        <div class="max-h-96 overflow-y-auto space-y-6">
+            <!-- Quick Actions -->
+            <Card class="bg-blue-50 border-blue-200">
+                <template #content>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="pi pi-lightbulb text-blue-600 text-xl mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-blue-900">Quick Add Common Items</h3>
+                                <p class="text-sm text-blue-700">Add frequently used management items with one click</p>
                             </div>
                         </div>
-                    </AccordionTab>
-                </Accordion>
-            </div>
+                        <div class="flex gap-2">
+                            <Button label="⚡ Risk Management" size="small" severity="warning" outlined
+                                @click="addQuickItem('risk')" />
+                            <Button label="📈 Profit Taking" size="small" severity="success" outlined
+                                @click="addQuickItem('profit')" />
+                            <Button label="⏰ Time Check" size="small" severity="info" outlined
+                                @click="addQuickItem('time')" />
+                        </div>
+                    </div>
+                </template>
+            </Card>
 
-            <Divider />
+            <!-- Predefined Items Section -->
+            <Card>
+                <template #title>
+                    <div class="flex items-center">
+                        <i class="pi pi-bookmark text-indigo-600 mr-2"></i>
+                        Predefined Templates
+                    </div>
+                </template>
+                <template #content>
+                    <Accordion multiple :activeIndex="[0]">
+                        <AccordionTab v-for="(items, category) in predefinedItems" :key="category">
+                            <template #header>
+                                <div class="flex items-center">
+                                    <Badge :value="items.length" severity="secondary" class="mr-2" />
+                                    <span class="font-medium">{{ formatCategoryName(category) }}</span>
+                                </div>
+                            </template>
+                            <div class="grid gap-3">
+                                <Card v-for="(item, index) in items" :key="index"
+                                    class="border hover:shadow-md transition-shadow cursor-pointer"
+                                    :class="isItemSelected(category, item) ? 'ring-2 ring-blue-500 bg-blue-50' : ''"
+                                    @click="togglePredefinedItem(category, item)">
+                                    <template #content>
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1">
+                                                <div class="flex items-center mb-2">
+                                                    <Badge :value="item.priority.toUpperCase()" size="small"
+                                                        :severity="getPrioritySeverity(item.priority)" class="mr-2" />
+                                                    <Badge :value="item.type.toUpperCase()" severity="info"
+                                                        size="small" />
+                                                </div>
+                                                <h4 class="font-semibold text-gray-800 mb-1">{{ item.title }}</h4>
+                                                <p class="text-sm text-gray-600">{{ item.description }}</p>
+                                            </div>
+                                            <div class="ml-4">
+                                                <Button
+                                                    :icon="isItemSelected(category, item) ? 'pi pi-check' : 'pi pi-plus'"
+                                                    :severity="isItemSelected(category, item) ? 'success' : 'secondary'"
+                                                    size="small" :outlined="!isItemSelected(category, item)"
+                                                    @click.stop="togglePredefinedItem(category, item)" />
+                                            </div>
+                                        </div>
+                                    </template>
+                                </Card>
+                            </div>
+                        </AccordionTab>
+                    </Accordion>
+                </template>
+            </Card>
 
             <!-- Custom Item Form -->
-            <div>
-                <h3 class="text-lg font-semibold mb-4">Add Custom Management Item</h3>
-                <form @submit.prevent="addCustomItem" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Type</label>
-                            <Dropdown v-model="customForm.type" :options="typeOptions" option-label="label"
-                                option-value="value" placeholder="Select type" class="w-full" />
+            <Card>
+                <template #title>
+                    <div class="flex items-center">
+                        <i class="pi pi-pencil text-purple-600 mr-2"></i>
+                        Create Custom Item
+                    </div>
+                </template>
+                <template #content>
+                    <form @submit.prevent="addCustomItem" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-gray-700">
+                                    <i class="pi pi-tag mr-1"></i>Type
+                                </label>
+                                <Dropdown v-model="customForm.type" :options="typeOptions" option-label="label"
+                                    option-value="value" placeholder="Select type" class="w-full" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-gray-700">
+                                    <i class="pi pi-flag mr-1"></i>Priority
+                                </label>
+                                <Dropdown v-model="customForm.priority" :options="priorityOptions" option-label="label"
+                                    option-value="value" placeholder="Select priority" class="w-full" />
+                            </div>
                         </div>
+
                         <div>
-                            <label class="block text-sm font-medium mb-2">Priority</label>
-                            <Dropdown v-model="customForm.priority" :options="priorityOptions" option-label="label"
-                                option-value="value" placeholder="Select priority" class="w-full" />
+                            <label class="block text-sm font-medium mb-2 text-gray-700">
+                                <i class="pi pi-file mr-1"></i>Title
+                            </label>
+                            <InputText v-model="customForm.title" placeholder="Enter management item title"
+                                class="w-full" required />
                         </div>
-                    </div>
 
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Title</label>
-                        <InputText v-model="customForm.title" placeholder="Enter management item title" class="w-full"
-                            required />
-                    </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">
+                                <i class="pi pi-align-left mr-1"></i>Description
+                            </label>
+                            <Textarea v-model="customForm.description" placeholder="Enter description (optional)"
+                                rows="3" class="w-full" />
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Description</label>
-                        <Textarea v-model="customForm.description" placeholder="Enter description (optional)" rows="3"
-                            class="w-full" />
-                    </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">
+                                <i class="pi pi-calendar mr-1"></i>Due Date (Optional)
+                            </label>
+                            <Calendar v-model="customForm.due_date" show-time hour-format="24" class="w-full"
+                                placeholder="Select due date" />
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Due Date (Optional)</label>
-                        <Calendar v-model="customForm.due_date" show-time hour-format="24" class="w-full"
-                            placeholder="Select due date" />
-                    </div>
-
-                    <Button type="submit" label="Add Custom Item" class="w-full"
-                        :disabled="!customForm.title || !customForm.type || !customForm.priority" />
-                </form>
-            </div>
+                        <Button type="submit" label="🎯 Add Custom Item" severity="success" class="w-full"
+                            :disabled="!customForm.title || !customForm.type || !customForm.priority" />
+                    </form>
+                </template>
+            </Card>
 
             <!-- Selected Items Preview -->
             <div v-if="selectedItems.length > 0">
@@ -153,6 +232,59 @@ const getPrioritySeverity = (priority) => {
         'critical': 'danger'
     }
     return severities[priority] || 'info'
+}
+
+const isItemSelected = (category, item) => {
+    return selectedItems.value.some(selected =>
+        selected.title === item.title && selected.type === category
+    )
+}
+
+const togglePredefinedItem = (category, item) => {
+    const existingIndex = selectedItems.value.findIndex(selected =>
+        selected.title === item.title && selected.type === category
+    )
+
+    if (existingIndex > -1) {
+        selectedItems.value.splice(existingIndex, 1)
+    } else {
+        const newItem = {
+            type: category,
+            title: item.title,
+            description: item.description,
+            priority: item.priority,
+            due_date: null,
+        }
+        selectedItems.value.push(newItem)
+    }
+}
+
+const addQuickItem = (type) => {
+    const quickItems = {
+        risk: {
+            title: 'Move Stop to Breakeven',
+            description: 'Consider moving stop loss to breakeven after 1R profit',
+            priority: 'high',
+            type: 'risk'
+        },
+        profit: {
+            title: 'Take Partial Profits',
+            description: 'Take 50% profits at 1.5R and let rest run',
+            priority: 'medium',
+            type: 'technical'
+        },
+        time: {
+            title: 'Check Market Session',
+            description: 'Review if major market session changes affect trade',
+            priority: 'low',
+            type: 'time'
+        }
+    }
+
+    const item = quickItems[type]
+    if (item && !selectedItems.value.some(s => s.title === item.title)) {
+        selectedItems.value.push(item)
+    }
 }
 
 const addPredefinedItem = (category, item) => {

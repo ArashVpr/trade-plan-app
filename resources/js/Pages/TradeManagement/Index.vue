@@ -168,7 +168,7 @@
                                                             size="small" class="mx-1" />
                                                         {{ alert.trade_entry.checklist.symbol }}
                                                         @ <span class="font-mono">{{ alert.trade_entry.entry_price
-                                                            }}</span>
+                                                        }}</span>
                                                     </span>
                                                 </div>
                                             </div>
@@ -216,7 +216,7 @@
             <!-- View Management Items Dialog -->
             <ViewManagementItemsDialog v-model:visible="viewDialogVisible" :trade="selectedTrade"
                 :key="selectedTrade?.id + '-' + (selectedTrade?.management_items?.length || 0)"
-                @item-updated="refreshData" />
+                @item-updated="refreshData" @open-add-dialog="openAddDialogFromView" />
         </div>
     </AppLayout>
 </template>
@@ -336,6 +336,11 @@ const openManagementDialog = (trade) => {
 const viewManagementItems = (trade) => {
     selectedTrade.value = trade
     viewDialogVisible.value = true
+}
+
+const openAddDialogFromView = () => {
+    viewDialogVisible.value = false
+    managementDialogVisible.value = true
 }
 
 const editTrade = (trade) => {
