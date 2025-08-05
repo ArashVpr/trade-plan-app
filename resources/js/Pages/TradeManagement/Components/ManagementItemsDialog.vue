@@ -51,44 +51,56 @@
                     </div>
                 </template>
                 <template #content>
-                    <Accordion multiple :activeIndex="[0]">
-                        <AccordionTab v-for="(items, category) in predefinedItems" :key="category">
-                            <template #header>
-                                <div class="flex items-center">
-                                    <Badge :value="items.length" severity="secondary" class="mr-2" />
-                                    <span class="font-medium">{{ formatCategoryName(category) }}</span>
-                                </div>
-                            </template>
-                            <div class="grid gap-3">
-                                <Card v-for="(item, index) in items" :key="index"
-                                    class="border hover:shadow-md transition-shadow cursor-pointer"
-                                    :class="isItemSelected(category, item) ? 'ring-2 ring-blue-500 bg-blue-50' : ''"
-                                    @click="togglePredefinedItem(category, item)">
-                                    <template #content>
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex-1">
-                                                <div class="flex items-center mb-2">
-                                                    <Badge :value="item.priority.toUpperCase()" size="small"
-                                                        :severity="getPrioritySeverity(item.priority)" class="mr-2" />
-                                                    <Badge :value="item.type.toUpperCase()" severity="info"
-                                                        size="small" />
+                    <div v-if="predefinedItems && Object.keys(predefinedItems).length > 0">
+                        <Accordion value="0">
+                            <AccordionPanel v-for="(items, category) in predefinedItems" :key="category"
+                                :value="category">
+                                <AccordionHeader>
+                                    <div class="flex items-center">
+                                        <Badge :value="items.length" severity="secondary" class="mr-2" />
+                                        <span class="font-medium">{{ formatCategoryName(category) }}</span>
+                                    </div>
+                                </AccordionHeader>
+                                <AccordionContent>
+                                    <div class="grid gap-3">
+                                        <Card v-for="(item, index) in items" :key="index"
+                                            class="border hover:shadow-md transition-shadow cursor-pointer"
+                                            :class="isItemSelected(category, item) ? 'ring-2 ring-blue-500 bg-blue-50' : ''"
+                                            @click="togglePredefinedItem(category, item)">
+                                            <template #content>
+                                                <div class="flex items-start justify-between">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center mb-2">
+                                                            <Badge :value="(item.priority || 'medium').toUpperCase()"
+                                                                size="small"
+                                                                :severity="getPrioritySeverity(item.priority)"
+                                                                class="mr-2" />
+                                                            <Badge :value="(item.type || category).toUpperCase()"
+                                                                severity="info" size="small" />
+                                                        </div>
+                                                        <h4 class="font-semibold text-gray-800 mb-1">{{ item.title ||
+                                                            'Untitled' }}</h4>
+                                                        <p class="text-sm text-gray-600">{{ item.description || 'No description' }}</p>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <Button
+                                                            :icon="isItemSelected(category, item) ? 'pi pi-check' : 'pi pi-plus'"
+                                                            :severity="isItemSelected(category, item) ? 'success' : 'secondary'"
+                                                            size="small" :outlined="!isItemSelected(category, item)"
+                                                            @click.stop="togglePredefinedItem(category, item)" />
+                                                    </div>
                                                 </div>
-                                                <h4 class="font-semibold text-gray-800 mb-1">{{ item.title }}</h4>
-                                                <p class="text-sm text-gray-600">{{ item.description }}</p>
-                                            </div>
-                                            <div class="ml-4">
-                                                <Button
-                                                    :icon="isItemSelected(category, item) ? 'pi pi-check' : 'pi pi-plus'"
-                                                    :severity="isItemSelected(category, item) ? 'success' : 'secondary'"
-                                                    size="small" :outlined="!isItemSelected(category, item)"
-                                                    @click.stop="togglePredefinedItem(category, item)" />
-                                            </div>
-                                        </div>
-                                    </template>
-                                </Card>
-                            </div>
-                        </AccordionTab>
-                    </Accordion>
+                                            </template>
+                                        </Card>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionPanel>
+                        </Accordion>
+                    </div>
+                    <div v-else class="text-center py-8">
+                        <i class="pi pi-info-circle text-gray-400 text-3xl mb-3"></i>
+                        <p class="text-gray-500">No predefined templates available</p>
+                    </div>
                 </template>
             </Card>
 
@@ -107,14 +119,14 @@
                                 <label class="block text-sm font-medium mb-2 text-gray-700">
                                     <i class="pi pi-tag mr-1"></i>Type
                                 </label>
-                                <Dropdown v-model="customForm.type" :options="typeOptions" option-label="label"
+                                <Select v-model="customForm.type" :options="typeOptions" option-label="label"
                                     option-value="value" placeholder="Select type" class="w-full" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2 text-gray-700">
                                     <i class="pi pi-flag mr-1"></i>Priority
                                 </label>
-                                <Dropdown v-model="customForm.priority" :options="priorityOptions" option-label="label"
+                                <Select v-model="customForm.priority" :options="priorityOptions" option-label="label"
                                     option-value="value" placeholder="Select priority" class="w-full" />
                             </div>
                         </div>
@@ -139,7 +151,7 @@
                             <label class="block text-sm font-medium mb-2 text-gray-700">
                                 <i class="pi pi-calendar mr-1"></i>Due Date (Optional)
                             </label>
-                            <Calendar v-model="customForm.due_date" show-time hour-format="24" class="w-full"
+                            <DatePicker v-model="customForm.due_date" show-time hour-format="24" class="w-full"
                                 placeholder="Select due date" />
                         </div>
 
@@ -157,9 +169,9 @@
                     <div v-for="(item, index) in selectedItems" :key="index"
                         class="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded">
                         <div class="flex items-center">
-                            <Badge :value="item.priority.toUpperCase()" :severity="getPrioritySeverity(item.priority)"
-                                class="mr-2" />
-                            <span class="font-medium">{{ item.title }}</span>
+                            <Badge :value="(item.priority || 'medium').toUpperCase()"
+                                :severity="getPrioritySeverity(item.priority)" class="mr-2" />
+                            <span class="font-medium">{{ item.title || 'Untitled' }}</span>
                         </div>
                         <Button icon="pi pi-times" size="small" severity="danger" text
                             @click="removeSelectedItem(index)" />
@@ -231,16 +243,19 @@ const getPrioritySeverity = (priority) => {
         'high': 'warn',
         'critical': 'danger'
     }
-    return severities[priority] || 'info'
+    return severities[priority] || 'warning'
 }
 
 const isItemSelected = (category, item) => {
+    if (!item || !selectedItems.value) return false
     return selectedItems.value.some(selected =>
         selected.title === item.title && selected.type === category
     )
 }
 
 const togglePredefinedItem = (category, item) => {
+    if (!item || !selectedItems.value || !item.title) return
+
     const existingIndex = selectedItems.value.findIndex(selected =>
         selected.title === item.title && selected.type === category
     )
@@ -250,9 +265,9 @@ const togglePredefinedItem = (category, item) => {
     } else {
         const newItem = {
             type: category,
-            title: item.title,
-            description: item.description,
-            priority: item.priority,
+            title: item.title || 'Untitled',
+            description: item.description || '',
+            priority: item.priority || 'medium',
             due_date: null,
         }
         selectedItems.value.push(newItem)
