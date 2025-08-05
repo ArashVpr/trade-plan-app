@@ -65,7 +65,7 @@
                                         </template>
                                     </Column>
 
-                                    <Column field="management_items" header="Management Items">
+                                    <Column header="Actions">
                                         <template #body="{ data }">
                                             <div class="flex items-center space-x-2">
                                                 <Badge :value="data.management_items.length" severity="secondary" />
@@ -75,13 +75,6 @@
                                                 <Button icon="pi pi-eye" size="small" severity="info"
                                                     @click="viewManagementItems(data)"
                                                     v-tooltip="'View Management Items'" />
-                                            </div>
-                                        </template>
-                                    </Column>
-
-                                    <Column header="Actions">
-                                        <template #body="{ data }">
-                                            <div class="flex space-x-2">
                                                 <Button icon="pi pi-pencil" size="small" severity="secondary"
                                                     @click="editTrade(data)" v-tooltip="'Edit Trade'" />
                                             </div>
