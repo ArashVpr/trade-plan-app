@@ -1,5 +1,5 @@
 <template>
-    <Dialog :visible="visible" modal :style="{ width: '60rem', maxHeight: '90vh' }" :dismissableMask="true"
+    <Dialog :visible="visible" modal :style="{ width: '60rem', height: modalHeight }" :dismissableMask="true"
         @update:visible="$emit('update:visible', $event)" class="management-items-dialog">
 
         <!-- Enhanced Header -->
@@ -21,7 +21,7 @@
             </div>
         </template>
 
-        <div class="max-h-96 overflow-y-auto pr-2">
+        <div class="flex-1 overflow-y-auto pr-2">
             <div v-if="trade?.management_items?.length > 0" class="space-y-4">
                 <Card v-for="item in trade.management_items" :key="item.id"
                     class="shadow-sm hover:shadow-md transition-all duration-200"
@@ -59,7 +59,7 @@
                                         <i class="pi pi-check-circle mr-2 text-gray-500"></i>
                                         <span class="text-sm">
                                             <strong>{{ item.status === 'completed' ? 'Completed' : 'Triggered'
-                                                }}:</strong>
+                                            }}:</strong>
                                             {{ formatDateTime(item.triggered_at) }}
                                         </span>
                                     </div>
@@ -106,17 +106,13 @@
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-3">No Management Items</h3>
                         <p class="text-gray-600 mb-6">This trade doesn't have any management items yet.</p>
-                        <Button label="+ Add Management Items" severity="info" @click="$emit('open-add-dialog')" />
                     </div>
                 </template>
             </Card>
         </div>
 
         <template #footer>
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <Button label="+ Add Items" severity="info" outlined @click="$emit('open-add-dialog')" />
-                </div>
+            <div class="flex justify-end">
                 <Button label="Close" severity="secondary" @click="$emit('update:visible', false)" />
             </div>
         </template>
@@ -203,6 +199,27 @@ const emit = defineEmits(['update:visible', 'item-updated', 'open-add-dialog'])
 // Computed properties
 const pendingCount = computed(() => {
     return props.trade?.management_items?.filter(item => item.status === 'pending').length || 0
+})
+
+const modalHeight = computed(() => {
+    const itemCount = props.trade?.management_items?.length || 0
+
+    // Base height for header and footer
+    const baseHeight = 200
+
+    // Height per item (approximately 250px per item for card, spacing, etc.)
+    const itemHeight = 250
+
+    // Calculate total height
+    const calculatedHeight = baseHeight + (itemCount * itemHeight)
+
+    // Minimum height of 300px, maximum of 90vh
+    const minHeight = 300
+    const maxHeightVh = window.innerHeight * 0.9
+
+    const finalHeight = Math.min(Math.max(calculatedHeight, minHeight), maxHeightVh)
+
+    return `${finalHeight}px`
 })
 
 // State
