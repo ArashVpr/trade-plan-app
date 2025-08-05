@@ -25,10 +25,13 @@
                                     class="p-datatable-sm">
                                     <Column field="checklist.symbol" header="Symbol" sortable>
                                         <template #body="{ data }">
-                                            <div class="flex items-center">
-                                                <Tag :value="data.checklist.symbol" severity="info" class="mr-2" />
-                                                <EvaluationScore :score="data.checklist.score" size="small" />
-                                            </div>
+                                            <Tag :value="data.checklist.symbol" severity="info" />
+                                        </template>
+                                    </Column>
+
+                                    <Column field="checklist.score" header="Score" sortable>
+                                        <template #body="{ data }">
+                                            <EvaluationScore :score="data.checklist.score" size="small" title="" />
                                         </template>
                                     </Column>
 
