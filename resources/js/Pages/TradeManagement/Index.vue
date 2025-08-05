@@ -146,13 +146,14 @@
 
             <!-- View Management Items Dialog -->
             <ViewManagementItemsDialog v-model:visible="viewDialogVisible" :trade="selectedTrade"
+                :key="selectedTrade?.id + '-' + (selectedTrade?.management_items?.length || 0)"
                 @item-updated="refreshData" />
         </div>
     </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
@@ -262,6 +263,18 @@ const viewTrade = (tradeEntry) => {
 }
 
 const refreshData = () => {
-    router.reload({ only: ['openTrades', 'alertItems'] })
+    const currentTradeId = selectedTrade.value?.id
+    router.reload({
+        only: ['openTrades', 'alertItems'],
+        onSuccess: (page) => {
+            // Update selectedTrade with fresh data if it was set
+            if (currentTradeId && page.props.openTrades) {
+                const updatedTrade = page.props.openTrades.find(trade => trade.id === currentTradeId)
+                if (updatedTrade) {
+                    selectedTrade.value = updatedTrade
+                }
+            }
+        }
+    })
 }
 </script>
