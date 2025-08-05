@@ -10,8 +10,8 @@
             <!-- Tabs Navigation -->
             <Tabs value="0">
                 <TabList>
-                    <Tab value="0">Open Trades</Tab>
-                    <Tab value="1">Alerts & Reminders ({{ alertItems.length }})</Tab>
+                    <Tab value="0">📈 Open Trades</Tab>
+                    <Tab value="1">🔔 Alerts & Reminders ({{ alertItems.length }})</Tab>
                 </TabList>
                 <TabPanels>
                     <TabPanel value="0">
