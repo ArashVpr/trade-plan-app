@@ -8,6 +8,7 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ChecklistWeightsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TradeJournalController;
+use App\Http\Controllers\TradeManagementController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -54,6 +55,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])->name('checklists.edit');
     Route::put('/checklists/{checklist}', [ChecklistController::class, 'update'])->name('checklists.update');
     Route::post('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
+
+    // Trade Management
+    Route::get('/trade-management', [TradeManagementController::class, 'index'])->name('trade-management.index');
+    Route::post('/trade-management', [TradeManagementController::class, 'store'])->name('trade-management.store');
+    Route::post('/trade-management/predefined', [TradeManagementController::class, 'addPredefined'])->name('trade-management.add-predefined');
+    Route::put('/trade-management/{managementItem}/status', [TradeManagementController::class, 'updateStatus'])->name('trade-management.update-status');
+    Route::put('/trade-management/{managementItem}', [TradeManagementController::class, 'update'])->name('trade-management.update');
+    Route::delete('/trade-management/{managementItem}', [TradeManagementController::class, 'destroy'])->name('trade-management.destroy');
 });
 
 // Development/Test routes

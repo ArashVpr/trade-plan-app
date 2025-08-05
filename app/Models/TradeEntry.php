@@ -16,6 +16,16 @@ class TradeEntry extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function checklist()
+    {
+        return $this->belongsTo(Checklist::class);
+    }
+
+    public function managementItems()
+    {
+        return $this->hasMany(TradeManagementItem::class);
+    }
+
 
     /**
      * Check if trade is a win

@@ -59,6 +59,15 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a v-ripple @click="navigateTo(route('trade-management.index'))" :class="[
+                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                            isActive(route('trade-management.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                        ]">
+                                            <i class="pi pi-cog mr-2"></i>
+                                            <span class="font-medium">Trade Management</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a v-ripple
                                             class="flex items-center cursor-pointer p-4 rounded text-surface-400 opacity-50 duration-150 transition-colors p-ripple">
                                             <i class="pi pi-chart-bar mr-2"></i>
@@ -190,6 +199,9 @@ const isActive = (routeUrl) => {
     if (routeUrl === route('checklists.index') && currentUrl.includes('/checklists')) {
         return true
     }
+    if (routeUrl === route('trade-management.index') && currentUrl.includes('/trade-management')) {
+        return true
+    }
     if (routeUrl === route('checklist-weights.index') && currentUrl.includes('/checklist-weights')) {
         return true
     }
@@ -208,6 +220,7 @@ const pageTitle = computed(() => {
         if (currentUrl.includes('/checklists/')) return 'Checklist Details'
         return 'Trading History'
     }
+    if (currentUrl.includes('/trade-management')) return 'Trade Management'
     if (currentUrl.includes('/checklist-weights')) return 'Checklist Weights'
     if (currentUrl.includes('/profile')) return 'User Profile'
     return 'TradePlan'
