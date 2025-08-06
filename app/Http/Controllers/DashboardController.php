@@ -74,44 +74,6 @@ class DashboardController extends Controller
             ];
         }
 
-        // Score to Trade Outcome Analysis
-        $scoreOutcomeAnalysis = DB::table('checklists')
-            ->join('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
-            ->select(
-                DB::raw('CASE 
-                    WHEN checklists.score >= 80 THEN "80-100"
-                    WHEN checklists.score >= 60 THEN "60-79"
-                    WHEN checklists.score >= 40 THEN "40-59"
-                    ELSE "0-39"
-                END as score_range'),
-                DB::raw('count(*) as total_trades'),
-                DB::raw('ROUND(AVG(CASE WHEN trade_entries.trade_status = "win" THEN 1 ELSE 0 END) * 100, 1) as win_rate'),
-                DB::raw('ROUND(AVG(CASE WHEN trade_entries.trade_status IN ("win", "loss") THEN trade_entries.rrr ELSE NULL END), 2) as avg_return')
-            )
-            ->where('checklists.user_id', Auth::id())
-            ->whereIn('trade_entries.trade_status', ['win', 'loss', 'breakeven'])
-            ->groupBy(DB::raw('CASE 
-                WHEN checklists.score >= 80 THEN "80-100"
-                WHEN checklists.score >= 60 THEN "60-79"
-                WHEN checklists.score >= 40 THEN "40-59"
-                ELSE "0-39"
-            END'))
-            ->orderBy(DB::raw('CASE 
-                WHEN score_range = "0-39" THEN 1
-                WHEN score_range = "40-59" THEN 2
-                WHEN score_range = "60-79" THEN 3
-                WHEN score_range = "80-100" THEN 4
-            END'), 'asc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'score_range' => $item->score_range,
-                    'total_trades' => $item->total_trades,
-                    'win_rate' => $item->win_rate ?? 0,
-                    'avg_return' => $item->avg_return ?? 0
-                ];
-            });
-
         // Top performing symbols (by score)
         $topSymbols = Checklist::select(
             DB::raw('COALESCE(symbol) as symbol_key'),
@@ -133,45 +95,11 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Score distribution
-        $scoreDistribution = Checklist::select(
-            DB::raw('CASE 
-                WHEN score >= 80 THEN "Excellent (80-100)"
-                WHEN score >= 60 THEN "Good (60-79)"
-                WHEN score >= 40 THEN "Average (40-59)"
-                ELSE "Poor (0-39)"
-            END as score_range'),
-            DB::raw('count(*) as count')
-        )
-            ->where('user_id', Auth::id())
-            ->groupBy(DB::raw('CASE 
-                WHEN score >= 80 THEN "Excellent (80-100)"
-                WHEN score >= 60 THEN "Good (60-79)"
-                WHEN score >= 40 THEN "Average (40-59)"
-                ELSE "Poor (0-39)"
-            END'))
-            ->orderBy(DB::raw('CASE 
-                WHEN score_range = "Poor (0-39)" THEN 1
-                WHEN score_range = "Average (40-59)" THEN 2
-                WHEN score_range = "Good (60-79)" THEN 3
-                WHEN score_range = "Excellent (80-100)" THEN 4
-            END'), 'asc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'range' => $item->score_range,
-                    'count' => $item->count
-                ];
-            });
-
         // Setup Performance Analysis
         $setupPerformanceAnalysis = $this->getSetupPerformanceAnalysis();
 
-        // Winning Trades with Setups
-        $winningTrades = $this->getWinningTradesWithSetups();
-
         // Pattern Analysis
-        $patternAnalysis = $this->analyzeWinningPatterns($winningTrades);
+        $patternAnalysis = $this->analyzeWinningPatterns($this->getWinningTradesWithSetups());
 
         return [
             'overview' => [
@@ -182,12 +110,9 @@ class DashboardController extends Controller
             ],
             'recent_activity' => $recentActivity,
             'weekly_trend' => $weeklyTrend,
-            'score_outcome_analysis' => $scoreOutcomeAnalysis,
             'setup_performance_analysis' => $setupPerformanceAnalysis,
-            'winning_trades' => $winningTrades,
             'pattern_analysis' => $patternAnalysis,
-            'top_symbols' => $topSymbols,
-            'score_distribution' => $scoreDistribution
+            'top_symbols' => $topSymbols
         ];
     }
 

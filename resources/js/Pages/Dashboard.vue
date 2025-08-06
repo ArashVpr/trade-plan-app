@@ -68,69 +68,10 @@
                         </div>
                     </template>
                 </Card>
-
-                <!-- Score Distribution Chart -->
-                <Card>
-                    <template #header>
-                        <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Score Distribution</h3>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="p-4">
-                            <Chart type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
-                                class="w-full h-64" />
-                        </div>
-                    </template>
-                </Card>
             </div>
 
             <!-- Data Tables Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Score to Trade Outcome Analysis -->
-                <Card>
-                    <template #header>
-                        <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Score vs Trade Outcome</h3>
-                            <p class="text-sm text-gray-600 mt-1">Correlation between checklist scores and trade results
-                            </p>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="p-4">
-                            <DataTable :value="stats.score_outcome_analysis" class="p-datatable-sm">
-                                <Column field="score_range" header="Score Range">
-                                    <template #body="slotProps">
-                                        <Badge :value="slotProps.data.score_range"
-                                            :severity="getScoreRangeSeverity(slotProps.data.score_range)" />
-                                    </template>
-                                </Column>
-                                <Column field="total_trades" header="Total">
-                                    <template #body="slotProps">
-                                        <span class="font-semibold">{{ slotProps.data.total_trades }}</span>
-                                    </template>
-                                </Column>
-                                <Column field="win_rate" header="Win Rate">
-                                    <template #body="slotProps">
-                                        <div class="flex items-center gap-2">
-                                            <ProgressBar :value="slotProps.data.win_rate" :showValue="false"
-                                                class="w-16"
-                                                :pt="{ value: { style: getWinRateColor(slotProps.data.win_rate) } }" />
-                                            <span class="text-sm font-semibold">{{ slotProps.data.win_rate }}%</span>
-                                        </div>
-                                    </template>
-                                </Column>
-                                <Column field="avg_return" header="Avg R:R">
-                                    <template #body="slotProps">
-                                        <Tag :value="`1:${slotProps.data.avg_return || 'N/A'}`"
-                                            :severity="slotProps.data.avg_return >= 2 ? 'success' : slotProps.data.avg_return >= 1 ? 'warn' : 'danger'" />
-                                    </template>
-                                </Column>
-                            </DataTable>
-                        </div>
-                    </template>
-                </Card>
-
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
                 <!-- Top Symbols -->
                 <Card>
                     <template #header>
@@ -144,7 +85,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -156,113 +97,6 @@
                                     </template>
                                 </Column>
                             </DataTable>
-                        </div>
-                    </template>
-                </Card>
-            </div>
-
-            <!-- Winning Trades & Setups -->
-            <div class="mb-8">
-                <Card>
-                    <template #header>
-                        <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Winning Trades & Their Setups</h3>
-                            <p class="text-sm text-gray-600 mt-1">Learn from your successful trades - see what setups
-                                led to wins</p>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="p-4">
-                            <DataTable :value="stats.winning_trades" class="p-datatable-sm" :paginator="true"
-                                :rows="10">
-                                <Column field="symbol" header="Symbol" style="width: 80px">
-                                    <template #body="slotProps">
-                                        <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
-                                    </template>
-                                </Column>
-                                <Column field="position_type" header="Position" style="width: 80px">
-                                    <template #body="slotProps">
-                                        <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : 'danger'"
-                                            :value="slotProps.data.position_type" />
-                                    </template>
-                                </Column>
-                                <Column field="score" header="Score" style="width: 80px">
-                                    <template #body="slotProps">
-                                        <div class="flex items-center gap-2">
-                                            <ProgressBar :value="slotProps.data.score" :showValue="false"
-                                                class="w-12" />
-                                            <span class="text-sm font-semibold">{{ slotProps.data.score }}/100</span>
-                                        </div>
-                                    </template>
-                                </Column>
-                                <Column field="rrr" header="R:R" style="width: 70px">
-                                    <template #body="slotProps">
-                                        <span class="text-sm font-mono">1:{{ slotProps.data.rrr || 'N/A' }}</span>
-                                    </template>
-                                </Column>
-                                <Column field="setup_summary" header="Winning Setup">
-                                    <template #body="slotProps">
-                                        <div class="space-y-2">
-                                            <div class="font-semibold text-sm text-green-800">{{
-                                                slotProps.data.setup_summary }}</div>
-                                            <div class="flex flex-wrap gap-1">
-                                                <!-- Technical Tags -->
-                                                <small class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                                    {{ slotProps.data.technical_location }}
-                                                </small>
-                                                <small class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs">
-                                                    {{ slotProps.data.technical_direction }}
-                                                </small>
-
-                                                <!-- Fundamental Tags -->
-                                                <small v-if="slotProps.data.fundamental_valuation !== 'N/A'"
-                                                    class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
-                                                    {{ slotProps.data.fundamental_valuation }}
-                                                </small>
-                                                <small v-if="slotProps.data.fundamental_seasonal === 'Yes'"
-                                                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
-                                                    Seasonal
-                                                </small>
-                                                <small v-if="slotProps.data.fundamental_noncommercials === 'Divergence'"
-                                                    class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">
-                                                    COT Divergence
-                                                </small>
-                                                <small
-                                                    v-if="slotProps.data.fundamental_cot_index !== 'N/A' && slotProps.data.fundamental_cot_index !== 'Neutral'"
-                                                    class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
-                                                    {{ slotProps.data.fundamental_cot_index }} COT
-                                                </small>
-
-                                                <!-- Zone Qualifiers -->
-                                                <small v-if="slotProps.data.zone_qualifiers_count > 0"
-                                                    class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                                    {{ slotProps.data.zone_qualifiers_count }} Zones
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </Column>
-                                <Column field="entry_date" header="Date" style="width: 100px">
-                                    <template #body="slotProps">
-                                        <small class="text-gray-600">{{ slotProps.data.created_at }}</small>
-                                    </template>
-                                </Column>
-                                <Column header="Actions" style="width: 60px">
-                                    <template #body="slotProps">
-                                        <Button icon="pi pi-eye" size="small" text
-                                            @click="router.get(route('checklists.show', slotProps.data.id))"
-                                            v-tooltip="'View Full Setup'" />
-                                    </template>
-                                </Column>
-                            </DataTable>
-
-                            <!-- Show message if no winning trades -->
-                            <div v-if="!stats.winning_trades || stats.winning_trades.length === 0"
-                                class="text-center py-8 text-gray-500">
-                                <i class="pi pi-info-circle text-3xl mb-3"></i>
-                                <p>No winning trades yet. Keep analyzing and trading!</p>
-                            </div>
                         </div>
                     </template>
                 </Card>
@@ -354,7 +188,7 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                            }}%</span>
+                                                                }}%</span>
                                                         </div>
                                                     </template>
                                                 </Column>
@@ -494,7 +328,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
@@ -588,33 +422,6 @@ const weeklyTrendData = computed(() => ({
     ]
 }))
 
-// Chart data for score distribution
-const scoreDistributionData = computed(() => {
-    // Define color mapping for each score range    
-    const colorMap = {
-        'Excellent (80-100)': '#10B981', // Green
-        'Good (60-79)': '#3B82F6',       // Blue
-        'Average (40-59)': '#F59E0B',    // Yellow
-        'Poor (0-39)': '#EF4444'         // Red
-    }
-
-    // Map colors to match the actual data order
-    const colors = props.stats.score_distribution.map(item =>
-        colorMap[item.range] || '#6B7280' // Default gray for unknown ranges
-    )
-
-    return {
-        labels: props.stats.score_distribution.map(item => item.range),
-        datasets: [
-            {
-                data: props.stats.score_distribution.map(item => item.count),
-                backgroundColor: colors,
-                borderWidth: 0
-            }
-        ]
-    }
-})
-
 // Chart options
 const chartOptions = {
     responsive: true,
@@ -642,21 +449,6 @@ const doughnutOptions = {
             position: 'bottom',
         }
     }
-}
-
-// Helper methods for Score vs Outcome styling
-const getScoreRangeSeverity = (scoreRange) => {
-    if (scoreRange.includes('80-100')) return 'success'
-    if (scoreRange.includes('60-79')) return 'info'
-    if (scoreRange.includes('40-59')) return 'warn'
-    return 'danger'
-}
-
-const getWinRateColor = (winRate) => {
-    if (winRate >= 70) return 'background: #10B981' // Green
-    if (winRate >= 50) return 'background: #3B82F6' // Blue
-    if (winRate >= 30) return 'background: #F59E0B' // Yellow
-    return 'background: #EF4444' // Red
 }
 
 // Parse setup string into individual tags with appropriate styling
