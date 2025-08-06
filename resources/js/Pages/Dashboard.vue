@@ -343,7 +343,7 @@
                                                 stats.pattern_analysis.total_wins) * 100) }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
-                                            Masters support/resistance levels
+                                            Masters supply/demand zones
                                         </div>
                                     </div>
 
