@@ -68,6 +68,21 @@
                         </div>
                     </template>
                 </Card>
+
+                <!-- Score Distribution Chart -->
+                <Card>
+                    <template #header>
+                        <div class="p-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">Score Distribution</h3>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="p-4">
+                            <Chart type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
+                                class="w-full h-64" />
+                        </div>
+                    </template>
+                </Card>
             </div>
 
             <!-- Data Tables Row -->
@@ -250,10 +265,6 @@
                                                     :key="pattern"
                                                     class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
                                                     <div class="flex items-center gap-3">
-                                                        <i :class="{
-                                                            'pi pi-map-marker text-blue-600': pattern.includes('Location'),
-                                                            'pi pi-arrow-right text-indigo-600': pattern.includes('Direction')
-                                                        }" class="text-lg"></i>
                                                         <span class="font-semibold text-blue-900">{{ pattern }}</span>
                                                     </div>
                                                     <div class="text-right">
@@ -274,12 +285,6 @@
                                                     :key="pattern"
                                                     class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
                                                     <div class="flex items-center gap-3">
-                                                        <i :class="{
-                                                            'pi pi-dollar text-purple-600': pattern.includes('Valuation'),
-                                                            'pi pi-calendar text-yellow-600': pattern.includes('Seasonal'),
-                                                            'pi pi-chart-line text-pink-600': pattern.includes('COT Divergence'),
-                                                            'pi pi-trending-up text-orange-600': pattern.includes('COT Index')
-                                                        }" class="text-lg"></i>
                                                         <span class="font-semibold text-purple-900">{{ pattern }}</span>
                                                     </div>
                                                     <div class="text-right">
@@ -421,6 +426,33 @@ const weeklyTrendData = computed(() => ({
         }
     ]
 }))
+
+// Chart data for score distribution
+const scoreDistributionData = computed(() => {
+    // Define color mapping for each score range    
+    const colorMap = {
+        'Excellent (80-100)': '#10B981', // Green
+        'Good (60-79)': '#3B82F6',       // Blue
+        'Average (40-59)': '#F59E0B',    // Yellow
+        'Poor (0-39)': '#EF4444'         // Red
+    }
+
+    // Map colors to match the actual data order
+    const colors = props.stats.score_distribution.map(item =>
+        colorMap[item.range] || '#6B7280' // Default gray for unknown ranges
+    )
+
+    return {
+        labels: props.stats.score_distribution.map(item => item.range),
+        datasets: [
+            {
+                data: props.stats.score_distribution.map(item => item.count),
+                backgroundColor: colors,
+                borderWidth: 0
+            }
+        ]
+    }
+})
 
 // Chart options
 const chartOptions = {

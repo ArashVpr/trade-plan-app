@@ -95,6 +95,37 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Score distribution
+        $scoreDistribution = Checklist::select(
+            DB::raw('CASE 
+                WHEN score >= 80 THEN "Excellent (80-100)"
+                WHEN score >= 60 THEN "Good (60-79)"
+                WHEN score >= 40 THEN "Average (40-59)"
+                ELSE "Poor (0-39)"
+            END as score_range'),
+            DB::raw('count(*) as count')
+        )
+            ->where('user_id', Auth::id())
+            ->groupBy(DB::raw('CASE 
+                WHEN score >= 80 THEN "Excellent (80-100)"
+                WHEN score >= 60 THEN "Good (60-79)"
+                WHEN score >= 40 THEN "Average (40-59)"
+                ELSE "Poor (0-39)"
+            END'))
+            ->orderBy(DB::raw('CASE 
+                WHEN score_range = "Poor (0-39)" THEN 1
+                WHEN score_range = "Average (40-59)" THEN 2
+                WHEN score_range = "Good (60-79)" THEN 3
+                WHEN score_range = "Excellent (80-100)" THEN 4
+            END'), 'asc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'range' => $item->score_range,
+                    'count' => $item->count
+                ];
+            });
+
         // Setup Performance Analysis
         $setupPerformanceAnalysis = $this->getSetupPerformanceAnalysis();
 
@@ -112,7 +143,8 @@ class DashboardController extends Controller
             'weekly_trend' => $weeklyTrend,
             'setup_performance_analysis' => $setupPerformanceAnalysis,
             'pattern_analysis' => $patternAnalysis,
-            'top_symbols' => $topSymbols
+            'top_symbols' => $topSymbols,
+            'score_distribution' => $scoreDistribution
         ];
     }
 
