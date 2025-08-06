@@ -100,7 +100,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -203,7 +203,7 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                            }}%</span>
+                                                                }}%</span>
                                                         </div>
                                                     </template>
                                                 </Column>
@@ -305,137 +305,138 @@
                 </Card>
             </div>
 
-            <!-- Analysis Alignment -->
+            <!-- Trading Style Profile -->
             <div class="mb-8">
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">🎯 Analysis Alignment</h3>
-                            <p class="text-sm text-gray-600 mt-1">Discover what type of analysis drives your winning
-                                trades</p>
+                            <h3 class="text-lg font-semibold text-gray-900">🎯 Trading Style Profile</h3>
+                            <p class="text-sm text-gray-600 mt-1">Discover your unique trading personality and
+                                analytical strengths</p>
                         </div>
                     </template>
                     <template #content>
                         <div class="p-4">
                             <div v-if="stats.pattern_analysis.total_wins === 0" class="text-center py-8 text-gray-500">
                                 <i class="pi pi-chart-line text-3xl mb-3"></i>
-                                <p>No winning trades yet to analyze alignment</p>
+                                <p>No winning trades yet to analyze your trading style</p>
                             </div>
 
                             <div v-else class="space-y-6">
                                 <div class="text-center mb-6">
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-2">What Drives Your Winning
-                                        Trades?</h4>
-                                    <p class="text-sm text-gray-600">See whether your successful trades are more aligned
-                                        towards zones, technical analysis, or fundamental analysis</p>
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-2">What Type of Trader Are You?
+                                    </h4>
+                                    <p class="text-sm text-gray-600">Your winning trades reveal whether you excel as a
+                                        chart reader, macro analyst, zone specialist, or well-rounded trader</p>
                                 </div>
 
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <!-- Zones Focused -->
+                                    <!-- Zone Specialist -->
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
                                         <div class="text-3xl font-bold text-green-900 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis.zones_focused }}
                                         </div>
-                                        <div class="text-sm font-semibold text-green-800 mb-1">🗺️ Zones Focused</div>
+                                        <div class="text-sm font-semibold text-green-800 mb-1">🗺️ Zone Specialist</div>
                                         <div class="text-xs text-gray-600">
                                             {{ Math.round((stats.pattern_analysis.alignment_analysis.zones_focused /
-                                            stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                                stats.pattern_analysis.total_wins) * 100) }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
-                                            Trades with strong zone qualifier presence
+                                            Masters support/resistance levels
                                         </div>
                                     </div>
 
-                                    <!-- Technicals Focused -->
+                                    <!-- Chart Reader -->
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                                         <div class="text-3xl font-bold text-blue-900 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis.technicals_focused }}
                                         </div>
-                                        <div class="text-sm font-semibold text-blue-800 mb-1">⚙️ Technicals Focused
+                                        <div class="text-sm font-semibold text-blue-800 mb-1">⚙️ Chart Reader
                                         </div>
                                         <div class="text-xs text-gray-600">
                                             {{ Math.round((stats.pattern_analysis.alignment_analysis.technicals_focused
                                                 / stats.pattern_analysis.total_wins) * 100) }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
-                                            Trades driven by technical location & direction
+                                            Excels at technical price action
                                         </div>
                                     </div>
 
-                                    <!-- Fundamentals Focused -->
+                                    <!-- Macro Analyst -->
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
                                         <div class="text-3xl font-bold text-purple-900 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis.fundamentals_focused }}
                                         </div>
-                                        <div class="text-sm font-semibold text-purple-800 mb-1">📈 Fundamentals Focused
+                                        <div class="text-sm font-semibold text-purple-800 mb-1">📈 Macro Analyst
                                         </div>
                                         <div class="text-xs text-gray-600">
                                             {{
                                                 Math.round((stats.pattern_analysis.alignment_analysis.fundamentals_focused /
-                                            stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                                    stats.pattern_analysis.total_wins) * 100) }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
-                                            Trades driven by valuation, seasonal & COT factors
+                                            Leverages economic fundamentals
                                         </div>
                                     </div>
 
-                                    <!-- Balanced -->
+                                    <!-- Well-Rounded Trader -->
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
                                         <div class="text-3xl font-bold text-gray-900 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis.balanced }}
                                         </div>
-                                        <div class="text-sm font-semibold text-gray-800 mb-1">⚖️ Balanced</div>
+                                        <div class="text-sm font-semibold text-gray-800 mb-1">⚖️ Well-Rounded</div>
                                         <div class="text-xs text-gray-600">
                                             {{ Math.round((stats.pattern_analysis.alignment_analysis.balanced /
-                                            stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                                stats.pattern_analysis.total_wins) * 100) }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
-                                            Trades with equal strength across categories
+                                            Balances multiple approaches
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Alignment Insights -->
+                                <!-- Trading Style Insights -->
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-                                    <h5 class="font-semibold text-blue-900 mb-3">💡 Alignment Insights</h5>
+                                    <h5 class="font-semibold text-blue-900 mb-3">💡 Your Trading DNA</h5>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div v-if="stats.pattern_analysis.alignment_analysis.zones_focused > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-green-600">🗺️</span>
                                             <div>
-                                                <span class="font-medium">Zones Strength:</span> You excel when multiple
-                                                zone qualifiers align, suggesting strong support/resistance recognition
-                                                skills.
+                                                <span class="font-medium">Zone Specialist:</span> You have a natural
+                                                gift for identifying key support and resistance levels. Your wins come
+                                                from patience and waiting for price to reach critical zones.
                                             </div>
                                         </div>
                                         <div v-if="stats.pattern_analysis.alignment_analysis.technicals_focused > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-blue-600">⚙️</span>
                                             <div>
-                                                <span class="font-medium">Technical Strength:</span> Your wins come from
-                                                solid technical location and direction analysis - trust your chart
-                                                reading skills.
+                                                <span class="font-medium">Chart Reader:</span> You're a technical purist
+                                                who reads price action like a story. Trust your chart analysis skills -
+                                                they're your biggest edge.
                                             </div>
                                         </div>
                                         <div v-if="stats.pattern_analysis.alignment_analysis.fundamentals_focused > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-purple-600">📈</span>
                                             <div>
-                                                <span class="font-medium">Fundamental Strength:</span> You succeed when
-                                                fundamental factors align - macro analysis is your edge.
+                                                <span class="font-medium">Macro Analyst:</span> You see the big picture
+                                                and understand how economic forces move markets. Your strength lies in
+                                                fundamental analysis and market timing.
                                             </div>
                                         </div>
                                         <div v-if="stats.pattern_analysis.alignment_analysis.balanced > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-gray-600">⚖️</span>
                                             <div>
-                                                <span class="font-medium">Balanced Approach:</span> Your wins come from
-                                                comprehensive analysis across all factors - maintain this holistic
-                                                approach.
+                                                <span class="font-medium">Well-Rounded Trader:</span> You're the
+                                                complete package - combining technical, fundamental, and zone analysis.
+                                                This comprehensive approach is your competitive advantage.
                                             </div>
                                         </div>
                                     </div>
@@ -474,7 +475,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
