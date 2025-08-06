@@ -32,7 +32,7 @@ class LoginController extends Controller
             'email' => [
                 'required',
                 'string',
-                'email:rfc,dns',
+                // 'email:rfc,dns',
                 'max:255',
                 'exists:users,email'
             ],
@@ -44,7 +44,7 @@ class LoginController extends Controller
             ],
         ], [
             'email.required' => 'Email address is required.',
-            'email.email' => 'Please enter a valid email address.',
+            // 'email.email' => 'Please enter a valid email address.', 
             'email.exists' => 'No account found with this email address.',
             'password.required' => 'Password is required.',
             'password.min' => 'Password must be at least 8 characters.',

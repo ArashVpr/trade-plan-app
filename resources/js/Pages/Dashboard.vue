@@ -87,26 +87,43 @@
 
             <!-- Data Tables Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Position Performance -->
+                <!-- Score to Trade Outcome Analysis -->
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Performance by Position Type</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">Score vs Trade Outcome</h3>
+                            <p class="text-sm text-gray-600 mt-1">Correlation between checklist scores and trade results
+                            </p>
                         </div>
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <DataTable :value="stats.position_type_performance" class="p-datatable-sm">
-                                <Column field="position_type" header="Position Type">
+                            <DataTable :value="stats.score_outcome_analysis" class="p-datatable-sm">
+                                <Column field="score_range" header="Score Range">
                                     <template #body="slotProps">
-                                        <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : 'danger'"
-                                            :value="slotProps.data.position_type" />
+                                        <Badge :value="slotProps.data.score_range"
+                                            :severity="getScoreRangeSeverity(slotProps.data.score_range)" />
                                     </template>
                                 </Column>
-                                <Column field="count" header="Count" />
-                                <Column field="avg_score" header="Avg Score">
+                                <Column field="total_trades" header="Total">
                                     <template #body="slotProps">
-                                        <span class="font-semibold">{{ slotProps.data.avg_score }}/100</span>
+                                        <span class="font-semibold">{{ slotProps.data.total_trades }}</span>
+                                    </template>
+                                </Column>
+                                <Column field="win_rate" header="Win Rate">
+                                    <template #body="slotProps">
+                                        <div class="flex items-center gap-2">
+                                            <ProgressBar :value="slotProps.data.win_rate" :showValue="false"
+                                                class="w-16"
+                                                :pt="{ value: { style: getWinRateColor(slotProps.data.win_rate) } }" />
+                                            <span class="text-sm font-semibold">{{ slotProps.data.win_rate }}%</span>
+                                        </div>
+                                    </template>
+                                </Column>
+                                <Column field="avg_return" header="Avg R:R">
+                                    <template #body="slotProps">
+                                        <Tag :value="`1:${slotProps.data.avg_return || 'N/A'}`"
+                                            :severity="slotProps.data.avg_return >= 2 ? 'success' : slotProps.data.avg_return >= 1 ? 'warn' : 'danger'" />
                                     </template>
                                 </Column>
                             </DataTable>
@@ -127,7 +144,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -172,7 +189,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
@@ -320,6 +337,21 @@ const doughnutOptions = {
             position: 'bottom',
         }
     }
+}
+
+// Helper methods for Score vs Outcome styling
+const getScoreRangeSeverity = (scoreRange) => {
+    if (scoreRange.includes('80-100')) return 'success'
+    if (scoreRange.includes('60-79')) return 'info'
+    if (scoreRange.includes('40-59')) return 'warn'
+    return 'danger'
+}
+
+const getWinRateColor = (winRate) => {
+    if (winRate >= 70) return 'background: #10B981' // Green
+    if (winRate >= 50) return 'background: #3B82F6' // Blue
+    if (winRate >= 30) return 'background: #F59E0B' // Yellow
+    return 'background: #EF4444' // Red
 }
 </script>
 

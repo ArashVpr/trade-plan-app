@@ -74,23 +74,41 @@ class DashboardController extends Controller
             ];
         }
 
-        // Performance by position type (Long vs Short) - from trade entries
-        $positionTypePerformance = DB::table('checklists')
+        // Score to Trade Outcome Analysis
+        $scoreOutcomeAnalysis = DB::table('checklists')
             ->join('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
             ->select(
-                'trade_entries.position_type',
-                DB::raw('count(*) as count'),
-                DB::raw('avg(checklists.score) as avg_score')
+                DB::raw('CASE 
+                    WHEN checklists.score >= 80 THEN "80-100"
+                    WHEN checklists.score >= 60 THEN "60-79"
+                    WHEN checklists.score >= 40 THEN "40-59"
+                    ELSE "0-39"
+                END as score_range'),
+                DB::raw('count(*) as total_trades'),
+                DB::raw('ROUND(AVG(CASE WHEN trade_entries.trade_status = "win" THEN 1 ELSE 0 END) * 100, 1) as win_rate'),
+                DB::raw('ROUND(AVG(CASE WHEN trade_entries.trade_status IN ("win", "loss") THEN trade_entries.rrr ELSE NULL END), 2) as avg_return')
             )
             ->where('checklists.user_id', Auth::id())
-            ->whereNotNull('trade_entries.position_type')
-            ->groupBy('trade_entries.position_type')
+            ->whereIn('trade_entries.trade_status', ['win', 'loss', 'breakeven'])
+            ->groupBy(DB::raw('CASE 
+                WHEN checklists.score >= 80 THEN "80-100"
+                WHEN checklists.score >= 60 THEN "60-79"
+                WHEN checklists.score >= 40 THEN "40-59"
+                ELSE "0-39"
+            END'))
+            ->orderBy(DB::raw('CASE 
+                WHEN score_range = "0-39" THEN 1
+                WHEN score_range = "40-59" THEN 2
+                WHEN score_range = "60-79" THEN 3
+                WHEN score_range = "80-100" THEN 4
+            END'), 'asc')
             ->get()
             ->map(function ($item) {
                 return [
-                    'position_type' => ucfirst($item->position_type), // Capitalize Long/Short
-                    'count' => $item->count,
-                    'avg_score' => round($item->avg_score, 1)
+                    'score_range' => $item->score_range,
+                    'total_trades' => $item->total_trades,
+                    'win_rate' => $item->win_rate ?? 0,
+                    'avg_return' => $item->avg_return ?? 0
                 ];
             });
 
@@ -155,7 +173,7 @@ class DashboardController extends Controller
             ],
             'recent_activity' => $recentActivity,
             'weekly_trend' => $weeklyTrend,
-            'position_type_performance' => $positionTypePerformance,
+            'score_outcome_analysis' => $scoreOutcomeAnalysis,
             'top_symbols' => $topSymbols,
             'score_distribution' => $scoreDistribution
         ];
