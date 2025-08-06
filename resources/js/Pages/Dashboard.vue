@@ -144,7 +144,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -178,7 +178,7 @@
                                 <Column field="symbol" header="Symbol" style="width: 80px">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="position_type" header="Position" style="width: 80px">
@@ -320,6 +320,8 @@
                                         <Tab value="1">📊 Score Patterns</Tab>
                                         <Tab value="2">💱 Symbol Patterns</Tab>
                                         <Tab value="3">🗺️ Zone Patterns</Tab>
+                                        <Tab value="4">⚙️ Technical Patterns</Tab>
+                                        <Tab value="5">📈 Fundamental Patterns</Tab>
                                     </TabList>
                                     <TabPanels>
                                         <!-- Top Performing Setups -->
@@ -328,8 +330,17 @@
                                                 class="p-datatable-sm">
                                                 <Column field="setup" header="Winning Setup">
                                                     <template #body="slotProps">
-                                                        <span class="font-semibold text-green-800 text-sm">{{
-                                                            slotProps.data.setup }}</span>
+                                                        <div class="space-y-2">
+                                                            <div class="font-semibold text-sm text-green-800">{{
+                                                                slotProps.data.setup }}</div>
+                                                            <div class="flex flex-wrap gap-1">
+                                                                <template
+                                                                    v-for="tag in parseSetupTags(slotProps.data.setup)"
+                                                                    :key="tag.text">
+                                                                    <small :class="tag.class">{{ tag.text }}</small>
+                                                                </template>
+                                                            </div>
+                                                        </div>
                                                     </template>
                                                 </Column>
                                                 <Column field="frequency" header="Wins">
@@ -343,19 +354,8 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                                }}%</span>
+                                                            }}%</span>
                                                         </div>
-                                                    </template>
-                                                </Column>
-                                                <Column field="avg_rrr" header="Avg R:R">
-                                                    <template #body="slotProps">
-                                                        <span class="text-sm font-mono">1:{{ slotProps.data.avg_rrr
-                                                            }}</span>
-                                                    </template>
-                                                </Column>
-                                                <Column field="avg_score" header="Avg Score">
-                                                    <template #body="slotProps">
-                                                        <span class="text-sm">{{ slotProps.data.avg_score }}/100</span>
                                                     </template>
                                                 </Column>
                                             </DataTable>
@@ -387,7 +387,7 @@
                                                         <div class="font-semibold">{{ count }} wins</div>
                                                         <div class="text-xs text-gray-600">
                                                             {{ Math.round((count / stats.pattern_analysis.total_wins) *
-                                                            100) }}%
+                                                                100) }}%
                                                         </div>
                                                     </div>
                                                 </div>
@@ -404,6 +404,56 @@
                                                     <div class="text-xs text-gray-500 mt-1">
                                                         {{ Math.round((count / stats.pattern_analysis.total_wins) * 100)
                                                         }}% of wins
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+
+                                        <!-- Technical Patterns -->
+                                        <TabPanel value="4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div v-for="(data, pattern) in stats.pattern_analysis.technical_patterns"
+                                                    :key="pattern"
+                                                    class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                                    <div class="flex items-center gap-3">
+                                                        <i :class="{
+                                                            'pi pi-map-marker text-blue-600': pattern.includes('Location'),
+                                                            'pi pi-arrow-right text-indigo-600': pattern.includes('Direction')
+                                                        }" class="text-lg"></i>
+                                                        <span class="font-semibold text-blue-900">{{ pattern }}</span>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="text-xl font-bold text-blue-900">{{ data.count }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-600">
+                                                            {{ data.percentage }}% of wins
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+
+                                        <!-- Fundamental Patterns -->
+                                        <TabPanel value="5">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div v-for="(data, pattern) in stats.pattern_analysis.fundamental_patterns"
+                                                    :key="pattern"
+                                                    class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                                                    <div class="flex items-center gap-3">
+                                                        <i :class="{
+                                                            'pi pi-dollar text-purple-600': pattern.includes('Valuation'),
+                                                            'pi pi-calendar text-yellow-600': pattern.includes('Seasonal'),
+                                                            'pi pi-chart-line text-pink-600': pattern.includes('COT Divergence'),
+                                                            'pi pi-trending-up text-orange-600': pattern.includes('COT Index')
+                                                        }" class="text-lg"></i>
+                                                        <span class="font-semibold text-purple-900">{{ pattern }}</span>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="text-xl font-bold text-purple-900">{{ data.count }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-600">
+                                                            {{ data.percentage }}% of wins
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -444,7 +494,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                        }}/100</span>
+                                            }}/100</span>
                                     </div>
                                 </template>
                             </Column>
@@ -607,6 +657,81 @@ const getWinRateColor = (winRate) => {
     if (winRate >= 50) return 'background: #3B82F6' // Blue
     if (winRate >= 30) return 'background: #F59E0B' // Yellow
     return 'background: #EF4444' // Red
+}
+
+// Parse setup string into individual tags with appropriate styling
+const parseSetupTags = (setupString) => {
+    const tags = []
+
+    if (!setupString) return tags
+
+    // Split by + and & to get individual components
+    const parts = setupString.split(/\s*[\+&]\s*/)
+
+    parts.forEach(part => {
+        const trimmed = part.trim()
+        if (!trimmed) return
+
+        // Technical Location Tags
+        if (trimmed.includes('Very Expensive') || trimmed.includes('Very Cheap') ||
+            trimmed.includes('Expensive') || trimmed.includes('Cheap')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // Technical Direction Tags
+        else if (trimmed.includes('Impulsion') || trimmed.includes('Correction')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // Fundamental Valuation Tags
+        else if (trimmed.includes('Overvalued') || trimmed.includes('Undervalued')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // Seasonal Tags
+        else if (trimmed.includes('Seasonal')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // COT Divergence Tags
+        else if (trimmed.includes('COT Divergence')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // COT Index Tags
+        else if (trimmed.includes('COT')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // Zone Qualifiers Tags
+        else if (trimmed.includes('Zone')) {
+            tags.push({
+                text: trimmed,
+                class: 'bg-green-100 text-green-800 px-2 py-1 rounded text-xs'
+            })
+        }
+        // Default styling for unmatched parts
+        else {
+            tags.push({
+                text: trimmed,
+                class: 'bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs'
+            })
+        }
+    })
+
+    return tags
 }
 </script>
 

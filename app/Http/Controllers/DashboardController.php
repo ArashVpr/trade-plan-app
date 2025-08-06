@@ -348,18 +348,28 @@ class DashboardController extends Controller
                 'symbol_patterns' => [],
                 'time_patterns' => [],
                 'zone_patterns' => [],
+                'technical_patterns' => [],
+                'fundamental_patterns' => [],
                 'recommendations' => []
             ];
         }
 
-        // 1. Most Profitable Setup Combinations (by frequency)
+        $totalWins = $winningTrades->count();
+
+        // Initialize counters for patterns
         $setupFrequency = [];
         $scorePatterns = ['80+' => 0, '60-79' => 0, '40-59' => 0, '<40' => 0];
         $symbolFrequency = [];
         $timePatterns = [];
         $zonePatterns = [];
 
+        // Track which trades have each pattern (for percentage calculation)
+        $technicalPatternTrades = [];
+        $fundamentalPatternTrades = [];
+
         foreach ($winningTrades as $trade) {
+            $tradeId = $trade['id'];
+
             // Setup combination frequency
             $setupKey = $trade['setup_summary'];
             if (!isset($setupFrequency[$setupKey])) {
@@ -388,18 +398,85 @@ class DashboardController extends Controller
             $zoneCount = $trade['zone_qualifiers_count'] ?? 0;
             $zoneKey = $zoneCount === 0 ? '0 Zones' : ($zoneCount <= 2 ? '1-2 Zones' : ($zoneCount <= 4 ? '3-4 Zones' : '5+ Zones'));
             $zonePatterns[$zoneKey] = ($zonePatterns[$zoneKey] ?? 0) + 1;
+
+            // Technical patterns - track trades, not occurrences
+            $techLocation = $trade['technical_location'] ?? 'N/A';
+            $techDirection = $trade['technical_direction'] ?? 'N/A';
+
+            if ($techLocation !== 'N/A') {
+                // Group extreme zones together
+                if (in_array($techLocation, ['Very Expensive', 'Very Cheap'])) {
+                    $technicalPatternTrades['Location: Extreme Zones'][] = $tradeId;
+                } elseif (in_array($techLocation, ['Expensive', 'Cheap'])) {
+                    $technicalPatternTrades['Location: Moderate Zones'][] = $tradeId;
+                } else {
+                    $technicalPatternTrades['Location: ' . $techLocation][] = $tradeId;
+                }
+            }
+            if ($techDirection !== 'N/A') {
+                $technicalPatternTrades['Direction: ' . $techDirection][] = $tradeId;
+            }
+
+            // Fundamental patterns - track trades, not occurrences
+            $fundValuation = $trade['fundamental_valuation'] ?? 'N/A';
+            $fundSeasonal = $trade['fundamental_seasonal'] ?? 'N/A';
+            $fundNonCommercials = $trade['fundamental_noncommercials'] ?? 'N/A';
+            $fundCotIndex = $trade['fundamental_cot_index'] ?? 'N/A';
+
+            if ($fundValuation !== 'N/A' && $fundValuation !== 'Neutral') {
+                // Group valuation categories
+                if (in_array($fundValuation, ['Overvalued', 'Undervalued'])) {
+                    $fundamentalPatternTrades['Valuation: Extreme Levels'][] = $tradeId;
+                } else {
+                    $fundamentalPatternTrades['Valuation: ' . $fundValuation][] = $tradeId;
+                }
+            }
+            if ($fundSeasonal === 'Yes') {
+                $fundamentalPatternTrades['Seasonal Confluence'][] = $tradeId;
+            }
+            if ($fundNonCommercials === 'Divergence') {
+                $fundamentalPatternTrades['COT Divergence'][] = $tradeId;
+            }
+            if ($fundCotIndex !== 'N/A' && $fundCotIndex !== 'Neutral') {
+                // Group COT Index categories  
+                if (in_array($fundCotIndex, ['Bullish', 'Bearish'])) {
+                    $fundamentalPatternTrades['COT Index: Directional'][] = $tradeId;
+                } else {
+                    $fundamentalPatternTrades['COT Index: ' . $fundCotIndex][] = $tradeId;
+                }
+            }
+        }
+
+        // Convert technical patterns to count and percentage
+        $technicalPatterns = [];
+        foreach ($technicalPatternTrades as $pattern => $tradeIds) {
+            $uniqueTradesCount = count(array_unique($tradeIds));
+            $technicalPatterns[$pattern] = [
+                'count' => $uniqueTradesCount,
+                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1)
+            ];
+        }
+
+        // Convert fundamental patterns to count and percentage
+        $fundamentalPatterns = [];
+        foreach ($fundamentalPatternTrades as $pattern => $tradeIds) {
+            $uniqueTradesCount = count(array_unique($tradeIds));
+            $fundamentalPatterns[$pattern] = [
+                'count' => $uniqueTradesCount,
+                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1)
+            ];
         }
 
         // Process most profitable setups
         $mostProfitableSetups = [];
         foreach ($setupFrequency as $setup => $data) {
-            if ($data['count'] >= 2) { // Only patterns with 2+ occurrences
+            if ($data['count'] >= 1) { // Show all setups, even single occurrences
                 $mostProfitableSetups[] = [
                     'setup' => $setup,
                     'frequency' => $data['count'],
                     'avg_rrr' => round($data['total_rrr'] / $data['count'], 2),
                     'avg_score' => round($data['avg_score'] / $data['count'], 1),
-                    'success_rate' => round(($data['count'] / $winningTrades->count()) * 100, 1)
+                    'success_rate' => round(($data['count'] / $totalWins) * 100, 1)
                 ];
             }
         }
@@ -418,8 +495,10 @@ class DashboardController extends Controller
             'symbol_patterns' => array_slice(arsort($symbolFrequency) ? $symbolFrequency : [], 0, 5, true),
             'time_patterns' => $timePatterns,
             'zone_patterns' => $zonePatterns,
+            'technical_patterns' => $technicalPatterns,
+            'fundamental_patterns' => $fundamentalPatterns,
             'recommendations' => $recommendations,
-            'total_wins' => $winningTrades->count()
+            'total_wins' => $totalWins
         ];
     }
 
