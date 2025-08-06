@@ -170,6 +170,9 @@ class DashboardController extends Controller
         // Winning Trades with Setups
         $winningTrades = $this->getWinningTradesWithSetups();
 
+        // Pattern Analysis
+        $patternAnalysis = $this->analyzeWinningPatterns($winningTrades);
+
         return [
             'overview' => [
                 'total_checklists' => $totalChecklists,
@@ -182,6 +185,7 @@ class DashboardController extends Controller
             'score_outcome_analysis' => $scoreOutcomeAnalysis,
             'setup_performance_analysis' => $setupPerformanceAnalysis,
             'winning_trades' => $winningTrades,
+            'pattern_analysis' => $patternAnalysis,
             'top_symbols' => $topSymbols,
             'score_distribution' => $scoreDistribution
         ];
@@ -330,6 +334,167 @@ class DashboardController extends Controller
                     'setup_summary' => $this->generateSetupSummary($technicals, $fundamentals, $zoneQualifiers)
                 ];
             });
+    }
+
+    /**
+     * Analyze patterns in winning trades to identify what consistently works
+     */
+    private function analyzeWinningPatterns($winningTrades)
+    {
+        if ($winningTrades->isEmpty()) {
+            return [
+                'most_profitable_setups' => [],
+                'score_patterns' => [],
+                'symbol_patterns' => [],
+                'time_patterns' => [],
+                'zone_patterns' => [],
+                'recommendations' => []
+            ];
+        }
+
+        // 1. Most Profitable Setup Combinations (by frequency)
+        $setupFrequency = [];
+        $scorePatterns = ['80+' => 0, '60-79' => 0, '40-59' => 0, '<40' => 0];
+        $symbolFrequency = [];
+        $timePatterns = [];
+        $zonePatterns = [];
+
+        foreach ($winningTrades as $trade) {
+            // Setup combination frequency
+            $setupKey = $trade['setup_summary'];
+            if (!isset($setupFrequency[$setupKey])) {
+                $setupFrequency[$setupKey] = ['count' => 0, 'total_rrr' => 0, 'avg_score' => 0];
+            }
+            $setupFrequency[$setupKey]['count']++;
+            $setupFrequency[$setupKey]['total_rrr'] += $trade['rrr'] ?? 0;
+            $setupFrequency[$setupKey]['avg_score'] += $trade['score'] ?? 0;
+
+            // Score patterns
+            $score = $trade['score'] ?? 0;
+            if ($score >= 80) $scorePatterns['80+']++;
+            elseif ($score >= 60) $scorePatterns['60-79']++;
+            elseif ($score >= 40) $scorePatterns['40-59']++;
+            else $scorePatterns['<40']++;
+
+            // Symbol patterns
+            $symbol = $trade['symbol'] ?? 'Unknown';
+            $symbolFrequency[$symbol] = ($symbolFrequency[$symbol] ?? 0) + 1;
+
+            // Time patterns (month analysis)
+            $month = date('M', strtotime($trade['created_at']));
+            $timePatterns[$month] = ($timePatterns[$month] ?? 0) + 1;
+
+            // Zone qualifier patterns
+            $zoneCount = $trade['zone_qualifiers_count'] ?? 0;
+            $zoneKey = $zoneCount === 0 ? '0 Zones' : ($zoneCount <= 2 ? '1-2 Zones' : ($zoneCount <= 4 ? '3-4 Zones' : '5+ Zones'));
+            $zonePatterns[$zoneKey] = ($zonePatterns[$zoneKey] ?? 0) + 1;
+        }
+
+        // Process most profitable setups
+        $mostProfitableSetups = [];
+        foreach ($setupFrequency as $setup => $data) {
+            if ($data['count'] >= 2) { // Only patterns with 2+ occurrences
+                $mostProfitableSetups[] = [
+                    'setup' => $setup,
+                    'frequency' => $data['count'],
+                    'avg_rrr' => round($data['total_rrr'] / $data['count'], 2),
+                    'avg_score' => round($data['avg_score'] / $data['count'], 1),
+                    'success_rate' => round(($data['count'] / $winningTrades->count()) * 100, 1)
+                ];
+            }
+        }
+
+        // Sort by frequency descending
+        usort($mostProfitableSetups, function ($a, $b) {
+            return $b['frequency'] <=> $a['frequency'];
+        });
+
+        // Generate recommendations
+        $recommendations = $this->generatePatternRecommendations($mostProfitableSetups, $scorePatterns, $symbolFrequency, $zonePatterns);
+
+        return [
+            'most_profitable_setups' => array_slice($mostProfitableSetups, 0, 5),
+            'score_patterns' => $scorePatterns,
+            'symbol_patterns' => array_slice(arsort($symbolFrequency) ? $symbolFrequency : [], 0, 5, true),
+            'time_patterns' => $timePatterns,
+            'zone_patterns' => $zonePatterns,
+            'recommendations' => $recommendations,
+            'total_wins' => $winningTrades->count()
+        ];
+    }
+
+    /**
+     * Generate actionable recommendations based on winning patterns
+     */
+    private function generatePatternRecommendations($setups, $scorePatterns, $symbolFrequency, $zonePatterns)
+    {
+        $recommendations = [];
+
+        // Setup-based recommendations
+        if (!empty($setups)) {
+            $topSetup = $setups[0];
+            if ($topSetup['frequency'] >= 3) {
+                $recommendations[] = [
+                    'type' => 'setup',
+                    'title' => 'Your Most Successful Setup',
+                    'description' => "'{$topSetup['setup']}' has won {$topSetup['frequency']} times with avg R:R of {$topSetup['avg_rrr']}",
+                    'action' => 'Focus on this setup pattern for future trades'
+                ];
+            }
+        }
+
+        // Score-based recommendations
+        $totalScoreWins = array_sum($scorePatterns);
+        if ($totalScoreWins > 0) {
+            $highScorePercentage = round(($scorePatterns['80+'] / $totalScoreWins) * 100, 1);
+            if ($highScorePercentage >= 60) {
+                $recommendations[] = [
+                    'type' => 'score',
+                    'title' => 'High Score Pattern',
+                    'description' => "{$highScorePercentage}% of your wins came from scores 80+",
+                    'action' => 'Only trade setups with scores above 80 for higher win probability'
+                ];
+            } elseif ($scorePatterns['60-79'] > $scorePatterns['80+']) {
+                $recommendations[] = [
+                    'type' => 'score',
+                    'title' => 'Sweet Spot Identified',
+                    'description' => "Most wins come from 60-79 score range",
+                    'action' => 'Your optimal trading zone appears to be 60-79 score range'
+                ];
+            }
+        }
+
+        // Symbol-based recommendations
+        if (!empty($symbolFrequency)) {
+            arsort($symbolFrequency);
+            $topSymbol = array_key_first($symbolFrequency);
+            $topSymbolWins = $symbolFrequency[$topSymbol];
+            if ($topSymbolWins >= 3) {
+                $recommendations[] = [
+                    'type' => 'symbol',
+                    'title' => 'Favorite Currency Pair',
+                    'description' => "{$topSymbol} has generated {$topSymbolWins} winning trades",
+                    'action' => 'Consider specializing in this pair - you understand its behavior well'
+                ];
+            }
+        }
+
+        // Zone-based recommendations
+        if (!empty($zonePatterns)) {
+            arsort($zonePatterns);
+            $topZonePattern = array_key_first($zonePatterns);
+            $zoneWins = $zonePatterns[$topZonePattern];
+            if ($zoneWins >= 3) {
+                $recommendations[] = [
+                    'type' => 'zone',
+                    'title' => 'Zone Qualifier Sweet Spot',
+                    'description' => "Setups with {$topZonePattern} won {$zoneWins} times",
+                    'action' => 'This zone qualifier combination seems optimal for your strategy'
+                ];
+            }
+        }
+
+        return array_slice($recommendations, 0, 4); // Return top 4 recommendations
     }
 
     /**

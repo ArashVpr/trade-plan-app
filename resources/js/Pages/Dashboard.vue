@@ -144,7 +144,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -178,7 +178,7 @@
                                 <Column field="symbol" header="Symbol" style="width: 80px">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="position_type" header="Position" style="width: 80px">
@@ -268,6 +268,154 @@
                 </Card>
             </div>
 
+            <!-- Pattern Analysis -->
+            <div class="mb-8">
+                <Card>
+                    <template #header>
+                        <div class="p-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">🔍 Winning Patterns Analysis</h3>
+                            <p class="text-sm text-gray-600 mt-1">Discover what consistently makes your trades
+                                successful</p>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="p-4">
+                            <div v-if="stats.pattern_analysis.total_wins === 0" class="text-center py-8 text-gray-500">
+                                <i class="pi pi-chart-line text-3xl mb-3"></i>
+                                <p>No winning trades yet to analyze patterns</p>
+                            </div>
+
+                            <div v-else class="space-y-6">
+                                <!-- Recommendations -->
+                                <div v-if="stats.pattern_analysis.recommendations.length > 0">
+                                    <h4 class="text-md font-semibold text-blue-900 mb-3">💡 Key Insights &
+                                        Recommendations</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div v-for="rec in stats.pattern_analysis.recommendations" :key="rec.title"
+                                            class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                                            <div class="flex items-start gap-3">
+                                                <div class="flex-shrink-0">
+                                                    <i :class="{
+                                                        'pi pi-target text-green-600': rec.type === 'setup',
+                                                        'pi pi-star text-yellow-600': rec.type === 'score',
+                                                        'pi pi-chart-bar text-blue-600': rec.type === 'symbol',
+                                                        'pi pi-map-marker text-purple-600': rec.type === 'zone'
+                                                    }" class="text-lg"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h5 class="font-semibold text-gray-900 text-sm">{{ rec.title }}</h5>
+                                                    <p class="text-gray-700 text-xs mt-1">{{ rec.description }}</p>
+                                                    <p class="text-blue-800 text-xs mt-2 font-medium">→ {{ rec.action }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pattern Analysis Tabs -->
+                                <Tabs value="0">
+                                    <TabList>
+                                        <Tab value="0">🎯 Top Setups</Tab>
+                                        <Tab value="1">📊 Score Patterns</Tab>
+                                        <Tab value="2">💱 Symbol Patterns</Tab>
+                                        <Tab value="3">🗺️ Zone Patterns</Tab>
+                                    </TabList>
+                                    <TabPanels>
+                                        <!-- Top Performing Setups -->
+                                        <TabPanel value="0">
+                                            <DataTable :value="stats.pattern_analysis.most_profitable_setups"
+                                                class="p-datatable-sm">
+                                                <Column field="setup" header="Winning Setup">
+                                                    <template #body="slotProps">
+                                                        <span class="font-semibold text-green-800 text-sm">{{
+                                                            slotProps.data.setup }}</span>
+                                                    </template>
+                                                </Column>
+                                                <Column field="frequency" header="Wins">
+                                                    <template #body="slotProps">
+                                                        <Badge :value="slotProps.data.frequency" severity="success" />
+                                                    </template>
+                                                </Column>
+                                                <Column field="success_rate" header="% of Total Wins">
+                                                    <template #body="slotProps">
+                                                        <div class="flex items-center gap-2">
+                                                            <ProgressBar :value="slotProps.data.success_rate"
+                                                                :showValue="false" class="w-16" />
+                                                            <span class="text-sm">{{ slotProps.data.success_rate
+                                                                }}%</span>
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                                <Column field="avg_rrr" header="Avg R:R">
+                                                    <template #body="slotProps">
+                                                        <span class="text-sm font-mono">1:{{ slotProps.data.avg_rrr
+                                                            }}</span>
+                                                    </template>
+                                                </Column>
+                                                <Column field="avg_score" header="Avg Score">
+                                                    <template #body="slotProps">
+                                                        <span class="text-sm">{{ slotProps.data.avg_score }}/100</span>
+                                                    </template>
+                                                </Column>
+                                            </DataTable>
+                                        </TabPanel>
+
+                                        <!-- Score Patterns -->
+                                        <TabPanel value="1">
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div v-for="(count, range) in stats.pattern_analysis.score_patterns"
+                                                    :key="range" class="text-center p-4 bg-gray-50 rounded-lg">
+                                                    <div class="text-2xl font-bold text-blue-900">{{ count }}</div>
+                                                    <div class="text-sm text-gray-600">{{ range }} Score</div>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        {{ Math.round((count / stats.pattern_analysis.total_wins) * 100)
+                                                        }}% of wins
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+
+                                        <!-- Symbol Patterns -->
+                                        <TabPanel value="2">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div v-for="(count, symbol) in stats.pattern_analysis.symbol_patterns"
+                                                    :key="symbol"
+                                                    class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                                    <span class="font-mono font-bold text-blue-900">{{ symbol }}</span>
+                                                    <div class="text-right">
+                                                        <div class="font-semibold">{{ count }} wins</div>
+                                                        <div class="text-xs text-gray-600">
+                                                            {{ Math.round((count / stats.pattern_analysis.total_wins) *
+                                                            100) }}%
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+
+                                        <!-- Zone Patterns -->
+                                        <TabPanel value="3">
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div v-for="(count, pattern) in stats.pattern_analysis.zone_patterns"
+                                                    :key="pattern" class="text-center p-4 bg-green-50 rounded-lg">
+                                                    <div class="text-2xl font-bold text-green-900">{{ count }}</div>
+                                                    <div class="text-sm text-gray-600">{{ pattern }}</div>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        {{ Math.round((count / stats.pattern_analysis.total_wins) * 100)
+                                                        }}% of wins
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+                                    </TabPanels>
+                                </Tabs>
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+            </div>
+
             <!-- Recent Activity -->
             <Card>
                 <template #header>
@@ -296,7 +444,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
