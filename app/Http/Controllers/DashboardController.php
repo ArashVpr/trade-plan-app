@@ -324,6 +324,14 @@ class DashboardController extends Controller
         $technicalPatternTrades = [];
         $fundamentalPatternTrades = [];
 
+        // Track alignment towards zones, technicals, or fundamentals
+        $alignmentAnalysis = [
+            'zones_focused' => 0,
+            'technicals_focused' => 0,
+            'fundamentals_focused' => 0,
+            'balanced' => 0
+        ];
+
         foreach ($winningTrades as $trade) {
             $tradeId = $trade['id'];
 
@@ -402,6 +410,39 @@ class DashboardController extends Controller
                     $fundamentalPatternTrades['COT Index: ' . $fundCotIndex][] = $tradeId;
                 }
             }
+
+            // Calculate alignment for this trade
+            $zoneStrength = $trade['zone_qualifiers_count'] ?? 0;
+
+            // Technical strength (location + direction)
+            $technicalStrength = 0;
+            if (($trade['technical_location'] ?? 'N/A') !== 'N/A') $technicalStrength++;
+            if (($trade['technical_direction'] ?? 'N/A') !== 'N/A') $technicalStrength++;
+
+            // Fundamental strength (valuation + seasonal + COT factors)
+            $fundamentalStrength = 0;
+            if (($trade['fundamental_valuation'] ?? 'N/A') !== 'N/A' && $trade['fundamental_valuation'] !== 'Neutral') $fundamentalStrength++;
+            if (($trade['fundamental_seasonal'] ?? 'N/A') === 'Yes') $fundamentalStrength++;
+            if (($trade['fundamental_noncommercials'] ?? 'N/A') === 'Divergence') $fundamentalStrength++;
+            if (($trade['fundamental_cot_index'] ?? 'N/A') !== 'N/A' && $trade['fundamental_cot_index'] !== 'Neutral') $fundamentalStrength++;
+
+            // Determine primary alignment
+            $maxStrength = max($zoneStrength, $technicalStrength, $fundamentalStrength);
+            $strengthCounts = array_count_values([$zoneStrength, $technicalStrength, $fundamentalStrength]);
+
+            if ($strengthCounts[$maxStrength] > 1) {
+                // Balanced - multiple categories tied for highest
+                $alignmentAnalysis['balanced']++;
+            } elseif ($zoneStrength === $maxStrength && $zoneStrength > 0) {
+                $alignmentAnalysis['zones_focused']++;
+            } elseif ($technicalStrength === $maxStrength && $technicalStrength > 0) {
+                $alignmentAnalysis['technicals_focused']++;
+            } elseif ($fundamentalStrength === $maxStrength && $fundamentalStrength > 0) {
+                $alignmentAnalysis['fundamentals_focused']++;
+            } else {
+                // Edge case - all zeros, count as balanced
+                $alignmentAnalysis['balanced']++;
+            }
         }
 
         // Convert technical patterns to count and percentage
@@ -454,6 +495,7 @@ class DashboardController extends Controller
             'zone_patterns' => $zonePatterns,
             'technical_patterns' => $technicalPatterns,
             'fundamental_patterns' => $fundamentalPatterns,
+            'alignment_analysis' => $alignmentAnalysis,
             'recommendations' => $recommendations,
             'total_wins' => $totalWins
         ];
