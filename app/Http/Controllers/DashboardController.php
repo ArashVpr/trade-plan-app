@@ -164,6 +164,12 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Setup Performance Analysis
+        $setupPerformanceAnalysis = $this->getSetupPerformanceAnalysis();
+
+        // Winning Trades with Setups
+        $winningTrades = $this->getWinningTradesWithSetups();
+
         return [
             'overview' => [
                 'total_checklists' => $totalChecklists,
@@ -174,9 +180,195 @@ class DashboardController extends Controller
             'recent_activity' => $recentActivity,
             'weekly_trend' => $weeklyTrend,
             'score_outcome_analysis' => $scoreOutcomeAnalysis,
+            'setup_performance_analysis' => $setupPerformanceAnalysis,
+            'winning_trades' => $winningTrades,
             'top_symbols' => $topSymbols,
             'score_distribution' => $scoreDistribution
         ];
+    }
+
+    /**
+     * Analyze setup performance - which technical/fundamental combinations perform best
+     */
+    private function getSetupPerformanceAnalysis()
+    {
+        // Get completed trades with their checklist setups
+        $setupData = DB::table('checklists')
+            ->join('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
+            ->select(
+                'checklists.technicals',
+                'checklists.fundamentals',
+                'trade_entries.trade_status',
+                'trade_entries.rrr'
+            )
+            ->where('checklists.user_id', Auth::id())
+            ->whereIn('trade_entries.trade_status', ['win', 'loss', 'breakeven'])
+            ->get();
+
+        // Analyze technical setups
+        $technicalPerformance = [];
+        $fundamentalPerformance = [];
+        $combinedPerformance = [];
+
+        foreach ($setupData as $trade) {
+            $technicals = json_decode($trade->technicals, true);
+            $fundamentals = json_decode($trade->fundamentals, true);
+            $isWin = $trade->trade_status === 'win';
+
+            // Technical Location Analysis
+            if (isset($technicals['location'])) {
+                $location = $technicals['location'];
+                if (!isset($technicalPerformance[$location])) {
+                    $technicalPerformance[$location] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
+                }
+                $technicalPerformance[$location]['total']++;
+                if ($isWin) $technicalPerformance[$location]['wins']++;
+                $technicalPerformance[$location]['total_rrr'] += $trade->rrr ?? 0;
+            }
+
+            // Technical Direction Analysis
+            if (isset($technicals['direction'])) {
+                $direction = $technicals['direction'];
+                if (!isset($technicalPerformance[$direction])) {
+                    $technicalPerformance[$direction] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
+                }
+                $technicalPerformance[$direction]['total']++;
+                if ($isWin) $technicalPerformance[$direction]['wins']++;
+                $technicalPerformance[$direction]['total_rrr'] += $trade->rrr ?? 0;
+            }
+
+            // Fundamental Analysis
+            if (isset($fundamentals['valuation'])) {
+                $valuation = $fundamentals['valuation'];
+                if (!isset($fundamentalPerformance[$valuation])) {
+                    $fundamentalPerformance[$valuation] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
+                }
+                $fundamentalPerformance[$valuation]['total']++;
+                if ($isWin) $fundamentalPerformance[$valuation]['wins']++;
+                $fundamentalPerformance[$valuation]['total_rrr'] += $trade->rrr ?? 0;
+            }
+
+            // Combined Setup Analysis (Location + Direction + Valuation)
+            if (isset($technicals['location']) && isset($technicals['direction']) && isset($fundamentals['valuation'])) {
+                $combinedKey = $technicals['location'] . ' + ' . $technicals['direction'] . ' + ' . $fundamentals['valuation'];
+                if (!isset($combinedPerformance[$combinedKey])) {
+                    $combinedPerformance[$combinedKey] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
+                }
+                $combinedPerformance[$combinedKey]['total']++;
+                if ($isWin) $combinedPerformance[$combinedKey]['wins']++;
+                $combinedPerformance[$combinedKey]['total_rrr'] += $trade->rrr ?? 0;
+            }
+        }
+
+        // Calculate win rates and average RRR
+        $processPerformanceData = function ($data) {
+            $result = [];
+            foreach ($data as $setup => $stats) {
+                if ($stats['total'] >= 2) { // Only include setups with at least 2 trades
+                    $result[] = [
+                        'setup_name' => $setup,
+                        'total_trades' => $stats['total'],
+                        'win_rate' => round(($stats['wins'] / $stats['total']) * 100, 1),
+                        'avg_rrr' => round($stats['total_rrr'] / $stats['total'], 2)
+                    ];
+                }
+            }
+            // Sort by win rate descending
+            usort($result, function ($a, $b) {
+                return $b['win_rate'] <=> $a['win_rate'];
+            });
+            return array_slice($result, 0, 5); // Top 5
+        };
+
+        return [
+            'technical_setups' => $processPerformanceData($technicalPerformance),
+            'fundamental_setups' => $processPerformanceData($fundamentalPerformance),
+            'combined_setups' => $processPerformanceData($combinedPerformance)
+        ];
+    }
+
+    /**
+     * Get winning trades with their complete checklist setups
+     */
+    private function getWinningTradesWithSetups()
+    {
+        return Checklist::with('tradeEntry')
+            ->where('user_id', Auth::id())
+            ->whereHas('tradeEntry', function ($query) {
+                $query->where('trade_status', 'win');
+            })
+            ->orderBy('created_at', 'desc')
+            ->get() // Show ALL winning trades
+            ->map(function ($checklist) {
+                $tradeEntry = $checklist->tradeEntry;
+                $technicals = $checklist->technicals;
+                $fundamentals = $checklist->fundamentals;
+                $zoneQualifiers = $checklist->zone_qualifiers ?? [];
+
+                return [
+                    'id' => $checklist->id,
+                    'symbol' => $checklist->symbol,
+                    'score' => $checklist->score,
+                    'position_type' => $tradeEntry->position_type,
+                    'entry_price' => $tradeEntry->entry_price,
+                    'target_price' => $tradeEntry->target_price,
+                    'rrr' => $tradeEntry->rrr,
+                    'entry_date' => $tradeEntry->entry_date,
+                    'created_at' => $checklist->created_at->format('M j, Y'),
+
+                    // Setup Details
+                    'technical_location' => $technicals['location'] ?? 'N/A',
+                    'technical_direction' => $technicals['direction'] ?? 'N/A',
+                    'fundamental_valuation' => $fundamentals['valuation'] ?? 'N/A',
+                    'fundamental_seasonal' => $fundamentals['seasonalConfluence'] ?? 'N/A',
+                    'fundamental_noncommercials' => $fundamentals['nonCommercials'] ?? 'N/A',
+                    'fundamental_cot_index' => $fundamentals['cotIndex'] ?? 'N/A',
+                    'zone_qualifiers' => $zoneQualifiers,
+                    'zone_qualifiers_count' => count($zoneQualifiers),
+
+                    // Combined setup description
+                    'setup_summary' => $this->generateSetupSummary($technicals, $fundamentals, $zoneQualifiers)
+                ];
+            });
+    }
+
+    /**
+     * Generate a readable setup summary
+     */
+    private function generateSetupSummary($technicals, $fundamentals, $zoneQualifiers)
+    {
+        $summary = [];
+
+        // Technical summary
+        if (isset($technicals['location']) && isset($technicals['direction'])) {
+            $summary[] = $technicals['location'] . ' ' . $technicals['direction'];
+        }
+
+        // Fundamental summary - include all fundamental fields
+        $fundamentalParts = [];
+        if (isset($fundamentals['valuation']) && $fundamentals['valuation'] !== 'Neutral') {
+            $fundamentalParts[] = $fundamentals['valuation'];
+        }
+        if (isset($fundamentals['seasonalConfluence']) && $fundamentals['seasonalConfluence'] === 'Yes') {
+            $fundamentalParts[] = 'Seasonal';
+        }
+        if (isset($fundamentals['nonCommercials']) && $fundamentals['nonCommercials'] === 'Divergence') {
+            $fundamentalParts[] = 'COT Divergence';
+        }
+        if (isset($fundamentals['cotIndex']) && $fundamentals['cotIndex'] !== 'Neutral') {
+            $fundamentalParts[] = $fundamentals['cotIndex'] . ' COT';
+        }
+
+        if (!empty($fundamentalParts)) {
+            $summary[] = implode(' & ', $fundamentalParts);
+        }
+
+        // Zone qualifiers summary
+        if (!empty($zoneQualifiers)) {
+            $summary[] = count($zoneQualifiers) . ' Zone Qualifiers';
+        }
+
+        return implode(' + ', $summary);
     }
 
     /**

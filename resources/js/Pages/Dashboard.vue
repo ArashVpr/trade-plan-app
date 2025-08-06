@@ -144,7 +144,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -156,6 +156,113 @@
                                     </template>
                                 </Column>
                             </DataTable>
+                        </div>
+                    </template>
+                </Card>
+            </div>
+
+            <!-- Winning Trades & Setups -->
+            <div class="mb-8">
+                <Card>
+                    <template #header>
+                        <div class="p-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">Winning Trades & Their Setups</h3>
+                            <p class="text-sm text-gray-600 mt-1">Learn from your successful trades - see what setups
+                                led to wins</p>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="p-4">
+                            <DataTable :value="stats.winning_trades" class="p-datatable-sm" :paginator="true"
+                                :rows="10">
+                                <Column field="symbol" header="Symbol" style="width: 80px">
+                                    <template #body="slotProps">
+                                        <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
+                                        }}</span>
+                                    </template>
+                                </Column>
+                                <Column field="position_type" header="Position" style="width: 80px">
+                                    <template #body="slotProps">
+                                        <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : 'danger'"
+                                            :value="slotProps.data.position_type" />
+                                    </template>
+                                </Column>
+                                <Column field="score" header="Score" style="width: 80px">
+                                    <template #body="slotProps">
+                                        <div class="flex items-center gap-2">
+                                            <ProgressBar :value="slotProps.data.score" :showValue="false"
+                                                class="w-12" />
+                                            <span class="text-sm font-semibold">{{ slotProps.data.score }}/100</span>
+                                        </div>
+                                    </template>
+                                </Column>
+                                <Column field="rrr" header="R:R" style="width: 70px">
+                                    <template #body="slotProps">
+                                        <span class="text-sm font-mono">1:{{ slotProps.data.rrr || 'N/A' }}</span>
+                                    </template>
+                                </Column>
+                                <Column field="setup_summary" header="Winning Setup">
+                                    <template #body="slotProps">
+                                        <div class="space-y-2">
+                                            <div class="font-semibold text-sm text-green-800">{{
+                                                slotProps.data.setup_summary }}</div>
+                                            <div class="flex flex-wrap gap-1">
+                                                <!-- Technical Tags -->
+                                                <small class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                                    {{ slotProps.data.technical_location }}
+                                                </small>
+                                                <small class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs">
+                                                    {{ slotProps.data.technical_direction }}
+                                                </small>
+
+                                                <!-- Fundamental Tags -->
+                                                <small v-if="slotProps.data.fundamental_valuation !== 'N/A'"
+                                                    class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
+                                                    {{ slotProps.data.fundamental_valuation }}
+                                                </small>
+                                                <small v-if="slotProps.data.fundamental_seasonal === 'Yes'"
+                                                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                                                    Seasonal
+                                                </small>
+                                                <small v-if="slotProps.data.fundamental_noncommercials === 'Divergence'"
+                                                    class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">
+                                                    COT Divergence
+                                                </small>
+                                                <small
+                                                    v-if="slotProps.data.fundamental_cot_index !== 'N/A' && slotProps.data.fundamental_cot_index !== 'Neutral'"
+                                                    class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
+                                                    {{ slotProps.data.fundamental_cot_index }} COT
+                                                </small>
+
+                                                <!-- Zone Qualifiers -->
+                                                <small v-if="slotProps.data.zone_qualifiers_count > 0"
+                                                    class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                                    {{ slotProps.data.zone_qualifiers_count }} Zones
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </Column>
+                                <Column field="entry_date" header="Date" style="width: 100px">
+                                    <template #body="slotProps">
+                                        <small class="text-gray-600">{{ slotProps.data.created_at }}</small>
+                                    </template>
+                                </Column>
+                                <Column header="Actions" style="width: 60px">
+                                    <template #body="slotProps">
+                                        <Button icon="pi pi-eye" size="small" text
+                                            @click="router.get(route('checklists.show', slotProps.data.id))"
+                                            v-tooltip="'View Full Setup'" />
+                                    </template>
+                                </Column>
+                            </DataTable>
+
+                            <!-- Show message if no winning trades -->
+                            <div v-if="!stats.winning_trades || stats.winning_trades.length === 0"
+                                class="text-center py-8 text-gray-500">
+                                <i class="pi pi-info-circle text-3xl mb-3"></i>
+                                <p>No winning trades yet. Keep analyzing and trading!</p>
+                            </div>
                         </div>
                     </template>
                 </Card>
@@ -189,7 +296,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                        }}/100</span>
+                                            }}/100</span>
                                     </div>
                                 </template>
                             </Column>
