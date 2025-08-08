@@ -307,7 +307,14 @@ class DashboardController extends Controller
                 'zone_patterns' => [],
                 'technical_patterns' => [],
                 'fundamental_patterns' => [],
-                'recommendations' => []
+                'alignment_analysis' => [
+                    'zones_focused' => 0,
+                    'technicals_focused' => 0,
+                    'fundamentals_focused' => 0,
+                    'balanced' => 0
+                ],
+                'recommendations' => [],
+                'total_wins' => 0
             ];
         }
 

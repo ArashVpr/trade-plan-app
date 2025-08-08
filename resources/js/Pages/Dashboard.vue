@@ -100,7 +100,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -129,7 +129,8 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <div v-if="stats.pattern_analysis.total_wins === 0" class="text-center py-8 text-gray-500">
+                            <div v-if="(stats.pattern_analysis.total_wins || 0) === 0"
+                                class="text-center py-8 text-gray-500">
                                 <i class="pi pi-chart-line text-3xl mb-3"></i>
                                 <p>No winning trades yet to analyze patterns</p>
                             </div>
@@ -203,7 +204,7 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                                }}%</span>
+                                                            }}%</span>
                                                         </div>
                                                     </template>
                                                 </Column>
@@ -317,7 +318,8 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <div v-if="stats.pattern_analysis.total_wins === 0" class="text-center py-8 text-gray-500">
+                            <div v-if="(stats.pattern_analysis.total_wins || 0) === 0"
+                                class="text-center py-8 text-gray-500">
                                 <i class="pi pi-chart-line text-3xl mb-3"></i>
                                 <p>No winning trades yet to analyze your trading style</p>
                             </div>
@@ -335,12 +337,14 @@
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
                                         <div class="text-3xl font-bold text-green-900 mb-2">
-                                            {{ stats.pattern_analysis.alignment_analysis.zones_focused }}
+                                            {{ stats.pattern_analysis.alignment_analysis?.zones_focused || 0 }}
                                         </div>
                                         <div class="text-sm font-semibold text-green-800 mb-1">🗺️ Zone Specialist</div>
                                         <div class="text-xs text-gray-600">
-                                            {{ Math.round((stats.pattern_analysis.alignment_analysis.zones_focused /
-                                                stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                            {{ stats.pattern_analysis.total_wins > 0 ?
+                                                Math.round(((stats.pattern_analysis.alignment_analysis?.zones_focused || 0)
+                                                    /
+                                            stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Masters supply/demand zones
@@ -351,13 +355,15 @@
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                                         <div class="text-3xl font-bold text-blue-900 mb-2">
-                                            {{ stats.pattern_analysis.alignment_analysis.technicals_focused }}
+                                            {{ stats.pattern_analysis.alignment_analysis?.technicals_focused || 0 }}
                                         </div>
                                         <div class="text-sm font-semibold text-blue-800 mb-1">⚙️ Chart Reader
                                         </div>
                                         <div class="text-xs text-gray-600">
-                                            {{ Math.round((stats.pattern_analysis.alignment_analysis.technicals_focused
-                                                / stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                            {{ stats.pattern_analysis.total_wins > 0 ?
+                                                Math.round(((stats.pattern_analysis.alignment_analysis?.technicals_focused
+                                                    || 0)
+                                            / stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Excels at technical price action
@@ -368,14 +374,15 @@
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
                                         <div class="text-3xl font-bold text-purple-900 mb-2">
-                                            {{ stats.pattern_analysis.alignment_analysis.fundamentals_focused }}
+                                            {{ stats.pattern_analysis.alignment_analysis?.fundamentals_focused || 0 }}
                                         </div>
                                         <div class="text-sm font-semibold text-purple-800 mb-1">📈 Macro Analyst
                                         </div>
                                         <div class="text-xs text-gray-600">
-                                            {{
-                                                Math.round((stats.pattern_analysis.alignment_analysis.fundamentals_focused /
-                                                    stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                            {{ stats.pattern_analysis.total_wins > 0 ?
+                                                Math.round(((stats.pattern_analysis.alignment_analysis?.fundamentals_focused
+                                                    || 0) /
+                                            stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Leverages economic fundamentals
@@ -386,12 +393,13 @@
                                     <div
                                         class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
                                         <div class="text-3xl font-bold text-gray-900 mb-2">
-                                            {{ stats.pattern_analysis.alignment_analysis.balanced }}
+                                            {{ stats.pattern_analysis.alignment_analysis?.balanced || 0 }}
                                         </div>
                                         <div class="text-sm font-semibold text-gray-800 mb-1">⚖️ Well-Rounded</div>
                                         <div class="text-xs text-gray-600">
-                                            {{ Math.round((stats.pattern_analysis.alignment_analysis.balanced /
-                                                stats.pattern_analysis.total_wins) * 100) }}% of wins
+                                            {{ stats.pattern_analysis.total_wins > 0 ?
+                                                Math.round(((stats.pattern_analysis.alignment_analysis?.balanced || 0) /
+                                                    stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Balances multiple approaches
@@ -403,7 +411,7 @@
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
                                     <h5 class="font-semibold text-blue-900 mb-3">💡 Your Trading DNA</h5>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div v-if="stats.pattern_analysis.alignment_analysis.zones_focused > 0"
+                                        <div v-if="(stats.pattern_analysis.alignment_analysis?.zones_focused || 0) > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-green-600">🗺️</span>
                                             <div>
@@ -412,7 +420,7 @@
                                                 from patience and waiting for price to reach critical zones.
                                             </div>
                                         </div>
-                                        <div v-if="stats.pattern_analysis.alignment_analysis.technicals_focused > 0"
+                                        <div v-if="(stats.pattern_analysis.alignment_analysis?.technicals_focused || 0) > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-blue-600">⚙️</span>
                                             <div>
@@ -421,7 +429,7 @@
                                                 they're your biggest edge.
                                             </div>
                                         </div>
-                                        <div v-if="stats.pattern_analysis.alignment_analysis.fundamentals_focused > 0"
+                                        <div v-if="(stats.pattern_analysis.alignment_analysis?.fundamentals_focused || 0) > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-purple-600">📈</span>
                                             <div>
@@ -430,7 +438,7 @@
                                                 fundamental analysis and market timing.
                                             </div>
                                         </div>
-                                        <div v-if="stats.pattern_analysis.alignment_analysis.balanced > 0"
+                                        <div v-if="(stats.pattern_analysis.alignment_analysis?.balanced || 0) > 0"
                                             class="flex items-start gap-2">
                                             <span class="text-gray-600">⚖️</span>
                                             <div>
@@ -475,7 +483,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                        }}/100</span>
+                                            }}/100</span>
                                     </div>
                                 </template>
                             </Column>
