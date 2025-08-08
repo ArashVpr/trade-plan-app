@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TradeEntry;
 use App\Models\TradeManagementItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TradeManagementController extends Controller
@@ -14,7 +15,7 @@ class TradeManagementController extends Controller
      */
     public function index()
     {
-        $userId = 1; // Replace with auth()->id() when authentication is implemented
+        $userId = Auth::id();
 
         // Get all open and pending trades with their management items
         $openTrades = TradeEntry::with(['checklist', 'managementItems'])
@@ -50,7 +51,7 @@ class TradeManagementController extends Controller
      */
     public function store(Request $request)
     {
-        $userId = 1; // Replace with auth()->id()
+        $userId = Auth::id();
 
         $validated = $request->validate([
             'trade_entry_id' => 'required|exists:trade_entries,id',
@@ -93,7 +94,7 @@ class TradeManagementController extends Controller
      */
     public function addPredefined(Request $request)
     {
-        $userId = 1; // Replace with auth()->id()
+        $userId = Auth::id();
 
         $validated = $request->validate([
             'trade_entry_id' => 'required|exists:trade_entries,id',

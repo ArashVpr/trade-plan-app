@@ -31,9 +31,9 @@
             </div>
 
             <!-- Tabs Navigation -->
-            <Tabs value="0">
+            <Tabs v-model:value="activeTab">
                 <TabList>
-                    <Tab value="0">📈 Open Trades</Tab>
+                    <Tab value="0">📈 Open Trades ({{ openTrades.length }})</Tab>
                     <Tab value="1">🔔 Alerts & Reminders ({{ alertItems.length }})</Tab>
                 </TabList>
                 <TabPanels>
@@ -44,7 +44,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <i class="pi pi-chart-line text-blue-600 mr-3 text-xl"></i>
-                                        <span>Open Trades ({{ openTrades.length }})</span>
+                                        <span>Open Trades</span>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <Badge
@@ -168,7 +168,7 @@
                                                             size="small" class="mx-1" />
                                                         {{ alert.trade_entry.checklist.symbol }}
                                                         @ <span class="font-mono">{{ alert.trade_entry.entry_price
-                                                        }}</span>
+                                                            }}</span>
                                                     </span>
                                                 </div>
                                             </div>
@@ -200,7 +200,7 @@
                                     <p class="text-gray-500">Keep up the systematic trading discipline!</p>
                                     <div class="mt-8">
                                         <Button label="📊 View Open Trades" severity="info" outlined
-                                            @click="$emit('switch-tab', '0')" />
+                                            @click="activeTab = '0'" />
                                     </div>
                                 </div>
                             </template>
@@ -240,6 +240,7 @@ const props = defineProps({
 })
 
 // State
+const activeTab = ref('0')
 const managementDialogVisible = ref(false)
 const viewDialogVisible = ref(false)
 const selectedTrade = ref(null)
