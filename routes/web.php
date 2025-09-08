@@ -11,6 +11,7 @@ use App\Http\Controllers\TradeJournalController;
 use App\Http\Controllers\TradeManagementController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 
 // Guest routes (authentication)
@@ -69,3 +70,5 @@ Route::middleware('auth')->group(function () {
 Route::get('/test', function () {
     return Inertia::render('Test');
 })->name('test');
+
+if (env('APP_ENV')) { URL::forceScheme('https'); } // Force HTTPS in non-local environments

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Only force login in local environment
+         if ($this->app->environment('local')) {
+            $user = User::find(1);
+            if ($user) {
+                Auth::login($user);
+            }
+        }
     }
 }
