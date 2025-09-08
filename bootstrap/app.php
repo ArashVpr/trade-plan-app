@@ -4,7 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\HandleInertiaRequests;
-use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 
 
@@ -18,21 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
         ]);
-    })
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(TrustProxies::class);
-    })
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(
-            // List your proxies here. Use '*' to trust all.
-            '*',
 
-            // Headers to trust
-            headers: Request::HEADER_X_FORWARDED_FOR
-                | Request::HEADER_X_FORWARDED_HOST
-                | Request::HEADER_X_FORWARDED_PORT
-                | Request::HEADER_X_FORWARDED_PROTO
-                | Request::HEADER_X_FORWARDED_AWS_ELB
+        $middleware->trustProxies(
+            at: '*',
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
