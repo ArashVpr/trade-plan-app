@@ -71,4 +71,4 @@ Route::get('/test', function () {
     return Inertia::render('Test');
 })->name('test');
 
-if (env('APP_ENV')) { URL::forceScheme('https'); } // Force HTTPS in non-local environments
+// if (env('APP_ENV')) { URL::forceScheme('https'); } // Force HTTPS in non-local environments
