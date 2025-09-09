@@ -5,7 +5,7 @@
                 <i class="pi pi-money-bill text-blue-900"></i>
                 Order Entry (Optional)
             </h2>
-            <Chip :label="`Instrument: ${asset || '—'}`" />
+            <Chip :label="`Symbol: ${symbol || '—'}`" />
         </div>
 
         <Message severity="info" :closable="false" class="mb-4">
@@ -53,9 +53,10 @@
         </div>
 
         <div class="field">
-            <label class="block text-sm font-medium mb-2">Outcome</label>
-            <Select :model-value="modelValue.outcome" @update:model-value="updateData('outcome', $event)"
-                :options="outcomeOptions" placeholder="Select Outcome" class="w-full" />
+            <label class="block text-sm font-medium mb-2">Trade Status</label>
+            <Select :model-value="modelValue.trade_status" @update:model-value="updateData('trade_status', $event)"
+                :options="tradeStatusOptions" optionLabel="label" optionValue="value" placeholder="Select Trade Status"
+                class="w-full" />
         </div>
 
         <div class="field">
@@ -78,7 +79,7 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    asset: {
+    symbol: {
         type: String,
         default: ''
     }
@@ -87,7 +88,14 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'progress-updated'])
 
 const positionOptions = ['Long', 'Short']
-const outcomeOptions = ['win', 'loss', 'breakeven']
+const tradeStatusOptions = [
+    { label: 'Pending', value: 'pending' },
+    { label: 'Active', value: 'active' },
+    { label: 'Win', value: 'win' },
+    { label: 'Loss', value: 'loss' },
+    { label: 'Breakeven', value: 'breakeven' },
+    { label: 'Cancelled', value: 'cancelled' }
+]
 
 const updateData = (key, value) => {
     const updatedData = { ...props.modelValue, [key]: value }

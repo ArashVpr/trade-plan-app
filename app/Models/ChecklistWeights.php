@@ -5,27 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserSettings extends Model
+class ChecklistWeights extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'zone_fresh_weight',
-        'zone_original_weight',
-        'zone_flip_weight',
-        'zone_lol_weight',
-        'zone_min_profit_margin_weight',
-        'zone_big_brother_weight',
-        'technical_very_exp_chp_weight',
-        'technical_exp_chp_weight',
-        'technical_direction_impulsive_weight',
-        'technical_direction_correction_weight',
-        'fundamental_valuation_weight',
-        'fundamental_seasonal_weight',
-        'fundamental_cot_index_weight',
-        'fundamental_noncommercial_divergence_weight',
-    ];
+    protected $guarded = [];
+
     /**
      * Default values for each weight attribute.
      * These are applied when a new model instance is created or attribute is missing.
@@ -48,4 +33,12 @@ class UserSettings extends Model
         'fundamental_cot_index_weight' => 12,
         'fundamental_noncommercial_divergence_weight' => 12,
     ];
+
+    /**
+     * Get the user that owns the checklist weights.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

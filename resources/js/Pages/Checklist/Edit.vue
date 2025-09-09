@@ -36,14 +36,18 @@
                     <!-- Basic Information Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
-                            <label class="block text-sm font-medium mb-2">Asset</label>
-                            <Select v-model="form.asset" :options="['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD']"
-                                placeholder="Select Asset" class="w-full" />
+                            <label class="block text-sm font-medium mb-2">Symbol</label>
+                            <Select v-model="form.symbol" :options="['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY']"
+                                placeholder="Select Symbol" class="w-full" :invalid="!!$errors.symbol" />
+                            <Message v-if="$errors.symbol" severity="error" :closable="false">{{ $errors.symbol }}
+                            </Message>
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Entry Date</label>
                             <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
-                                iconDisplay="input" />
+                                iconDisplay="input" :invalid="!!$errors.entry_date" />
+                            <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
+                            }}</Message>
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
@@ -67,13 +71,18 @@
                                         <label class="block text-sm font-medium mb-1">Location</label>
                                         <Select v-model="form.technicals.location"
                                             :options="['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
-                                            placeholder="Select Location" class="w-full" />
+                                            placeholder="Select Location" class="w-full"
+                                            :invalid="!!$errors['technicals.location']" />
+                                        <Message v-if="$errors['technicals.location']" severity="error"
+                                            :closable="false">{{ $errors['technicals.location'] }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Direction</label>
                                         <Select v-model="form.technicals.direction"
                                             :options="['Correction', 'Impulsion']" placeholder="Select Direction"
-                                            class="w-full" />
+                                            class="w-full" :invalid="!!$errors['technicals.direction']" />
+                                        <Message v-if="$errors['technicals.direction']" severity="error"
+                                            :closable="false">{{ $errors['technicals.direction'] }}</Message>
                                     </div>
                                 </div>
                             </div>
@@ -89,24 +98,35 @@
                                         <label class="block text-sm font-medium mb-1">Valuation</label>
                                         <Select v-model="form.fundamentals.valuation"
                                             :options="['Overvalued', 'Neutral', 'Undervalued']"
-                                            placeholder="Select Valuation" class="w-full" />
+                                            placeholder="Select Valuation" class="w-full"
+                                            :invalid="!!$errors['fundamentals.valuation']" />
+                                        <Message v-if="$errors['fundamentals.valuation']" severity="error"
+                                            :closable="false">{{ $errors['fundamentals.valuation'] }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Seasonal Confluence</label>
                                         <Select v-model="form.fundamentals.seasonalConfluence" :options="['Yes', 'No']"
-                                            placeholder="Select Seasonal Confluence" class="w-full" />
+                                            placeholder="Select Seasonal Confluence" class="w-full"
+                                            :invalid="!!$errors['fundamentals.seasonalConfluence']" />
+                                        <Message v-if="$errors['fundamentals.seasonalConfluence']" severity="error"
+                                            :closable="false">{{ $errors['fundamentals.seasonalConfluence'] }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Non-Commercials</label>
                                         <Select v-model="form.fundamentals.nonCommercials"
                                             :options="['Divergence', 'No-Divergence']"
-                                            placeholder="Select Non-Commercials" class="w-full" />
+                                            placeholder="Select Non-Commercials" class="w-full"
+                                            :invalid="!!$errors['fundamentals.nonCommercials']" />
+                                        <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
+                                            :closable="false">{{ $errors['fundamentals.nonCommercials'] }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">CoT Index</label>
                                         <Select v-model="form.fundamentals.cotIndex"
                                             :options="['Bullish', 'Neutral', 'Bearish']" placeholder="Select CoT Index"
-                                            class="w-full" />
+                                            class="w-full" :invalid="!!$errors['fundamentals.cotIndex']" />
+                                        <Message v-if="$errors['fundamentals.cotIndex']" severity="error"
+                                            :closable="false">{{ $errors['fundamentals.cotIndex'] }}</Message>
                                     </div>
                                 </div>
                             </div>
@@ -129,6 +149,8 @@
                                             {{ qualifier }}
                                         </label>
                                     </div>
+                                    <Message v-if="$errors.zone_qualifiers" severity="error" :closable="false">{{
+                                        $errors.zone_qualifiers }}</Message>
                                 </div>
                             </div>
 
@@ -145,32 +167,52 @@
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Position Type</label>
                                         <Select v-model="form.position_type" :options="['Long', 'Short']"
-                                            placeholder="Select Position Type" class="w-full" />
+                                            placeholder="Select Position Type" class="w-full"
+                                            :invalid="!!$errors.position_type" />
+                                        <Message v-if="$errors.position_type" severity="error" :closable="false">{{
+                                            $errors.position_type }}</Message>
                                     </div>
                                     <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Trade Outcome</label>
-                                        <Select v-model="form.outcome" :options="['win', 'loss', 'breakeven']"
-                                            placeholder="Select Outcome" class="w-full" />
+                                        <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                        <Select v-model="form.trade_status" :options="[
+                                            { label: 'Order Pending', value: 'pending' },
+                                            { label: 'Position Open', value: 'active' },
+                                            { label: 'Win', value: 'win' },
+                                            { label: 'Loss', value: 'loss' },
+                                            { label: 'Breakeven', value: 'breakeven' },
+                                            { label: 'Cancelled', value: 'cancelled' }
+                                        ]" option-label="label" option-value="value" placeholder="Select Status"
+                                            class="w-full" :invalid="!!$errors.trade_status" />
+                                        <Message v-if="$errors.trade_status" severity="error" :closable="false">{{
+                                            $errors.trade_status }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Entry Price</label>
                                         <InputText v-model="form.entry_price" type="number" step="0.0001"
-                                            placeholder="0.0000" class="w-full" />
+                                            placeholder="0.0000" class="w-full" :invalid="!!$errors.entry_price" />
+                                        <Message v-if="$errors.entry_price" severity="error" :closable="false">{{
+                                            $errors.entry_price }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Stop Loss</label>
                                         <InputText v-model="form.stop_price" type="number" step="0.0001"
-                                            placeholder="0.0000" class="w-full" />
+                                            placeholder="0.0000" class="w-full" :invalid="!!$errors.stop_price" />
+                                        <Message v-if="$errors.stop_price" severity="error" :closable="false">{{
+                                            $errors.stop_price }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Take Profit</label>
                                         <InputText v-model="form.target_price" type="number" step="0.0001"
-                                            placeholder="0.0000" class="w-full" />
+                                            placeholder="0.0000" class="w-full" :invalid="!!$errors.target_price" />
+                                        <Message v-if="$errors.target_price" severity="error" :closable="false">{{
+                                            $errors.target_price }}</Message>
                                     </div>
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">R:R Ratio</label>
                                         <InputText v-model="form.rrr" type="number" step="0.01" placeholder="1.50"
-                                            class="w-full" />
+                                            class="w-full" :invalid="!!$errors.rrr" />
+                                        <Message v-if="$errors.rrr" severity="error" :closable="false">{{ $errors.rrr }}
+                                        </Message>
                                     </div>
                                 </div>
                             </div>
@@ -187,7 +229,10 @@
                             </h3>
                             <div class="field">
                                 <Textarea v-model="form.notes" rows="6" class="w-full"
-                                    placeholder="Document your analysis, reasoning, and any additional context for this trade..." />
+                                    placeholder="Document your analysis, reasoning, and any additional context for this trade..."
+                                    :invalid="!!$errors.notes" />
+                                <Message v-if="$errors.notes" severity="error" :closable="false">{{ $errors.notes }}
+                                </Message>
                             </div>
                         </div>
 
@@ -207,6 +252,8 @@
                                         Upload a screenshot of your trading chart
                                     </p>
                                 </div>
+                                <Message v-if="$errors.screenshot" severity="error" :closable="false">{{
+                                    $errors.screenshot }}</Message>
                             </div>
                         </div>
                     </div>
@@ -221,14 +268,20 @@ import { useForm } from '@inertiajs/vue3';
 import { computed, watch, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const orderEntryRef = ref(null)
 
 const props = defineProps({
     checklist: Object,
     settings: Object,
-    tradeEntry: Object
+    tradeEntry: Object,
+    errors: Object,
 })
+
+// Computed property to access errors in template
+const $errors = computed(() => props.errors || {})
 
 // Check if we should focus on order entry section
 const shouldHighlightOrderEntry = ref(false)
@@ -284,12 +337,27 @@ const onFileChange = (event) => {
 }
 
 // Form submission handler
-const submitForm = () => {
-    // Format the entry_date before submission
-    const originalDate = form.entry_date
-    form.entry_date = formatDate(form.entry_date)
+const submitForm = (event) => {
+    // Prevent default form submission
+    event.preventDefault()
 
-    form.put(route('checklists.update', props.checklist.id))
+    // Format the entry_date before submission
+    if (form.entry_date) {
+        form.entry_date = formatDate(form.entry_date)
+    }
+
+    // Use the Inertia form submission
+    form.put(route('checklists.update', props.checklist.id), {
+        onError: () => {
+            // Handle validation or other errors
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Please check the form for errors',
+                life: 3000
+            });
+        }
+    })
 }
 
 const zoneQualifiers = [
@@ -301,14 +369,14 @@ const form = useForm({
     technicals: { ...props.checklist.technicals },
     fundamentals: { ...props.checklist.fundamentals },
     score: props.checklist.score,
-    asset: props.checklist.asset,
+    symbol: props.checklist.symbol,
     notes: props.tradeEntry?.notes || '',
     entry_date: props.tradeEntry?.entry_date || '',
     position_type: props.tradeEntry?.position_type || '',
     entry_price: props.tradeEntry?.entry_price || '',
     stop_price: props.tradeEntry?.stop_price || '',
     target_price: props.tradeEntry?.target_price || '',
-    outcome: props.tradeEntry?.outcome || '',
+    trade_status: props.tradeEntry?.trade_status || '',
     rrr: props.tradeEntry?.rrr || '',
     screenshot: null
 })
@@ -326,7 +394,7 @@ const canSubmit = computed(() => {
         form.entry_price &&
         form.stop_price &&
         form.target_price &&
-        form.outcome &&
+        form.trade_status &&
         form.rrr
 })
 

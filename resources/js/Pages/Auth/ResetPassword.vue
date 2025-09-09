@@ -6,87 +6,74 @@
                     <i class="pi pi-chart-line text-2xl text-blue-600"></i>
                 </div>
                 <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Create your account
+                    Reset your password
                 </h2>
                 <p class="mt-2 text-center text-sm text-gray-600">
-                    Join Trade Plan App and start improving your trading
+                    Enter your new password below
                 </p>
             </div>
 
             <Card class="p-6">
                 <template #content>
-                    <form @submit.prevent="submit" class="space-y-6" method="post" action="/register">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name
-                            </label>
-                            <InputText id="name" name="name" v-model="form.name" type="text" autocomplete="name"
-                                required class="w-full" :class="{ 'p-invalid': form.errors.name }"
-                                placeholder="Enter your full name" @input="form.clearErrors('name')" />
-                            <small v-if="form.errors.name" class="p-error block mt-1">{{ form.errors.name }}</small>
-                        </div>
+                    <form @submit.prevent="submit" class="space-y-6" method="post" action="/reset-password">
+                        <!-- Hidden fields for password managers -->
+                        <input type="hidden" name="username" :value="form.email" autocomplete="username" />
 
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
                             </label>
                             <InputText id="email" name="email" v-model="form.email" type="email" autocomplete="username"
-                                required class="w-full" :class="{ 'p-invalid': form.errors.email }"
-                                placeholder="Enter your email" @input="form.clearErrors('email')" />
-                            <small v-if="form.errors.email" class="p-error block mt-1">{{ form.errors.email }}</small>
+                                readonly class="w-full bg-gray-50" />
                         </div>
 
                         <div>
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                                Password
+                                New Password
                             </label>
                             <Password v-model="form.password" toggleMask class="w-full"
-                                :class="{ 'p-invalid': form.errors.password }" placeholder="Choose a strong password"
+                                :class="{ 'p-invalid': form.errors.password }" placeholder="Enter your new password"
                                 @input="form.clearErrors('password')" autocomplete="new-password" inputId="password"
                                 name="password">
                                 <template #header>
-                                    <div class="font-semibold text-sm mb-4">Create Password</div>
+                                    <div class="font-semibold text-sm mb-4">Password Requirements</div>
                                 </template>
                                 <template #footer>
                                     <Divider />
                                     <ul class="pl-2 my-0 leading-normal text-sm">
-                                        <li>At least one lowercase letter</li>
-                                        <li>At least one uppercase letter</li>
-                                        <li>At least one number</li>
-                                        <li>At least one symbol</li>
                                         <li>Minimum 8 characters</li>
+                                        <li>At least one letter</li>
+                                        <li>At least one number</li>
+                                        <li>Mixed case letters (A-z)</li>
                                     </ul>
                                 </template>
                             </Password>
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                                }}</small>
+                            }}</small>
                         </div>
 
                         <div>
                             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
-                                Confirm Password
+                                Confirm New Password
                             </label>
                             <Password v-model="form.password_confirmation" :feedback="false" toggleMask class="w-full"
                                 :class="{ 'p-invalid': form.errors.password_confirmation }"
-                                placeholder="Confirm your password" @input="form.clearErrors('password_confirmation')"
-                                autocomplete="new-password" inputId="password_confirmation"
-                                name="password_confirmation" />
+                                placeholder="Confirm your new password"
+                                @input="form.clearErrors('password_confirmation')" autocomplete="new-password"
+                                inputId="password_confirmation" name="password_confirmation" />
                             <small v-if="form.errors.password_confirmation" class="p-error block mt-1">{{
                                 form.errors.password_confirmation }}</small>
                         </div>
 
                         <div>
-                            <Button type="submit" :loading="form.processing" label="Create Account" class="w-full"
+                            <Button type="submit" :loading="form.processing" label="Reset Password" class="w-full"
                                 size="large" />
                         </div>
 
                         <div class="text-center">
-                            <span class="text-sm text-gray-600">
-                                Already have an account?
-                                <Link :href="route('login')" class="font-medium text-blue-600 hover:text-blue-500">
-                                Sign in
-                                </Link>
-                            </span>
+                            <Link :href="route('login')" class="text-sm font-medium text-blue-600 hover:text-blue-500">
+                            Back to Sign In
+                            </Link>
                         </div>
                     </form>
                 </template>
@@ -99,15 +86,21 @@
 import { useForm, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
+// Receive props from backend
+const props = defineProps({
+    email: String,
+    token: String,
+})
+
 const form = useForm({
-    name: '',
-    email: '',
+    token: props.token,
+    email: props.email,
     password: '',
     password_confirmation: '',
 })
 
 const submit = () => {
-    form.post(route('register'))
+    form.post(route('password.update'))
 }
 </script>
 

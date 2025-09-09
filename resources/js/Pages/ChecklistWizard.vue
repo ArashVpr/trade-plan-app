@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="max-w-6xl mx-auto p-6">
+        <div class="max-w-6xl mx-auto">
             <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Trade Setup Checklist</h1>
 
             <!-- Step Indicator -->
@@ -31,7 +31,7 @@
 
                             <!-- Step 4: Order Entry -->
                             <OrderEntryStep v-if="currentStep === 4" v-model="orderEntryData"
-                                :asset="zoneQualifiersData.asset" @progress-updated="updateProgress" />
+                                :symbol="zoneQualifiersData.symbol" @progress-updated="updateProgress" />
 
                             <!-- Navigation Buttons -->
                             <div class="mt-8 flex justify-between items-center">
@@ -53,8 +53,8 @@
                                 </div>
                                 <ProgressBar :value="evaluationScore" :class="{
                                     'progress-danger': evaluationScore < 50,
-                                    'progress-warning': evaluationScore >= 50 && evaluationScore <= 80,
-                                    'progress-success': evaluationScore > 80
+                                    'progress-warning': evaluationScore >= 50 && evaluationScore < 80,
+                                    'progress-success': evaluationScore => 80
                                 }" />
                             </div>
                         </template>
@@ -116,7 +116,7 @@
                         </div>
                     </template>
                 </Card>
-                
+
             </div>
 
             <!-- Success/Error Messages -->
@@ -161,7 +161,7 @@ const steps = ['Zone Qualifiers', 'Technicals', 'Fundamentals', 'Order Entry'];
 
 // Step data objects
 const zoneQualifiersData = ref({
-    asset: '',
+    symbol: '',
     selectedZoneQualifiers: []
 });
 
@@ -184,7 +184,7 @@ const orderEntryData = ref({
     stopPrice: '',
     targetPrice: '',
     rrr: '',
-    outcome: '',
+    trade_status: '',
     screenshot: null,
     notes: ''
 });
@@ -230,7 +230,7 @@ const formatDate = (date) => {
 }
 
 // Constants
-const totalInputs = 20; // 6 zones + 2 technicals + 4 fundamentals + 8 order entry fields
+const totalInputs = 12; // 6 zones + 2 technicals + 4 fundamentals
 
 // Computed properties
 const progressPercentage = computed(() => {
@@ -287,7 +287,7 @@ function updateProgress() {
         (orderEntryData.value.stopPrice ? 1 : 0) +
         (orderEntryData.value.targetPrice ? 1 : 0) +
         (orderEntryData.value.positionType ? 1 : 0) +
-        (orderEntryData.value.outcome ? 1 : 0) +
+        (orderEntryData.value.trade_status ? 1 : 0) +
         (orderEntryData.value.rrr ? 1 : 0) +
         (orderEntryData.value.screenshot ? 1 : 0);
 }
@@ -295,7 +295,7 @@ function updateProgress() {
 function resetWizard() {
     currentStep.value = 1;
     zoneQualifiersData.value = {
-        asset: '',
+        symbol: '',
         selectedZoneQualifiers: []
     };
     technicalsData.value = {
@@ -315,7 +315,7 @@ function resetWizard() {
         stopPrice: '',
         targetPrice: '',
         rrr: '',
-        outcome: '',
+        trade_status: '',
         screenshot: null,
         notes: ''
     };
@@ -325,22 +325,24 @@ function resetWizard() {
 function submitChecklist() {
     if (!canSubmit.value) return;
 
-    router.post(route('checklists.store'), {
+    const submitData = {
         zone_qualifiers: zoneQualifiersData.value.selectedZoneQualifiers,
         technicals: technicalsData.value,
         fundamentals: fundamentalsData.value,
         score: evaluationScoreRef.value?.calculatedScore || 0,
-        asset: zoneQualifiersData.value.asset,
+        symbol: zoneQualifiersData.value.symbol,
         notes: orderEntryData.value.notes,
         entry_date: formatDate(orderEntryData.value.entryDate),
         entry_price: orderEntryData.value.entryPrice,
         stop_price: orderEntryData.value.stopPrice,
         target_price: orderEntryData.value.targetPrice,
         position_type: orderEntryData.value.positionType,
-        outcome: orderEntryData.value.outcome,
+        trade_status: orderEntryData.value.trade_status,
         rrr: orderEntryData.value.rrr,
         screenshot: orderEntryData.value.screenshot
-    }, {
+    };
+
+    router.post(route('checklists.store'), submitData, {
         preserveState: true,
         onSuccess: () => {
             toastRef.value?.showSuccess('Success', 'Checklist saved successfully!')
@@ -350,7 +352,9 @@ function submitChecklist() {
             toastRef.value?.showError('Error', 'Failed to save checklist. Please try again.')
             console.error('Submission error:', errors);
         }
+        
     });
+    console.log(zoneQualifiersData.value.symbol);
 }
 </script>
 

@@ -1,0 +1,226 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\TradeEntry;
+use App\Models\User;
+use App\Models\Checklist;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TradeEntry>
+ */
+class TradeEntryFactory extends Factory
+{
+    protected $model = TradeEntry::class;
+
+    /**
+     * Define the model's default state.
+     */
+    public function definition(): array
+    {
+        $entryPrice = $this->faker->randomFloat(4, 1.0000, 2.0000);
+        $isLong = $this->faker->boolean();
+
+        // Calculate realistic stop and target prices
+        $stopDistance = $this->faker->randomFloat(4, 0.0020, 0.0100); // 20-100 pips
+        $targetDistance = $this->faker->randomFloat(4, 0.0040, 0.0200); // 40-200 pips
+
+        $stopPrice = $isLong ? $entryPrice - $stopDistance : $entryPrice + $stopDistance;
+        $targetPrice = $isLong ? $entryPrice + $targetDistance : $entryPrice - $targetDistance;
+
+        return [
+            'user_id' => 1,
+            'checklist_id' => Checklist::factory(),
+            'entry_date' => $this->faker->dateTimeBetween('-2 weeks', 'now'),
+            'position_type' => $isLong ? 'Long' : 'Short',
+            'entry_price' => $entryPrice,
+            'stop_price' => $stopPrice,
+            'target_price' => $targetPrice,
+            'rrr' => round($targetDistance / $stopDistance, 2),
+            'trade_status' => 'pending',
+            'screenshot_path' => $this->faker->optional(0.3)->imageUrl(800, 600, 'business', true, 'Chart'),
+            'notes' => $this->faker->optional(0.6)->sentence(),
+        ];
+    }
+
+    /**
+     * Order is pending execution
+     */
+    public function pending()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'pending',
+                'screenshot_path' => $this->faker->optional(0.4)->imageUrl(800, 600, 'business', true, 'Setup'),
+                'notes' => $this->faker->optional(0.7)->sentence(),
+            ];
+        });
+    }
+
+    /**
+     * Position is active/running
+     */
+    public function active()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'active',
+                'entry_date' => $this->faker->dateTimeBetween('-1 week', 'now'),
+                'screenshot_path' => $this->faker->optional(0.6)->imageUrl(800, 600, 'business', true, 'Active'),
+                'notes' => $this->faker->optional(0.5)->sentence(),
+            ];
+        });
+    }
+
+    /**
+     * Trade is completed with outcome
+     */
+    public function completed()
+    {
+        return $this->state(function (array $attributes) {
+            $trade_status = $this->faker->randomElement(['win', 'loss', 'breakeven']);
+
+            // Use current status format from migration
+            $statusMap = [
+                'win' => 'win',
+                'loss' => 'loss',
+                'breakeven' => 'breakeven',
+            ];
+
+            // Calculate realistic R:R based on outcome
+            $rrr = $this->calculateRRByOutcome($trade_status);
+
+            return [
+                'trade_status' => $statusMap[$trade_status],
+                'rrr' => $rrr,
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.7)->imageUrl(800, 600, 'business', true, 'Closed'),
+                'notes' => $this->getOutcomeNote($trade_status),
+            ];
+        });
+    }
+
+    /**
+     * Trade completed with win
+     */
+    public function completedWin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'win',
+                'rrr' => $this->calculateRRByOutcome('win'),
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.8)->imageUrl(800, 600, 'business', true, 'Win'),
+                'notes' => $this->getOutcomeNote('win'),
+            ];
+        });
+    }
+
+    /**
+     * Trade completed with loss
+     */
+    public function completedLoss()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'loss',
+                'rrr' => $this->calculateRRByOutcome('loss'),
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.6)->imageUrl(800, 600, 'business', true, 'Loss'),
+                'notes' => $this->getOutcomeNote('loss'),
+            ];
+        });
+    }
+
+    /**
+     * Trade completed at breakeven
+     */
+    public function completedBreakeven()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'breakeven',
+                'rrr' => $this->calculateRRByOutcome('breakeven'),
+                'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
+                'screenshot_path' => $this->faker->optional(0.5)->imageUrl(800, 600, 'business', true, 'Breakeven'),
+                'notes' => $this->getOutcomeNote('breakeven'),
+            ];
+        });
+    }
+
+    /**
+     * Trade was cancelled before execution
+     */
+    public function cancelled()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'trade_status' => 'cancelled',
+                'screenshot_path' => $this->faker->optional(0.2)->imageUrl(800, 600, 'business', true, 'Cancelled'),
+                'notes' => $this->faker->randomElement([
+                    'Market conditions changed, cancelled order.',
+                    'Better opportunity emerged, cancelled this trade.',
+                    'Risk management - cancelled due to news.',
+                    'Setup invalidated, order cancelled.',
+                ]),
+            ];
+        });
+    }
+
+    /**
+     * Calculate realistic R:R ratio based on trade outcome
+     */
+    private function calculateRRByOutcome($outcome)
+    {
+        switch ($outcome) {
+            case 'win':
+                // Winners can have various R:R ratios (0.5 to 3.0)
+                return $this->faker->randomFloat(2, 0.5, 3.0);
+
+            case 'loss':
+                // Losses should be -1 (full stop loss) or partial loss
+                return $this->faker->randomElement([
+                    -1.0,  // Full stop loss hit (most common)
+                    -0.8,  // Partial loss (rare - maybe scaled out)
+                    -0.9,  // Almost full stop loss
+                ]);
+
+            case 'breakeven':
+                // Breakeven should be around 0
+                return $this->faker->randomFloat(2, -0.1, 0.1);
+
+            default:
+                return 1.0;
+        }
+    }
+
+    /**
+     * Generate realistic notes based on outcome
+     */
+    private function getOutcomeNote($outcome)
+    {
+        $notes = [
+            'win' => [
+                'Trade hit target perfectly. Good entry timing.',
+                'Market moved as expected, solid profit.',
+                'Excellent risk-reward execution.',
+                'Target reached, managed position well.',
+            ],
+            'loss' => [
+                'Stop loss hit, but risk was managed.',
+                'Market moved against us, cut losses.',
+                'Setup failed, stopped out quickly.',
+                'Unexpected news event triggered stop.',
+            ],
+            'breakeven' => [
+                'Closed at breakeven due to uncertainty.',
+                'Market was choppy, took breakeven exit.',
+                'Protected capital, no loss or gain.',
+                'Risk management - closed flat.',
+            ]
+        ];
+
+        return $this->faker->optional(0.8)->randomElement($notes[$outcome]);
+    }
+}

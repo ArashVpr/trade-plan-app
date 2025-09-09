@@ -1,10 +1,7 @@
 <template>
     <AppLayout>
-        <div class="max-w-5xl mx-auto p-6">
+        <div class="max-w-5xl mx-auto">
             <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
-
-            <Button label="Create New Checklist" icon="pi pi-plus" @click="router.get(route('home'))" class="mb-4" />
-
             <Card>
                 <template #title>
                     <h2 class="text-xl font-semibold text-blue-900">Saved Checklists</h2>
@@ -26,9 +23,9 @@
                                 </template>
                             </Column>
 
-                            <Column field="asset" header="Instrument" :style="{ width: '100px' }">
+                            <Column field="symbol" header="Symbol" :style="{ width: '100px' }">
                                 <template #body="slotProps">
-                                    <Chip :label="slotProps.data.asset || 'N/A'" size="small" />
+                                    <Chip :label="slotProps.data.symbol || 'N/A'" size="small" />
                                 </template>
                             </Column>
 
@@ -127,14 +124,27 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { router, Link } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import { onMounted } from 'vue'
+import { router, Link, usePage } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { route } from 'ziggy-js'
 
 const confirm = useConfirm()
 const toast = useToast()
+const page = usePage()
+
+onMounted(() => {
+    if (page.props.flash?.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: page.props.flash.success,
+            life: 3000
+        })
+    }
+})
 
 const props = defineProps({
     checklists: Object
@@ -143,65 +153,58 @@ const props = defineProps({
 // Helper function to determine score severity for Tag component
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
-    if (score <= 80) return 'warning'
+    if (score <= 80) return 'warn'
     return 'success'
 }
 
-// Helper function to determine outcome severity
-const getOutcomeSeverity = (outcome) => {
-    switch (outcome) {
-        case 'win': return 'success'
-        case 'loss': return 'danger'
-        case 'breakeven': return 'warning'
-        default: return 'secondary'
-    }
-}
-
-// Helper function to get trade status
+// Helper function to get trade status - matches Dashboard and Show.vue
 const getTradeStatus = (checklist) => {
-    if (!checklist.trade_entry) {
+    const tradeEntry = checklist.trade_entry
+
+    if (!tradeEntry) {
         return 'Analysis Only'
     }
-    if (checklist.trade_entry.outcome) {
-        // Show the outcome (Win/Loss/Breakeven) if trade is completed
-        return checklist.trade_entry.outcome.charAt(0).toUpperCase() + checklist.trade_entry.outcome.slice(1)
+
+    // Check if we have the new trade_status field (after migration)
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'Pending'
+            case 'active': return 'Open'
+            case 'win': return 'Win'
+            case 'loss': return 'Loss'
+            case 'breakeven': return 'Breakeven'
+            case 'cancelled': return 'Cancelled'
+            default: return 'Unknown'
+        }
     }
-    // Show position type if trade is taken but not completed
-    return checklist.trade_entry.position_type || 'Trade Pending'
+
+    return 'Trade Pending'
 }
 
-// Helper function to get trade status severity
+// Helper function to get trade status severity - matches Dashboard and Show.vue
 const getTradeStatusSeverity = (checklist) => {
-    if (!checklist.trade_entry) {
+    const tradeEntry = checklist.trade_entry
+
+    if (!tradeEntry) {
         return 'info'  // Blue for analysis only
     }
-    if (checklist.trade_entry.outcome) {
-        // Use outcome severity for completed trades
-        return getOutcomeSeverity(checklist.trade_entry.outcome)
+
+    // Check if we have the new trade_status field
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'info'   // Blue
+            case 'active': return 'warn'    // Yellow
+            case 'win': return 'success' // Green
+            case 'loss': return 'danger'  // Red
+            case 'breakeven': return 'info' // Yellow
+            case 'cancelled': return 'secondary' // Gray
+            default: return 'secondary'
+        }
     }
-    // Use position severity for pending trades
-    return checklist.trade_entry.position_type === 'Long' ? 'success' : 'danger'
+    return 'secondary'  // Default for unknown status
 }
 
 const confirmDelete = (checklistId) => {
-    // confirm.require({
-    //     group: 'headless',
-    //     header: 'Delete Checklist',
-    //     message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
-    //     accept: () => {
-
-    //         router.delete(route('checklists.destroy', checklistId), {}, {
-    //             onSuccess: () => {
-    //                 toast.add({ severity: 'success', summary: 'Success', detail: 'Checklist deleted', life: 3000 })
-    //             },
-    //             onError: (errors) => {
-    //                 console.error('Delete error:', errors)
-    //                 toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete checklist.', life: 3000 })
-    //             }
-    //         }
-    //         )
-    //     }
-    // })
     confirm.require({
         message: 'Do you want to delete this checklist?',
         header: 'Danger Zone',

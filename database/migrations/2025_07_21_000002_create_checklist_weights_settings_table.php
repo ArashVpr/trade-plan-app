@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('user_settings', function (Blueprint $table) {
+        Schema::create('checklist_weights', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->integer('zone_fresh_weight')->default(5);
@@ -36,7 +36,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('user_settings', function (Blueprint $table) {
+        Schema::table('checklist_weights', function (Blueprint $table) {
             $table->dropColumn([
                 'zone_fresh_weight',
                 'zone_original_weight',

@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="max-w-5xl mx-auto p-6">
+        <div class="max-w-5xl mx-auto">
             <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist Details</h1>
 
             <!-- Action Buttons -->
@@ -27,10 +27,10 @@
                     </template>
                     <template #content>
                         <div class="space-y-4">
-                            <!-- Asset -->
+                            <!-- Symbol -->
                             <div class="field">
-                                <label class="block text-sm font-medium mb-1">Asset</label>
-                                <Chip :label="checklist.asset || 'N/A'" />
+                                <label class="block text-sm font-medium mb-1">Symbol</label>
+                                <Chip :label="checklist.symbol || 'N/A'" />
                             </div>
 
                             <!-- Score -->
@@ -186,18 +186,18 @@
                                     readonly class="w-full" />
                             </div>
 
-                            <!-- Outcome -->
-                            <div class="field">
-                                <label class="block text-sm font-medium mb-1">Outcome</label>
-                                <Tag :value="tradeEntry.outcome || 'N/A'"
-                                    :severity="getOutcomeSeverity(tradeEntry.outcome)" />
-                            </div>
 
                             <!-- R:R -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Risk:Reward</label>
                                 <InputText :value="tradeEntry.rrr ? Number(tradeEntry.rrr).toFixed(2) : 'N/A'" readonly
                                     class="w-full" />
+                            </div>
+                            <!-- Trade Status -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                <Tag :value="getTradeStatus(tradeEntry)"
+                                    :severity="getTradeStatusSeverity(tradeEntry)" />
                             </div>
                         </div>
 
@@ -234,16 +234,16 @@
         </div>
 
         <!-- PrimeVue Dialog Components -->
-        <ConfirmDialog></ConfirmDialog>
+        <ConfirmDialog />
         <Toast />
     </AppLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { Radar } from 'vue-chartjs'
 import { Chart, registerables } from 'chart.js'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { route } from 'ziggy-js'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
@@ -253,16 +253,28 @@ Chart.register(...registerables)
 
 const confirm = useConfirm()
 const toast = useToast()
+const page = usePage()
 
 const props = defineProps({
     checklist: Object,
-    tradeEntry: Object
+    tradeEntry: Object,
+})
+
+onMounted(() => {
+    if (page.props.flash?.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: page.props.flash.success,
+            life: 3000,
+        })
+    }
 })
 
 // Helper functions for PrimeVue components
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
-    if (score <= 80) return 'warning'
+    if (score <= 80) return 'warn'
     return 'success'
 }
 
@@ -272,11 +284,52 @@ const getPositionDisplay = (positionType) => {
     return 'N/A'
 }
 
-const getOutcomeSeverity = (outcome) => {
-    if (outcome === 'win') return 'success'
-    if (outcome === 'loss') return 'danger'
-    if (outcome === 'breakeven') return 'warning'
-    return 'secondary'
+/**
+ * Get human-readable trade status - matches DashboardController logic
+ */
+const getTradeStatus = (tradeEntry) => {
+    if (!tradeEntry) {
+        return 'Analysis Only'
+    }
+
+    // Check if we have the new trade_status field (after migration)
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'Pending'
+            case 'active': return 'Open'
+            case 'win': return 'Win'
+            case 'loss': return 'Loss'
+            case 'breakeven': return 'Breakeven'
+            case 'cancelled': return 'Cancelled'
+            default: return 'Unknown'
+        }
+    }
+
+    return 'Trade Pending'
+}
+
+/**
+ * Get PrimeVue severity for trade status - matches DashboardController logic
+ */
+const getTradeStatusSeverity = (tradeEntry) => {
+    if (!tradeEntry) {
+        return 'info' // Blue for analysis only
+    }
+
+    // Check if we have the new trade_status field
+    if (tradeEntry.trade_status) {
+        switch (tradeEntry.trade_status) {
+            case 'pending': return 'warn'   // Yellow  
+            case 'active': return 'info'    // Yellow
+            case 'win': return 'success'     // Green
+            case 'loss': return 'danger'     // Red  
+            case 'breakeven': return 'warn' // Yellow
+            case 'cancelled': return 'secondary' // Gray
+            default: return 'secondary'
+        }
+    }
+
+    return 'warn' // Yellow for pending
 }
 
 const confirmDelete = () => {
