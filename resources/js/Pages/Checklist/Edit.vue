@@ -37,8 +37,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Symbol</label>
-                            <Select v-model="form.symbol" :options="['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY']"
-                                placeholder="Select Symbol" class="w-full" :invalid="!!$errors.symbol" />
+                            <Select v-model="form.symbol" :options="symbolOptions" placeholder="Select Symbol"
+                                class="w-full" :invalid="!!$errors.symbol" />
                             <Message v-if="$errors.symbol" severity="error" :closable="false">{{ $errors.symbol }}
                             </Message>
                         </div>
@@ -47,7 +47,7 @@
                             <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
                                 iconDisplay="input" :invalid="!!$errors.entry_date" />
                             <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
-                            }}</Message>
+                                }}</Message>
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
@@ -278,10 +278,23 @@ const props = defineProps({
     settings: Object,
     tradeEntry: Object,
     errors: Object,
+    instruments: {
+        type: Array,
+        default: () => []
+    }
 })
 
 // Computed property to access errors in template
 const $errors = computed(() => props.errors || {})
+
+// Computed property for symbol options
+const symbolOptions = computed(() => {
+    if (props.instruments && props.instruments.length > 0) {
+        return props.instruments.map(inst => inst.symbol)
+    }
+    // Fallback to original hardcoded list
+    return ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY']
+})
 
 // Check if we should focus on order entry section
 const shouldHighlightOrderEntry = ref(false)

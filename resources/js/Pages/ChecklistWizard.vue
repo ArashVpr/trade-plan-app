@@ -19,7 +19,7 @@
                         <template #content>
                             <!-- Step 1: Zone Qualifiers -->
                             <ZoneQualifiersStep v-if="currentStep === 1" v-model="zoneQualifiersData"
-                                @progress-updated="updateProgress" />
+                                :instruments="instruments" @progress-updated="updateProgress" />
 
                             <!-- Step 2: Technicals -->
                             <TechnicalsStep v-if="currentStep === 2" v-model="technicalsData"
@@ -73,10 +73,10 @@
                             <div>
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
                                 <div class="space-y-1">
-                                    <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not                                        selected'
+                                    <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not selected'
                                         }}
                                     </p>
-                                    <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not                                        selected' }}
+                                    <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not selected' }}
                                     </p>
                                 </div>
                             </div>
@@ -84,13 +84,13 @@
                             <div>
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
                                 <div class="space-y-1">
-                                    <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not                                        selected' }}</p>
+                                    <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not selected' }}</p>
                                     <p class="text-sm text-gray-600">Seasonal Confluence: {{
                                         fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
                                     <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials
                                         ||
                                         'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not                                        selected' }}</p>
+                                    <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not selected' }}</p>
                                 </div>
                             </div>
 
@@ -148,7 +148,11 @@ import AppToast from '@/Components/UI/AppToast.vue';
 import EvaluationScore from '@/Components/UI/EvaluationScore.vue';
 
 const props = defineProps({
-    settings: Object
+    settings: Object,
+    instruments: {
+        type: Array,
+        default: () => []
+    }
 })
 
 const toast = useToast();
@@ -352,7 +356,7 @@ function submitChecklist() {
             toastRef.value?.showError('Error', 'Failed to save checklist. Please try again.')
             console.error('Submission error:', errors);
         }
-        
+
     });
     console.log(zoneQualifiersData.value.symbol);
 }

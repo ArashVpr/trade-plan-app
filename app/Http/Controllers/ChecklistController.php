@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use App\Models\TradeEntry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
+use App\Models\Instrument;
 
 
 class ChecklistController extends Controller
@@ -21,7 +22,8 @@ class ChecklistController extends Controller
             ->where('user_id', Auth::id())
             ->latest()
             ->paginate(10);
-        return Inertia::render('Checklist/Index', ['checklists' => $checklists]);
+        $instruments = Instrument::active()->get();
+        return Inertia::render('Checklist/Index', ['checklists' => $checklists, 'instruments' => $instruments]);
     }
     public function store(Request $request)
     {
@@ -80,10 +82,12 @@ class ChecklistController extends Controller
     {
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
+        $instruments = Instrument::active()->get();
 
         return Inertia::render('Checklist/Show', [
             'checklist' => $checklist,
             'tradeEntry' => $tradeEntry,
+            'instruments' => $instruments,
         ]);
     }
     public function edit(Checklist $checklist)
@@ -94,11 +98,13 @@ class ChecklistController extends Controller
         );
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
+        $instruments = Instrument::active()->get();
 
         return Inertia::render('Checklist/Edit', [
             'checklist' => $checklist,
             'settings' => $settings,
             'tradeEntry' => $tradeEntry,
+            'instruments' => $instruments,
         ]);
     }
     public function update(Request $request, Checklist $checklist)
@@ -185,8 +191,10 @@ class ChecklistController extends Controller
         $settings = ChecklistWeights::firstOrCreate(
             ['user_id' => Auth::id()],
         );
+        $instruments = Instrument::active()->get();
         return Inertia::render('ChecklistWizard', [
             'settings' => $settings,
+            'instruments' => $instruments,
         ]);
     }
 }

@@ -28,7 +28,9 @@ class ChecklistFactory extends Factory
         $zoneQualifiers = ['Fresh', 'Original', 'Flip', 'LOL', 'Minimum 1:2 Profit Margin', 'Big Brother Coverage'];
         $selectedQualifiers = $this->faker->randomElements($zoneQualifiers, $this->faker->numberBetween(1, 4));
 
-        $symbols = ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY'];
+        // Get symbols from database instead of hardcoded array
+        $instruments = \App\Models\Instrument::active()->pluck('symbol')->toArray();
+        $symbols = !empty($instruments) ? $instruments : ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY'];
 
         return [
             'user_id' => 1, // Using static user ID for now, could use User::factory()
