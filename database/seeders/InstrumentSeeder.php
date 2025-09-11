@@ -53,16 +53,18 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'RICE', 'name' => 'Rice', 'type' => 'commodity', 'category' => 'agricultural'],
 
 
-            // Popular Commodities
-            ['symbol' => 'XAUUSD', 'name' => 'Gold vs US Dollar', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'XAGUSD', 'name' => 'Silver vs US Dollar', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'USOIL', 'name' => 'West Texas Intermediate Crude Oil', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'UKOIL', 'name' => 'Brent Crude Oil', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'NGAS', 'name' => 'Natural Gas', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'HEAT', 'name' => 'Heating Oil', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'XCUUSD', 'name' => 'Copper vs US Dollar', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'XPTUSD', 'name' => 'Platinum vs US Dollar', 'type' => 'commodity', 'category' => 'popular'],
-            ['symbol' => 'XPDUSD', 'name' => 'Palladium vs US Dollar', 'type' => 'commodity', 'category' => 'popular'],
+            // Metal Commodities
+            ['symbol' => 'XAUUSD', 'name' => 'Gold vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
+            ['symbol' => 'XAGUSD', 'name' => 'Silver vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
+            ['symbol' => 'XCUUSD', 'name' => 'Copper vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
+            ['symbol' => 'XPTUSD', 'name' => 'Platinum vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
+            ['symbol' => 'XPDUSD', 'name' => 'Palladium vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
+
+            // Energy Commodities
+            ['symbol' => 'USOIL', 'name' => 'West Texas Intermediate Crude Oil', 'type' => 'commodity', 'category' => 'energy'],
+            ['symbol' => 'UKOIL', 'name' => 'Brent Crude Oil', 'type' => 'commodity', 'category' => 'energy'],
+            ['symbol' => 'NGAS', 'name' => 'Natural Gas', 'type' => 'commodity', 'category' => 'energy'],
+            ['symbol' => 'HEAT', 'name' => 'Heating Oil', 'type' => 'commodity', 'category' => 'energy'],
 
             // Indices
             ['symbol' => 'DJI', 'name' => 'Dow Jones Industrial Average', 'type' => 'index', 'category' => null],

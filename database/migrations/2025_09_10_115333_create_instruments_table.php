@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('symbol', 20)->unique(); // e.g., 'EURUSD', 'AAPL'
             $table->string('name'); // e.g., 'Euro vs US Dollar', 'Apple Inc.'
             $table->enum('type', ['forex', 'commodity', 'index', 'stock']); // Instrument type
-            $table->enum('category', ['major', 'minor', 'popular', 'top100'])->nullable(); // Sub-category
+            $table->enum('category', ['major', 'minor', 'agricultural', 'metal', 'energy', 'top100'])->nullable(); // Sub-category
             $table->string('exchange')->nullable(); // e.g., 'NYSE', 'NASDAQ' for stocks
             $table->boolean('is_active')->default(true); // To enable/disable instruments
             $table->timestamps();
