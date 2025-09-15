@@ -18,6 +18,7 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'AUDUSD', 'name' => 'Australian Dollar vs US Dollar', 'type' => 'forex', 'category' => 'major'],
             ['symbol' => 'USDCAD', 'name' => 'US Dollar vs Canadian Dollar', 'type' => 'forex', 'category' => 'major'],
             ['symbol' => 'NZDUSD', 'name' => 'New Zealand Dollar vs US Dollar', 'type' => 'forex', 'category' => 'major'],
+            ['symbol' => 'USDX', 'name' => 'US Dollar Index', 'type' => 'forex', 'category' => 'index'],
 
             // Forex Minors
             ['symbol' => 'EURGBP', 'name' => 'Euro vs British Pound', 'type' => 'forex', 'category' => 'minor'],

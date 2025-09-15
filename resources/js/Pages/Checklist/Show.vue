@@ -94,7 +94,7 @@
                                             :severity="checklist.fundamentals?.valuation ? 'info' : 'secondary'" />
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-medium">Seasonal Confluence:</span>
+                                        <span class="text-sm font-medium">Seasonality:</span>
                                         <Tag :value="checklist.fundamentals?.seasonalConfluence || 'Not selected'"
                                             :severity="checklist.fundamentals?.seasonalConfluence ? 'info' : 'secondary'" />
                                     </div>
@@ -375,8 +375,8 @@ const calculateCategoryScores = (checklist) => {
 
     // Fundamentals score
     scores.Fundamentals += ['Undervalued', 'Overvalued'].includes(checklist.fundamentals.valuation) ? 13 : 0;
-    scores.Fundamentals += checklist.fundamentals.seasonalConfluence === 'Yes' ? 6 : 0;
-    scores.Fundamentals += checklist.fundamentals.nonCommercials === 'Divergence' ? 15 : 0;
+    scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.seasonalConfluence) ? 6 : 0;
+    scores.Fundamentals += ['Bullish Divergence', 'Bearish Divergence'].includes(checklist.fundamentals.nonCommercials) ? 15 : 0;
     scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.cotIndex) ? 12 : 0;
     scores.Fundamentals = Math.min(scores.Fundamentals, maxValues.Fundamentals);
 

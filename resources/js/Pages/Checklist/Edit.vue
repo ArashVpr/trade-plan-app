@@ -104,9 +104,10 @@
                                             :closable="false">{{ $errors['fundamentals.valuation'] }}</Message>
                                     </div>
                                     <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Seasonal Confluence</label>
-                                        <Select v-model="form.fundamentals.seasonalConfluence" :options="['Yes', 'No']"
-                                            placeholder="Select Seasonal Confluence" class="w-full"
+                                        <label class="block text-sm font-medium mb-1">Seasonality</label>
+                                        <Select v-model="form.fundamentals.seasonalConfluence"
+                                            :options="['Bullish', 'Neutral', 'Bearish']"
+                                            placeholder="Select Seasonality" class="w-full"
                                             :invalid="!!$errors['fundamentals.seasonalConfluence']" />
                                         <Message v-if="$errors['fundamentals.seasonalConfluence']" severity="error"
                                             :closable="false">{{ $errors['fundamentals.seasonalConfluence'] }}</Message>
@@ -114,7 +115,7 @@
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Non-Commercials</label>
                                         <Select v-model="form.fundamentals.nonCommercials"
-                                            :options="['Divergence', 'No-Divergence']"
+                                            :options="['Bullish Divergence', 'Neutral', 'Bearish Divergence']"
                                             placeholder="Select Non-Commercials" class="w-full"
                                             :invalid="!!$errors['fundamentals.nonCommercials']" />
                                         <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
@@ -437,11 +438,11 @@ const evaluationScore = () => {
         raw += Number(props.settings.fundamental_valuation_weight || 0);
     }
     // Fundamentals: Seasonal
-    if (form.fundamentals.seasonalConfluence === 'Yes') {
+    if (['Bullish', 'Bearish'].includes(form.fundamentals.seasonalConfluence)) {
         raw += Number(props.settings.fundamental_seasonal_weight || 0);
     }
     // Fundamentals: Non-Commercial
-    if (form.fundamentals.nonCommercials === 'Divergence') {
+    if (['Bullish Divergence', 'Bearish Divergence'].includes(form.fundamentals.nonCommercials)) {
         raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
     }
     // Fundamentals: CoT Index

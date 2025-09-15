@@ -73,8 +73,7 @@
                             <div>
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
                                 <div class="space-y-1">
-                                    <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not selected'
-                                        }}
+                                    <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not selected' }}
                                     </p>
                                     <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not selected' }}
                                     </p>
@@ -85,18 +84,15 @@
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
                                 <div class="space-y-1">
                                     <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">Seasonal Confluence: {{
-                                        fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials
-                                        ||
-                                        'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600">Seasonality: {{ fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials || 'Not selected' }}</p>
                                     <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not selected' }}</p>
                                 </div>
                             </div>
 
                             <div>
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{
-                                    selectedZoneQualifiersCount }})</h3>
+                                selectedZoneQualifiersCount }})</h3>
                                 <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
                                     <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
                                         {{ qualifier }}
