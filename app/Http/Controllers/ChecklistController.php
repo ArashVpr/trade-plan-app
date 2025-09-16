@@ -84,10 +84,16 @@ class ChecklistController extends Controller
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
         $instruments = Instrument::active()->get();
 
+        // Get user's checklist weights for directional bias calculation
+        $settings = ChecklistWeights::firstOrCreate(
+            ['user_id' => Auth::id()],
+        );
+
         return Inertia::render('Checklist/Show', [
             'checklist' => $checklist,
             'tradeEntry' => $tradeEntry,
             'instruments' => $instruments,
+            'settings' => $settings,
         ]);
     }
     public function edit(Checklist $checklist)

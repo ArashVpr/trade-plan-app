@@ -45,6 +45,21 @@
                                 </div>
                             </div>
 
+                            <!-- Directional Bias -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Directional Bias</label>
+                                <div v-if="directionalBias.hasEnoughData" class="flex items-center gap-2">
+                                    <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
+                                        class="text-lg font-bold px-4 py-2" />
+                                    <span class="text-sm text-gray-600 font-medium">
+                                        {{ directionalBias.confidence }}%
+                                    </span>
+                                </div>
+                                <div v-else class="text-sm text-gray-500">
+                                    No directional signals in analysis
+                                </div>
+                            </div>
+
                             <!-- Created Date -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Created</label>
@@ -248,6 +263,7 @@ import { route } from 'ziggy-js'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useDirectionalBias } from '@/composables/useDirectionalBias.js'
 
 Chart.register(...registerables)
 
@@ -258,7 +274,15 @@ const page = usePage()
 const props = defineProps({
     checklist: Object,
     tradeEntry: Object,
+    settings: Object,
 })
+
+// Calculate directional bias for this checklist
+const { directionalBias } = useDirectionalBias(
+    computed(() => props.checklist.technicals),
+    computed(() => props.checklist.fundamentals),
+    computed(() => props.settings)
+)
 
 onMounted(() => {
     if (page.props.flash?.success) {
