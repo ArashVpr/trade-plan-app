@@ -133,10 +133,10 @@ const calculatedScore = computed(() => {
     if (['Undervalued', 'Overvalued'].includes(props.fundamentals.valuation)) {
         raw += Number(props.settings.fundamental_valuation_weight || 0)
     }
-    if (props.fundamentals.seasonalConfluence === 'Yes') {
+    if (['Bullish', 'Bearish'].includes(props.fundamentals.seasonalConfluence)) {
         raw += Number(props.settings.fundamental_seasonal_weight || 0)
     }
-    if (props.fundamentals.nonCommercials === 'Divergence') {
+    if (['Bullish Divergence', 'Bearish Divergence'].includes(props.fundamentals.nonCommercials)) {
         raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0)
     }
     if (['Bullish', 'Bearish'].includes(props.fundamentals.cotIndex)) {

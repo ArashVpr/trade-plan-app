@@ -41,8 +41,8 @@ class ChecklistFactory extends Factory
             ],
             'fundamentals' => [
                 'valuation' => $this->faker->randomElement(['Overvalued', 'Neutral', 'Undervalued']),
-                'seasonalConfluence' => $this->faker->randomElement(['Yes', 'No']),
-                'nonCommercials' => $this->faker->randomElement(['Divergence', 'No-Divergence']),
+                'seasonalConfluence' => $this->faker->randomElement(['Bullish', 'Neutral', 'Bearish']),
+                'nonCommercials' => $this->faker->randomElement(['Bullish Divergence', 'Neutral', 'Bearish Divergence']),
                 'cotIndex' => $this->faker->randomElement(['Bullish', 'Neutral', 'Bearish']),
             ],
             'score' => $this->faker->numberBetween(0, 100),

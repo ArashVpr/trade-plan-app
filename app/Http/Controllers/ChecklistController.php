@@ -23,7 +23,17 @@ class ChecklistController extends Controller
             ->latest()
             ->paginate(10);
         $instruments = Instrument::active()->get();
-        return Inertia::render('Checklist/Index', ['checklists' => $checklists, 'instruments' => $instruments]);
+
+        // Get user's checklist weights for directional bias calculation
+        $settings = ChecklistWeights::firstOrCreate(
+            ['user_id' => Auth::id()],
+        );
+
+        return Inertia::render('Checklist/Index', [
+            'checklists' => $checklists,
+            'instruments' => $instruments,
+            'settings' => $settings,
+        ]);
     }
     public function store(Request $request)
     {
@@ -84,10 +94,16 @@ class ChecklistController extends Controller
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
         $instruments = Instrument::active()->get();
 
+        // Get user's checklist weights for directional bias calculation
+        $settings = ChecklistWeights::firstOrCreate(
+            ['user_id' => Auth::id()],
+        );
+
         return Inertia::render('Checklist/Show', [
             'checklist' => $checklist,
             'tradeEntry' => $tradeEntry,
             'instruments' => $instruments,
+            'settings' => $settings,
         ]);
     }
     public function edit(Checklist $checklist)
@@ -120,11 +136,10 @@ class ChecklistController extends Controller
             'technicals.direction' => 'required|string|in:Correction,Impulsion',
             'fundamentals' => 'array|required',
             'fundamentals.valuation' => 'required|string|in:Overvalued,Neutral,Undervalued',
-            'fundamentals.seasonalConfluence' => 'required|string|in:Yes,No',
-            'fundamentals.nonCommercials' => 'required|string|in:Divergence,No-Divergence',
+            'fundamentals.seasonalConfluence' => 'required|string|in:Bullish,Neutral,Bearish',
+            'fundamentals.nonCommercials' => 'required|string|in:Bullish Divergence,Neutral,Bearish Divergence',
             'fundamentals.cotIndex' => 'required|string|in:Bullish,Neutral,Bearish',
             'score' => 'required|integer|min:0|max:170',
-            'symbol' => 'nullable|string|max:255',
             // Order entry - now optional for updates too
             'entry_date' => 'nullable|date',
             'position_type' => 'nullable|in:Long,Short',
@@ -138,13 +153,12 @@ class ChecklistController extends Controller
 
         // Update both Checklist and its TradeEntry atomically
         DB::transaction(function () use ($checklist, $validated) {
-            // Update checklist fields
+            // Update checklist fields (excluding symbol)
             $checklist->update(Arr::only($validated, [
                 'zone_qualifiers',
                 'technicals',
                 'fundamentals',
                 'score',
-                'symbol',
             ]));
 
             // Only update/create trade entry if order details are provided

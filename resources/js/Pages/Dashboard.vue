@@ -172,6 +172,7 @@
                                         <Tab value="3">🗺️ Zone Patterns</Tab>
                                         <Tab value="4">⚙️ Technical Patterns</Tab>
                                         <Tab value="5">📈 Fundamental Patterns</Tab>
+                                        <Tab value="6">🧭 Directional Bias</Tab>
                                     </TabList>
                                     <TabPanels>
                                         <!-- Top Performing Setups -->
@@ -189,6 +190,12 @@
                                                                     :key="tag.text">
                                                                     <small :class="tag.class">{{ tag.text }}</small>
                                                                 </template>
+                                                                <!-- Directional Bias Badge -->
+                                                                <small
+                                                                    v-if="slotProps.data.dominant_bias && slotProps.data.dominant_bias !== 'Neutral'"
+                                                                    :class="getBiasTagClass(slotProps.data.dominant_bias)">
+                                                                    {{ slotProps.data.dominant_bias }}
+                                                                </small>
                                                             </div>
                                                         </div>
                                                     </template>
@@ -298,6 +305,30 @@
                                                 </div>
                                             </div>
                                         </TabPanel>
+
+                                        <!-- Directional Bias Patterns -->
+                                        <TabPanel value="6">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div v-for="(data, pattern) in stats.pattern_analysis.directional_bias_patterns"
+                                                    :key="pattern"
+                                                    class="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <i :class="getBiasIcon(pattern)"
+                                                                :style="{ color: getBiasColor(pattern) }"></i>
+                                                        </div>
+                                                        <span class="font-semibold text-indigo-900">{{ pattern }}</span>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="text-xl font-bold text-indigo-900">{{ data.count }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-600">
+                                                            {{ data.percentage }}% of wins
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
                                     </TabPanels>
                                 </Tabs>
                             </div>
@@ -344,7 +375,7 @@
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.zones_focused || 0)
                                                     /
-                                            stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
+                                                    stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Masters supply/demand zones
@@ -363,7 +394,7 @@
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.technicals_focused
                                                     || 0)
-                                            / stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
+                                                    / stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Excels at technical price action
@@ -382,7 +413,7 @@
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.fundamentals_focused
                                                     || 0) /
-                                            stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
+                                                    stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2">
                                             Leverages economic fundamentals
@@ -446,6 +477,111 @@
                                                 complete package - combining technical, fundamental, and zone analysis.
                                                 This comprehensive approach is your competitive advantage.
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+            </div>
+
+            <!-- Directional Bias Analysis -->
+            <div class="mb-8" v-if="(stats.pattern_analysis.total_wins || 0) > 0">
+                <Card>
+                    <template #header>
+                        <div class="p-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">🎯 Directional Bias Analysis</h3>
+                            <p class="text-sm text-gray-600 mt-1">Discover your market direction tendencies and
+                                conviction patterns</p>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Bullish Trades -->
+                                <div
+                                    class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                                    <div class="text-4xl font-bold text-green-900 mb-2">
+                                        {{ getBullishWins() }}
+                                    </div>
+                                    <div class="text-sm font-semibold text-green-800 mb-1">📈 Bullish Setups</div>
+                                    <div class="text-xs text-gray-600">
+                                        {{ getBullishPercentage() }}% of winning trades
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2">
+                                        Long position winners
+                                    </div>
+                                </div>
+
+                                <!-- Bearish Trades -->
+                                <div
+                                    class="text-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200">
+                                    <div class="text-4xl font-bold text-red-900 mb-2">
+                                        {{ getBearishWins() }}
+                                    </div>
+                                    <div class="text-sm font-semibold text-red-800 mb-1">📉 Bearish Setups</div>
+                                    <div class="text-xs text-gray-600">
+                                        {{ getBearishPercentage() }}% of winning trades
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2">
+                                        Short position winners
+                                    </div>
+                                </div>
+
+                                <!-- Neutral Trades -->
+                                <div
+                                    class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                                    <div class="text-4xl font-bold text-gray-900 mb-2">
+                                        {{ getNeutralWins() }}
+                                    </div>
+                                    <div class="text-sm font-semibold text-gray-800 mb-1">⚖️ Neutral Setups</div>
+                                    <div class="text-xs text-gray-600">
+                                        {{ getNeutralPercentage() }}% of winning trades
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2">
+                                        Mixed signal winners
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Directional Insights -->
+                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mt-6">
+                                <h5 class="font-semibold text-indigo-900 mb-3">🎯 Your Directional Edge</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div v-if="getBullishWins() > getBearishWins() && getBullishWins() > getNeutralWins()"
+                                        class="flex items-start gap-2">
+                                        <span class="text-green-600">📈</span>
+                                        <div>
+                                            <span class="font-medium">Bullish Specialist:</span> You excel at
+                                            identifying oversold conditions and undervalued assets. Your strength lies
+                                            in timing market bottoms and riding uptrends.
+                                        </div>
+                                    </div>
+                                    <div v-if="getBearishWins() > getBullishWins() && getBearishWins() > getNeutralWins()"
+                                        class="flex items-start gap-2">
+                                        <span class="text-red-600">📉</span>
+                                        <div>
+                                            <span class="font-medium">Bearish Expert:</span> You have a keen eye for
+                                            overvalued markets and distribution patterns. Your edge is in timing market
+                                            tops and profiting from downtrends.
+                                        </div>
+                                    </div>
+                                    <div v-if="Math.abs(getBullishWins() - getBearishWins()) <= 1"
+                                        class="flex items-start gap-2">
+                                        <span class="text-indigo-600">⚖️</span>
+                                        <div>
+                                            <span class="font-medium">Direction Agnostic:</span> You're equally skilled
+                                            at both bullish and bearish setups. This flexibility allows you to profit in
+                                            any market condition.
+                                        </div>
+                                    </div>
+                                    <div v-if="getHighConfidenceWins() > 0" class="flex items-start gap-2">
+                                        <span class="text-blue-600">🎯</span>
+                                        <div>
+                                            <span class="font-medium">High Conviction Trader:</span> {{
+                                                getHighConfidenceWins() }} of your wins came from high-confidence
+                                            directional calls. Trust your analysis when multiple factors align.
                                         </div>
                                     </div>
                                 </div>
@@ -527,6 +663,7 @@ import { computed, onMounted } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
+import { useDirectionalBias } from '@/composables/useDirectionalBias'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 // Toast setup
@@ -707,11 +844,125 @@ const parseSetupTags = (setupString) => {
 
     return tags
 }
+
+// Helper functions for directional bias patterns
+const getBiasIcon = (pattern) => {
+    if (pattern.includes('Buy') || pattern.includes('Bullish')) return 'pi pi-trending-up'
+    if (pattern.includes('Sell') || pattern.includes('Bearish')) return 'pi pi-trending-down'
+    if (pattern.includes('Neutral')) return 'pi pi-minus'
+    return 'pi pi-circle'
+}
+
+const getBiasColor = (pattern) => {
+    if (pattern.includes('Buy') || pattern.includes('Bullish')) return '#16a34a' // green-600
+    if (pattern.includes('Sell') || pattern.includes('Bearish')) return '#dc2626' // red-600
+    if (pattern.includes('Neutral')) return '#6b7280' // gray-500
+    return '#3b82f6' // blue-500
+}
+
+// Helper function for bias severity in setups
+const getBiasSeverityForSetup = (bias) => {
+    if (bias.includes('Strong Buy') || bias.includes('Strong Sell')) return 'success'
+    if (bias.includes('Buy') || bias.includes('Sell')) return 'info'
+    if (bias.includes('Lean')) return 'warning'
+    if (bias.includes('Neutral')) return 'secondary'
+    return 'secondary'
+}
+
+// Helper function for bias tag styling
+const getBiasTagClass = (bias) => {
+    if (bias.includes('Strong Buy')) return 'bg-green-200 text-green-900 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Buy') && !bias.includes('Strong') && !bias.includes('Lean')) return 'bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Lean Buy')) return 'bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Strong Sell')) return 'bg-red-200 text-red-900 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Sell') && !bias.includes('Strong') && !bias.includes('Lean')) return 'bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Lean Sell')) return 'bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-bold'
+    return 'bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold'
+}
+
+// Helper functions for directional bias analysis
+const getBullishWins = () => {
+    const patterns = props.stats.pattern_analysis?.directional_bias_patterns || {}
+    let bullishCount = 0
+
+    Object.entries(patterns).forEach(([key, data]) => {
+        if (key.includes('Buy') || key === 'Bullish') {
+            bullishCount += data.count || 0
+        }
+    })
+
+    return bullishCount
+}
+
+const getBearishWins = () => {
+    const patterns = props.stats.pattern_analysis?.directional_bias_patterns || {}
+    let bearishCount = 0
+
+    Object.entries(patterns).forEach(([key, data]) => {
+        if (key.includes('Sell') || key === 'Bearish') {
+            bearishCount += data.count || 0
+        }
+    })
+
+    return bearishCount
+}
+
+const getNeutralWins = () => {
+    const neutralPattern = props.stats.pattern_analysis?.directional_bias_patterns?.['Neutral']
+    return neutralPattern ? neutralPattern.count : 0
+}
+
+const getBullishPercentage = () => {
+    const totalWins = props.stats.pattern_analysis?.total_wins || 0
+    return totalWins > 0 ? Math.round((getBullishWins() / totalWins) * 100) : 0
+}
+
+const getBearishPercentage = () => {
+    const totalWins = props.stats.pattern_analysis?.total_wins || 0
+    return totalWins > 0 ? Math.round((getBearishWins() / totalWins) * 100) : 0
+}
+
+const getNeutralPercentage = () => {
+    const totalWins = props.stats.pattern_analysis?.total_wins || 0
+    return totalWins > 0 ? Math.round((getNeutralWins() / totalWins) * 100) : 0
+}
+
+const getHighConfidenceWins = () => {
+    const patterns = props.stats.pattern_analysis?.directional_bias_patterns || {}
+    let highConfidenceCount = 0
+
+    Object.entries(patterns).forEach(([key, data]) => {
+        if (key.includes('Strong')) {
+            highConfidenceCount += data.count || 0
+        }
+    })
+
+    return highConfidenceCount
+}
 </script>
 
 <style scoped>
 /* Custom styling for dashboard cards */
 :deep(.p-card-content) {
     padding: 0;
+}
+
+/* Ensure consistent spacing in tab panels */
+:deep(.p-tabpanels) {
+    padding: 1.5rem;
+}
+
+:deep(.p-tabpanel) {
+    padding: 0;
+}
+
+/* Consistent tab button spacing */
+:deep(.p-tablist) {
+    gap: 0;
+}
+
+:deep(.p-tab) {
+    margin-right: 0;
+    padding: 0.75rem 1rem;
 }
 </style>

@@ -25,6 +25,10 @@
                     <div class="flex items-center gap-3">
                         <Tag :value="`Score: ${form.score}/100`" :severity="getScoreSeverity(form.score)"
                             class="text-lg font-bold px-4 py-2" />
+                        <div v-if="directionalBias?.hasEnoughData" class="flex items-center gap-2">
+                            <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
+                                class="text-sm font-bold px-3 py-1" />
+                        </div>
                         <div v-if="form.score === 100" class="text-yellow-500 font-bold text-sm">
                             ★ All Stars Aligned ★
                         </div>
@@ -36,18 +40,19 @@
                     <!-- Basic Information Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
-                            <label class="block text-sm font-medium mb-2">Symbol</label>
-                            <Select v-model="form.symbol" :options="symbolOptions" placeholder="Select Symbol"
-                                class="w-full" :invalid="!!$errors.symbol" />
-                            <Message v-if="$errors.symbol" severity="error" :closable="false">{{ $errors.symbol }}
-                            </Message>
+                            <label class="flex items-center gap-2 text-sm font-medium mb-2">
+                                <span>Symbol</span>
+                                <i class="pi pi-lock text-gray-400 text-xs"></i>
+                            </label>
+                            <InputText :value="props.checklist.symbol" readonly
+                                class="w-full bg-gray-50 text-gray-600 cursor-not-allowed border-gray-200" />
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Entry Date</label>
                             <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
                                 iconDisplay="input" :invalid="!!$errors.entry_date" />
                             <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
-                                }}</Message>
+                            }}</Message>
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
@@ -104,9 +109,10 @@
                                             :closable="false">{{ $errors['fundamentals.valuation'] }}</Message>
                                     </div>
                                     <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Seasonal Confluence</label>
-                                        <Select v-model="form.fundamentals.seasonalConfluence" :options="['Yes', 'No']"
-                                            placeholder="Select Seasonal Confluence" class="w-full"
+                                        <label class="block text-sm font-medium mb-1">Seasonality</label>
+                                        <Select v-model="form.fundamentals.seasonalConfluence"
+                                            :options="['Bullish', 'Neutral', 'Bearish']"
+                                            placeholder="Select Seasonality" class="w-full"
                                             :invalid="!!$errors['fundamentals.seasonalConfluence']" />
                                         <Message v-if="$errors['fundamentals.seasonalConfluence']" severity="error"
                                             :closable="false">{{ $errors['fundamentals.seasonalConfluence'] }}</Message>
@@ -114,7 +120,7 @@
                                     <div class="field">
                                         <label class="block text-sm font-medium mb-1">Non-Commercials</label>
                                         <Select v-model="form.fundamentals.nonCommercials"
-                                            :options="['Divergence', 'No-Divergence']"
+                                            :options="['Bullish Divergence', 'Neutral', 'Bearish Divergence']"
                                             placeholder="Select Non-Commercials" class="w-full"
                                             :invalid="!!$errors['fundamentals.nonCommercials']" />
                                         <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
@@ -269,6 +275,7 @@ import { computed, watch, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
+import { useDirectionalBias } from '@/composables/useDirectionalBias'
 
 const toast = useToast()
 const orderEntryRef = ref(null)
@@ -382,7 +389,6 @@ const form = useForm({
     technicals: { ...props.checklist.technicals },
     fundamentals: { ...props.checklist.fundamentals },
     score: props.checklist.score,
-    symbol: props.checklist.symbol,
     notes: props.tradeEntry?.notes || '',
     entry_date: props.tradeEntry?.entry_date || '',
     position_type: props.tradeEntry?.position_type || '',
@@ -395,21 +401,75 @@ const form = useForm({
 })
 
 const canSubmit = computed(() => {
-    return form.technicals.location &&
+    // First check if core checklist fields are valid
+    const isValid = form.technicals.location &&
         form.technicals.direction &&
         form.fundamentals.valuation &&
         form.fundamentals.seasonalConfluence &&
         form.fundamentals.nonCommercials &&
         form.fundamentals.cotIndex &&
-        form.zone_qualifiers.length > 0 &&
-        form.entry_date &&
-        form.position_type &&
-        form.entry_price &&
-        form.stop_price &&
-        form.target_price &&
-        form.trade_status &&
-        form.rrr
+        form.zone_qualifiers.length > 0
+
+    if (!isValid) return false
+
+    // Then check if there are any changes
+    const hasChanges = hasFormChanges.value
+
+    return hasChanges
 })
+
+// Detect if form has changes compared to original data
+const hasFormChanges = computed(() => {
+    // Compare checklist fields
+    const originalChecklist = {
+        zone_qualifiers: props.checklist.zone_qualifiers,
+        technicals: props.checklist.technicals,
+        fundamentals: props.checklist.fundamentals,
+    }
+
+    const currentChecklist = {
+        zone_qualifiers: form.zone_qualifiers,
+        technicals: form.technicals,
+        fundamentals: form.fundamentals,
+    }
+
+    // Compare trade entry fields
+    const originalTradeEntry = {
+        notes: props.tradeEntry?.notes || '',
+        entry_date: props.tradeEntry?.entry_date || '',
+        position_type: props.tradeEntry?.position_type || '',
+        entry_price: props.tradeEntry?.entry_price || '',
+        stop_price: props.tradeEntry?.stop_price || '',
+        target_price: props.tradeEntry?.target_price || '',
+        trade_status: props.tradeEntry?.trade_status || '',
+        rrr: props.tradeEntry?.rrr || '',
+    }
+
+    const currentTradeEntry = {
+        notes: form.notes,
+        entry_date: form.entry_date,
+        position_type: form.position_type,
+        entry_price: form.entry_price,
+        stop_price: form.stop_price,
+        target_price: form.target_price,
+        trade_status: form.trade_status,
+        rrr: form.rrr,
+    }
+
+    // Deep comparison function
+    const isEqual = (obj1, obj2) => {
+        return JSON.stringify(obj1) === JSON.stringify(obj2)
+    }
+
+    return !isEqual(originalChecklist, currentChecklist) || !isEqual(originalTradeEntry, currentTradeEntry)
+})
+
+// Calculate directional bias in real-time
+const { directionalBias } = useDirectionalBias(
+    computed(() => form.technicals),
+    computed(() => form.fundamentals),
+    computed(() => props.settings)
+)
 
 const evaluationScore = () => {
     // 1. Raw weighted score
@@ -437,11 +497,11 @@ const evaluationScore = () => {
         raw += Number(props.settings.fundamental_valuation_weight || 0);
     }
     // Fundamentals: Seasonal
-    if (form.fundamentals.seasonalConfluence === 'Yes') {
+    if (['Bullish', 'Bearish'].includes(form.fundamentals.seasonalConfluence)) {
         raw += Number(props.settings.fundamental_seasonal_weight || 0);
     }
     // Fundamentals: Non-Commercial
-    if (form.fundamentals.nonCommercials === 'Divergence') {
+    if (['Bullish Divergence', 'Bearish Divergence'].includes(form.fundamentals.nonCommercials)) {
         raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
     }
     // Fundamentals: CoT Index

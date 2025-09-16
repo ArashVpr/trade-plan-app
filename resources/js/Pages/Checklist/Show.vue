@@ -45,6 +45,21 @@
                                 </div>
                             </div>
 
+                            <!-- Directional Bias -->
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-1">Directional Bias</label>
+                                <div v-if="directionalBias.hasEnoughData" class="flex items-center gap-2">
+                                    <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
+                                        class="text-lg font-bold px-4 py-2" />
+                                    <span class="text-sm text-gray-600 font-medium">
+                                        {{ directionalBias.confidence }}%
+                                    </span>
+                                </div>
+                                <div v-else class="text-sm text-gray-500">
+                                    No directional signals in analysis
+                                </div>
+                            </div>
+
                             <!-- Created Date -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Created</label>
@@ -94,7 +109,7 @@
                                             :severity="checklist.fundamentals?.valuation ? 'info' : 'secondary'" />
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-medium">Seasonal Confluence:</span>
+                                        <span class="text-sm font-medium">Seasonality:</span>
                                         <Tag :value="checklist.fundamentals?.seasonalConfluence || 'Not selected'"
                                             :severity="checklist.fundamentals?.seasonalConfluence ? 'info' : 'secondary'" />
                                     </div>
@@ -248,6 +263,7 @@ import { route } from 'ziggy-js'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useDirectionalBias } from '@/composables/useDirectionalBias.js'
 
 Chart.register(...registerables)
 
@@ -258,7 +274,15 @@ const page = usePage()
 const props = defineProps({
     checklist: Object,
     tradeEntry: Object,
+    settings: Object,
 })
+
+// Calculate directional bias for this checklist
+const { directionalBias } = useDirectionalBias(
+    computed(() => props.checklist.technicals),
+    computed(() => props.checklist.fundamentals),
+    computed(() => props.settings)
+)
 
 onMounted(() => {
     if (page.props.flash?.success) {
@@ -375,8 +399,8 @@ const calculateCategoryScores = (checklist) => {
 
     // Fundamentals score
     scores.Fundamentals += ['Undervalued', 'Overvalued'].includes(checklist.fundamentals.valuation) ? 13 : 0;
-    scores.Fundamentals += checklist.fundamentals.seasonalConfluence === 'Yes' ? 6 : 0;
-    scores.Fundamentals += checklist.fundamentals.nonCommercials === 'Divergence' ? 15 : 0;
+    scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.seasonalConfluence) ? 6 : 0;
+    scores.Fundamentals += ['Bullish Divergence', 'Bearish Divergence'].includes(checklist.fundamentals.nonCommercials) ? 15 : 0;
     scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.cotIndex) ? 12 : 0;
     scores.Fundamentals = Math.min(scores.Fundamentals, maxValues.Fundamentals);
 

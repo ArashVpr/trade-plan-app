@@ -13,10 +13,10 @@
             </div>
 
             <div class="field">
-                <label class="block text-sm font-medium mb-2">Seasonal Confluence</label>
+                <label class="block text-sm font-medium mb-2">Seasonality</label>
                 <Select :model-value="modelValue.seasonalConfluence"
                     @update:model-value="updateData('seasonalConfluence', $event)" :options="seasonalOptions"
-                    placeholder="Select Seasonal Confluence" class="w-full" />
+                    placeholder="Select Seasonality" class="w-full" />
             </div>
 
             <div class="field">
@@ -46,8 +46,8 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'progress-updated'])
 
 const valuationOptions = ['Overvalued', 'Neutral', 'Undervalued']
-const seasonalOptions = ['Yes', 'No']
-const nonCommercialsOptions = ['Divergence', 'No-Divergence']
+const seasonalOptions = ['Bullish', 'Neutral', 'Bearish']
+const nonCommercialsOptions = ['Bullish Divergence', 'Neutral', 'Bearish Divergence']
 const cotIndexOptions = ['Bullish', 'Neutral', 'Bearish']
 
 const updateData = (key, value) => {
