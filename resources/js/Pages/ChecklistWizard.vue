@@ -87,12 +87,12 @@
                                     <p class="text-sm text-gray-600">Seasonality: {{ fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
                                     <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials || 'Not selected' }}</p>
                                     <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600">Commercials: {{ fundamentalsData.commercials || 'Not selected' }}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{
-                                selectedZoneQualifiersCount }})</h3>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{selectedZoneQualifiersCount }})</h3>
                                 <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
                                     <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
                                         {{ qualifier }}
@@ -103,6 +103,22 @@
                                 </ul>
                             </div>
 
+                            <!-- Directional Bias -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Directional Bias</h3>
+                                <div v-if="directionalBias.hasEnoughData" class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
+                                            class="font-bold text-sm" />
+                                        <span class="text-sm text-gray-600 font-medium">
+                                            {{ directionalBias.confidence }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div v-else class="text-sm text-gray-500">
+                                    No directional signals selected
+                                </div>
+                            </div>
                             <div>
                                 <EvaluationScore ref="evaluationScoreRef"
                                     :zone-qualifiers="zoneQualifiersData.selectedZoneQualifiers"
@@ -127,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { useToast } from 'primevue/usetoast';
@@ -142,6 +158,9 @@ import OrderEntryStep from '@/Components/ChecklistSteps/OrderEntryStep.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppToast from '@/Components/UI/AppToast.vue';
 import EvaluationScore from '@/Components/UI/EvaluationScore.vue';
+
+// Import composables
+import { useDirectionalBias } from '@/composables/useDirectionalBias.js';
 
 const props = defineProps({
     settings: Object,
@@ -212,6 +231,13 @@ const stepItems = computed(() =>
     }))
 );
 
+// Directional bias calculation
+const { directionalBias } = useDirectionalBias(
+    computed(() => technicalsData.value),
+    computed(() => fundamentalsData.value),
+    computed(() => props.settings)
+);
+
 // Helper functions
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
@@ -274,6 +300,21 @@ const evaluationScore = computed(() => {
     return evaluationScoreRef.value?.calculatedScore || 0;
 });
 
+// Auto-suggest position type based on directional bias (only if not manually set)
+const userHasSetPositionType = ref(false);
+
+watch(() => directionalBias.value, (newBias) => {
+    // Only auto-suggest if user hasn't manually set position type and we have decent confidence
+    if (!userHasSetPositionType.value && newBias.side && newBias.confidence > 20) {
+        orderEntryData.value.positionType = newBias.side;
+    }
+}, { immediate: true });
+
+// Track when user manually sets position type
+watch(() => orderEntryData.value.positionType, () => {
+    userHasSetPositionType.value = true;
+});
+
 function updateProgress() {
     progressCount.value = zoneQualifiersData.value.selectedZoneQualifiers.length +
         (technicalsData.value.location ? 1 : 0) +
@@ -294,6 +335,7 @@ function updateProgress() {
 
 function resetWizard() {
     currentStep.value = 1;
+    userHasSetPositionType.value = false; // Reset position type tracking
     zoneQualifiersData.value = {
         symbol: '',
         selectedZoneQualifiers: []
