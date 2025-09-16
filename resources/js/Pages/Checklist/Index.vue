@@ -36,6 +36,17 @@
                                 </template>
                             </Column>
 
+                            <Column header="Bias" :style="{ width: '120px' }">
+                                <template #body="slotProps">
+                                    <div v-if="getDirectionalBias(slotProps.data).hasEnoughData">
+                                        <Tag :value="getDirectionalBias(slotProps.data).biasDisplay"
+                                            :severity="getDirectionalBias(slotProps.data).severity"
+                                            class="text-xs font-bold" />
+                                    </div>
+                                    <span v-else class="text-gray-400 text-xs">No Signals</span>
+                                </template>
+                            </Column>
+
                             <Column header="Position" :style="{ width: '80px' }">
                                 <template #body="slotProps">
                                     <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
@@ -125,11 +136,12 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { route } from 'ziggy-js'
+import { useDirectionalBias } from '@/composables/useDirectionalBias.js'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -147,8 +159,19 @@ onMounted(() => {
 })
 
 const props = defineProps({
-    checklists: Object
+    checklists: Object,
+    settings: Object,
 })
+
+// Helper function to calculate directional bias for a specific checklist
+const getDirectionalBias = (checklist) => {
+    const { directionalBias } = useDirectionalBias(
+        computed(() => checklist.technicals),
+        computed(() => checklist.fundamentals),
+        computed(() => props.settings)
+    )
+    return directionalBias.value
+}
 
 // Helper function to determine score severity for Tag component
 const getScoreSeverity = (score) => {

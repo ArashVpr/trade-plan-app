@@ -23,7 +23,17 @@ class ChecklistController extends Controller
             ->latest()
             ->paginate(10);
         $instruments = Instrument::active()->get();
-        return Inertia::render('Checklist/Index', ['checklists' => $checklists, 'instruments' => $instruments]);
+
+        // Get user's checklist weights for directional bias calculation
+        $settings = ChecklistWeights::firstOrCreate(
+            ['user_id' => Auth::id()],
+        );
+
+        return Inertia::render('Checklist/Index', [
+            'checklists' => $checklists,
+            'instruments' => $instruments,
+            'settings' => $settings,
+        ]);
     }
     public function store(Request $request)
     {

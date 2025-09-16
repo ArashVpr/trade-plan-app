@@ -114,16 +114,16 @@ export function useDirectionalBias(technicals, fundamentals, settings) {
         
         // Enhanced bias display with strength levels
         const getBiasDisplay = () => {
-            if (confidence <= 20) return { label: '⚖️ NEUTRAL', severity: 'secondary' }
+            if (confidence <= 20) return { label: 'NEUTRAL', severity: 'secondary' }
             
             if (bias === 'Bullish') {
-                if (confidence >= 81) return { label: '🎯 STRONG BUY', severity: 'success' }
-                if (confidence >= 51) return { label: '🔥 BUY', severity: 'success' }
-                return { label: '📈 LEAN BUY', severity: 'info' }
+                if (confidence >= 81) return { label: 'STRONG BUY', severity: 'success' }
+                if (confidence >= 51) return { label: 'BUY', severity: 'success' }
+                return { label: 'LEAN BUY', severity: 'info' }
             } else {
-                if (confidence >= 81) return { label: '🎯 STRONG SELL', severity: 'danger' }
-                if (confidence >= 51) return { label: '🔥 SELL', severity: 'danger' }
-                return { label: '📉 LEAN SELL', severity: 'warn' }
+                if (confidence >= 81) return { label: 'STRONG SELL', severity: 'danger' }
+                if (confidence >= 51) return { label: 'SELL', severity: 'danger' }
+                return { label: 'LEAN SELL', severity: 'warn' }
             }
         }
         
