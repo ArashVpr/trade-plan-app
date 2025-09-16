@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
+use App\Models\ChecklistWeights;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -294,6 +295,146 @@ class DashboardController extends Controller
     }
 
     /**
+     * Calculate directional bias based on checklist inputs
+     */
+    private function calculateDirectionalBias($trade, $settings)
+    {
+        // Get signal values (same logic as JavaScript composable)
+        $getSignalValue = function ($category, $selection) {
+            if (!$selection || $selection === 'N/A') return 0;
+
+            switch ($category) {
+                case 'location':
+                    return [
+                        'Very Cheap' => +1,
+                        'Cheap' => +1,
+                        'EQ' => 0,
+                        'Expensive' => -1,
+                        'Very Expensive' => -1
+                    ][$selection] ?? 0;
+
+                case 'valuation':
+                    return [
+                        'Undervalued' => +1,
+                        'Neutral' => 0,
+                        'Overvalued' => -1
+                    ][$selection] ?? 0;
+
+                case 'seasonality':
+                    return [
+                        'Bullish' => +1,
+                        'Neutral' => 0,
+                        'Bearish' => -1
+                    ][$selection] ?? 0;
+
+                case 'nonCommercials':
+                    return [
+                        'Bullish Divergence' => +1,
+                        'Neutral' => 0,
+                        'Bearish Divergence' => -1
+                    ][$selection] ?? 0;
+
+                case 'cotIndex':
+                    return [
+                        'Bullish' => +1,
+                        'Neutral' => 0,
+                        'Bearish' => -1
+                    ][$selection] ?? 0;
+
+                default:
+                    return 0;
+            }
+        };
+
+        // Get signal values from trade data
+        $techValue = $getSignalValue('location', $trade['technical_location']);
+        $valuationValue = $getSignalValue('valuation', $trade['fundamental_valuation']);
+        $seasonalityValue = $getSignalValue('seasonality', $trade['fundamental_seasonal']);
+        $nonCommercialsValue = $getSignalValue('nonCommercials', $trade['fundamental_noncommercials']);
+        $cotValue = $getSignalValue('cotIndex', $trade['fundamental_cot_index']);
+
+        // Get weights from settings
+        $techWeight = $techValue !== 0 ? (
+            in_array($trade['technical_location'], ['Very Cheap', 'Very Expensive'])
+            ? floatval($settings->technical_very_exp_chp_weight ?? 0)
+            : floatval($settings->technical_exp_chp_weight ?? 0)
+        ) : 0;
+
+        $valuationWeight = floatval($settings->fundamental_valuation_weight ?? 0);
+        $seasonalityWeight = floatval($settings->fundamental_seasonal_weight ?? 0);
+        $nonCommercialsWeight = floatval($settings->fundamental_noncommercial_divergence_weight ?? 0);
+        $cotWeight = floatval($settings->fundamental_cot_index_weight ?? 0);
+
+        // Calculate weighted contributions
+        $techContribution = $techValue * $techWeight;
+        $valuationContribution = $valuationValue * $valuationWeight;
+        $seasonalityContribution = $seasonalityValue * $seasonalityWeight;
+        $nonCommercialsContribution = $nonCommercialsValue * $nonCommercialsWeight;
+        $cotContribution = $cotValue * $cotWeight;
+
+        $weightedSum = $techContribution + $valuationContribution + $seasonalityContribution +
+            $nonCommercialsContribution + $cotContribution;
+
+        // Calculate maximum possible weighted sum for confidence calculation
+        $maxTechWeight = max(
+            floatval($settings->technical_very_exp_chp_weight ?? 0),
+            floatval($settings->technical_exp_chp_weight ?? 0)
+        );
+
+        $maxSum = (1 * $maxTechWeight) + $valuationWeight + $seasonalityWeight +
+            $nonCommercialsWeight + $cotWeight;
+
+        // Determine bias and confidence
+        $bias = $weightedSum > 0 ? 'Bullish' : ($weightedSum < 0 ? 'Bearish' : 'Neutral');
+        $confidence = $maxSum > 0 ? round((abs($weightedSum) / $maxSum) * 100) : 0;
+
+        // Determine strength
+        $strength = 'Weak';
+        if ($confidence >= 81) $strength = 'Strong';
+        elseif ($confidence >= 61) $strength = 'Moderate';
+
+        return [
+            'bias' => $bias,
+            'confidence' => $confidence,
+            'strength' => $strength,
+            'weighted_sum' => round($weightedSum, 1),
+            'max_sum' => round($maxSum, 1)
+        ];
+    }
+
+    /**
+     * Get bias display name following checklist naming convention
+     */
+    private function getBiasDisplayName($bias, $strength)
+    {
+        if ($bias === 'Bullish') {
+            switch ($strength) {
+                case 'Strong':
+                    return 'Strong Buy';
+                case 'Moderate':
+                    return 'Buy';
+                case 'Weak':
+                    return 'Lean Buy';
+                default:
+                    return 'Buy';
+            }
+        } elseif ($bias === 'Bearish') {
+            switch ($strength) {
+                case 'Strong':
+                    return 'Strong Sell';
+                case 'Moderate':
+                    return 'Sell';
+                case 'Weak':
+                    return 'Lean Sell';
+                default:
+                    return 'Sell';
+            }
+        }
+
+        return 'Neutral';
+    }
+
+    /**
      * Analyze patterns in winning trades to identify what consistently works
      */
     private function analyzeWinningPatterns($winningTrades)
@@ -307,6 +448,7 @@ class DashboardController extends Controller
                 'zone_patterns' => [],
                 'technical_patterns' => [],
                 'fundamental_patterns' => [],
+                'directional_bias_patterns' => [],
                 'alignment_analysis' => [
                     'zones_focused' => 0,
                     'technicals_focused' => 0,
@@ -320,6 +462,13 @@ class DashboardController extends Controller
 
         $totalWins = $winningTrades->count();
 
+        // Get user's checklist weights for directional bias calculation
+        $settings = ChecklistWeights::where('user_id', Auth::id())->first();
+        if (!$settings) {
+            // Default weights if none set
+            $settings = new ChecklistWeights();
+        }
+
         // Initialize counters for patterns
         $setupFrequency = [];
         $scorePatterns = ['80+' => 0, '60-79' => 0, '40-59' => 0, '<40' => 0];
@@ -330,6 +479,7 @@ class DashboardController extends Controller
         // Track which trades have each pattern (for percentage calculation)
         $technicalPatternTrades = [];
         $fundamentalPatternTrades = [];
+        $directionalBiasPatternTrades = [];
 
         // Track alignment towards zones, technicals, or fundamentals
         $alignmentAnalysis = [
@@ -345,11 +495,24 @@ class DashboardController extends Controller
             // Setup combination frequency
             $setupKey = $trade['setup_summary'];
             if (!isset($setupFrequency[$setupKey])) {
-                $setupFrequency[$setupKey] = ['count' => 0, 'total_rrr' => 0, 'avg_score' => 0];
+                $setupFrequency[$setupKey] = [
+                    'count' => 0,
+                    'total_rrr' => 0,
+                    'avg_score' => 0,
+                    'directional_bias_data' => []
+                ];
             }
             $setupFrequency[$setupKey]['count']++;
             $setupFrequency[$setupKey]['total_rrr'] += $trade['rrr'] ?? 0;
             $setupFrequency[$setupKey]['avg_score'] += $trade['score'] ?? 0;
+
+            // Calculate directional bias for this trade and add to setup data
+            $biasData = $this->calculateDirectionalBias($trade, $settings);
+            $setupFrequency[$setupKey]['directional_bias_data'][] = [
+                'bias' => $biasData['bias'],
+                'strength' => $biasData['strength'],
+                'confidence' => $biasData['confidence']
+            ];
 
             // Score patterns
             $score = $trade['score'] ?? 0;
@@ -370,6 +533,36 @@ class DashboardController extends Controller
             $zoneCount = $trade['zone_qualifiers_count'] ?? 0;
             $zoneKey = $zoneCount === 0 ? '0 Zones' : ($zoneCount <= 2 ? '1-2 Zones' : ($zoneCount <= 4 ? '3-4 Zones' : '5+ Zones'));
             $zonePatterns[$zoneKey] = ($zonePatterns[$zoneKey] ?? 0) + 1;
+
+            // Directional bias patterns
+            $biasData = $this->calculateDirectionalBias($trade, $settings);
+            $bias = $biasData['bias'];
+            $confidence = $biasData['confidence'];
+            $strength = $biasData['strength'];
+
+            if ($bias !== 'Neutral') {
+                // Track overall bias patterns with proper naming
+                $biasKey = $bias;
+                $directionalBiasPatternTrades[$biasKey][] = $tradeId;
+
+                // Track bias with strength using checklist naming convention
+                $biasStrengthKey = $this->getBiasDisplayName($bias, $strength);
+                $directionalBiasPatternTrades[$biasStrengthKey][] = $tradeId;
+
+                // Track bias with confidence ranges using checklist naming
+                if ($confidence >= 80) {
+                    $highConfidenceKey = $this->getBiasDisplayName($bias, 'Strong');
+                    $directionalBiasPatternTrades[$highConfidenceKey][] = $tradeId;
+                } elseif ($confidence >= 60) {
+                    $mediumConfidenceKey = $this->getBiasDisplayName($bias, 'Moderate');
+                    $directionalBiasPatternTrades[$mediumConfidenceKey][] = $tradeId;
+                } else {
+                    $lowConfidenceKey = $this->getBiasDisplayName($bias, 'Weak');
+                    $directionalBiasPatternTrades[$lowConfidenceKey][] = $tradeId;
+                }
+            } else {
+                $directionalBiasPatternTrades['Neutral'][] = $tradeId;
+            }
 
             // Technical patterns - track trades, not occurrences
             $techLocation = $trade['technical_location'] ?? 'N/A';
@@ -472,16 +665,50 @@ class DashboardController extends Controller
             ];
         }
 
+        // Convert directional bias patterns to count and percentage
+        $directionalBiasPatterns = [];
+        foreach ($directionalBiasPatternTrades as $pattern => $tradeIds) {
+            $uniqueTradesCount = count(array_unique($tradeIds));
+            $directionalBiasPatterns[$pattern] = [
+                'count' => $uniqueTradesCount,
+                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1)
+            ];
+        }
+
         // Process most profitable setups
         $mostProfitableSetups = [];
         foreach ($setupFrequency as $setup => $data) {
             if ($data['count'] >= 1) { // Show all setups, even single occurrences
+                // Process directional bias data for this setup
+                $biasFrequency = [];
+                $totalConfidence = 0;
+                $dominantBias = 'Neutral';
+
+                foreach ($data['directional_bias_data'] as $biasEntry) {
+                    $biasKey = $this->getBiasDisplayName($biasEntry['bias'], $biasEntry['strength']);
+                    $biasFrequency[$biasKey] = ($biasFrequency[$biasKey] ?? 0) + 1;
+                    $totalConfidence += $biasEntry['confidence'];
+                }
+
+                // Find the most common bias for this setup
+                if (!empty($biasFrequency)) {
+                    arsort($biasFrequency);
+                    $dominantBias = array_key_first($biasFrequency);
+                }
+
+                $avgConfidence = count($data['directional_bias_data']) > 0
+                    ? round($totalConfidence / count($data['directional_bias_data']), 1)
+                    : 0;
+
                 $mostProfitableSetups[] = [
                     'setup' => $setup,
                     'frequency' => $data['count'],
                     'avg_rrr' => round($data['total_rrr'] / $data['count'], 2),
                     'avg_score' => round($data['avg_score'] / $data['count'], 1),
-                    'success_rate' => round(($data['count'] / $totalWins) * 100, 1)
+                    'success_rate' => round(($data['count'] / $totalWins) * 100, 1),
+                    'dominant_bias' => $dominantBias,
+                    'avg_bias_confidence' => $avgConfidence,
+                    'bias_distribution' => $biasFrequency
                 ];
             }
         }
@@ -492,7 +719,7 @@ class DashboardController extends Controller
         });
 
         // Generate recommendations
-        $recommendations = $this->generatePatternRecommendations($mostProfitableSetups, $scorePatterns, $symbolFrequency, $zonePatterns);
+        $recommendations = $this->generatePatternRecommendations($mostProfitableSetups, $scorePatterns, $symbolFrequency, $zonePatterns, $directionalBiasPatterns);
 
         return [
             'most_profitable_setups' => array_slice($mostProfitableSetups, 0, 5),
@@ -502,6 +729,7 @@ class DashboardController extends Controller
             'zone_patterns' => $zonePatterns,
             'technical_patterns' => $technicalPatterns,
             'fundamental_patterns' => $fundamentalPatterns,
+            'directional_bias_patterns' => $directionalBiasPatterns,
             'alignment_analysis' => $alignmentAnalysis,
             'recommendations' => $recommendations,
             'total_wins' => $totalWins
@@ -511,7 +739,7 @@ class DashboardController extends Controller
     /**
      * Generate actionable recommendations based on winning patterns
      */
-    private function generatePatternRecommendations($setups, $scorePatterns, $symbolFrequency, $zonePatterns)
+    private function generatePatternRecommendations($setups, $scorePatterns, $symbolFrequency, $zonePatterns, $directionalBiasPatterns)
     {
         $recommendations = [];
 
@@ -576,6 +804,55 @@ class DashboardController extends Controller
                     'description' => "Setups with {$topZonePattern} won {$zoneWins} times",
                     'action' => 'This zone qualifier combination seems optimal for your strategy'
                 ];
+            }
+        }
+
+        // Directional bias-based recommendations
+        if (!empty($directionalBiasPatterns)) {
+            $bullishWins = $directionalBiasPatterns['Bullish']['count'] ?? 0;
+            $bearishWins = $directionalBiasPatterns['Bearish']['count'] ?? 0;
+            $neutralWins = $directionalBiasPatterns['Neutral']['count'] ?? 0;
+            $totalDirectionalWins = $bullishWins + $bearishWins + $neutralWins;
+
+            if ($totalDirectionalWins > 0) {
+                // Strong directional bias recommendations
+                if ($bullishWins >= $bearishWins * 2 && $bullishWins >= 3) {
+                    $bullishPercentage = round(($bullishWins / $totalDirectionalWins) * 100, 1);
+                    $recommendations[] = [
+                        'type' => 'directional_bias',
+                        'title' => 'Bullish Specialist',
+                        'description' => "{$bullishPercentage}% of your wins came from bullish setups ({$bullishWins} trades)",
+                        'action' => 'Focus on oversold conditions and undervalued assets for your edge'
+                    ];
+                } elseif ($bearishWins >= $bullishWins * 2 && $bearishWins >= 3) {
+                    $bearishPercentage = round(($bearishWins / $totalDirectionalWins) * 100, 1);
+                    $recommendations[] = [
+                        'type' => 'directional_bias',
+                        'title' => 'Bearish Expert',
+                        'description' => "{$bearishPercentage}% of your wins came from bearish setups ({$bearishWins} trades)",
+                        'action' => 'Focus on overbought conditions and overvalued assets for your edge'
+                    ];
+                } elseif (abs($bullishWins - $bearishWins) <= 1 && ($bullishWins + $bearishWins) >= 4) {
+                    $recommendations[] = [
+                        'type' => 'directional_bias',
+                        'title' => 'Direction Agnostic Trader',
+                        'description' => "Balanced success in both bullish ({$bullishWins}) and bearish ({$bearishWins}) setups",
+                        'action' => 'Your flexibility in market direction is your competitive advantage'
+                    ];
+                }
+
+                // High confidence pattern recommendations
+                $highConfidenceWins = ($directionalBiasPatterns['Bullish (High Confidence)']['count'] ?? 0) +
+                    ($directionalBiasPatterns['Bearish (High Confidence)']['count'] ?? 0);
+                if ($highConfidenceWins >= 3) {
+                    $confidencePercentage = round(($highConfidenceWins / $totalDirectionalWins) * 100, 1);
+                    $recommendations[] = [
+                        'type' => 'directional_confidence',
+                        'title' => 'High Conviction Performer',
+                        'description' => "{$confidencePercentage}% of wins came from high-confidence directional calls ({$highConfidenceWins} trades)",
+                        'action' => 'Trust your analysis when multiple directional factors align strongly'
+                    ];
+                }
             }
         }
 
