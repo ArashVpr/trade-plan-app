@@ -25,6 +25,10 @@
                     <div class="flex items-center gap-3">
                         <Tag :value="`Score: ${form.score}/100`" :severity="getScoreSeverity(form.score)"
                             class="text-lg font-bold px-4 py-2" />
+                        <div v-if="directionalBias?.hasEnoughData" class="flex items-center gap-2">
+                            <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
+                                class="text-sm font-bold px-3 py-1" />
+                        </div>
                         <div v-if="form.score === 100" class="text-yellow-500 font-bold text-sm">
                             ★ All Stars Aligned ★
                         </div>
@@ -48,7 +52,7 @@
                             <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
                                 iconDisplay="input" :invalid="!!$errors.entry_date" />
                             <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
-                                }}</Message>
+                            }}</Message>
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Created</label>
@@ -271,6 +275,7 @@ import { computed, watch, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
+import { useDirectionalBias } from '@/composables/useDirectionalBias'
 
 const toast = useToast()
 const orderEntryRef = ref(null)
@@ -458,6 +463,13 @@ const hasFormChanges = computed(() => {
 
     return !isEqual(originalChecklist, currentChecklist) || !isEqual(originalTradeEntry, currentTradeEntry)
 })
+
+// Calculate directional bias in real-time
+const { directionalBias } = useDirectionalBias(
+    computed(() => form.technicals),
+    computed(() => form.fundamentals),
+    computed(() => props.settings)
+)
 
 const evaluationScore = () => {
     // 1. Raw weighted score
