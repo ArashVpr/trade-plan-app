@@ -36,11 +36,12 @@
                     <!-- Basic Information Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
                         <div class="field">
-                            <label class="block text-sm font-medium mb-2">Symbol</label>
-                            <Select v-model="form.symbol" :options="symbolOptions" placeholder="Select Symbol"
-                                class="w-full" :invalid="!!$errors.symbol" />
-                            <Message v-if="$errors.symbol" severity="error" :closable="false">{{ $errors.symbol }}
-                            </Message>
+                            <label class="flex items-center gap-2 text-sm font-medium mb-2">
+                                <span>Symbol</span>
+                                <i class="pi pi-lock text-gray-400 text-xs"></i>
+                            </label>
+                            <InputText :value="props.checklist.symbol" readonly
+                                class="w-full bg-gray-50 text-gray-600 cursor-not-allowed border-gray-200" />
                         </div>
                         <div class="field">
                             <label class="block text-sm font-medium mb-2">Entry Date</label>
@@ -383,7 +384,6 @@ const form = useForm({
     technicals: { ...props.checklist.technicals },
     fundamentals: { ...props.checklist.fundamentals },
     score: props.checklist.score,
-    symbol: props.checklist.symbol,
     notes: props.tradeEntry?.notes || '',
     entry_date: props.tradeEntry?.entry_date || '',
     position_type: props.tradeEntry?.position_type || '',
@@ -396,20 +396,67 @@ const form = useForm({
 })
 
 const canSubmit = computed(() => {
-    return form.technicals.location &&
+    // First check if core checklist fields are valid
+    const isValid = form.technicals.location &&
         form.technicals.direction &&
         form.fundamentals.valuation &&
         form.fundamentals.seasonalConfluence &&
         form.fundamentals.nonCommercials &&
         form.fundamentals.cotIndex &&
-        form.zone_qualifiers.length > 0 &&
-        form.entry_date &&
-        form.position_type &&
-        form.entry_price &&
-        form.stop_price &&
-        form.target_price &&
-        form.trade_status &&
-        form.rrr
+        form.zone_qualifiers.length > 0
+
+    if (!isValid) return false
+
+    // Then check if there are any changes
+    const hasChanges = hasFormChanges.value
+
+    return hasChanges
+})
+
+// Detect if form has changes compared to original data
+const hasFormChanges = computed(() => {
+    // Compare checklist fields
+    const originalChecklist = {
+        zone_qualifiers: props.checklist.zone_qualifiers,
+        technicals: props.checklist.technicals,
+        fundamentals: props.checklist.fundamentals,
+    }
+
+    const currentChecklist = {
+        zone_qualifiers: form.zone_qualifiers,
+        technicals: form.technicals,
+        fundamentals: form.fundamentals,
+    }
+
+    // Compare trade entry fields
+    const originalTradeEntry = {
+        notes: props.tradeEntry?.notes || '',
+        entry_date: props.tradeEntry?.entry_date || '',
+        position_type: props.tradeEntry?.position_type || '',
+        entry_price: props.tradeEntry?.entry_price || '',
+        stop_price: props.tradeEntry?.stop_price || '',
+        target_price: props.tradeEntry?.target_price || '',
+        trade_status: props.tradeEntry?.trade_status || '',
+        rrr: props.tradeEntry?.rrr || '',
+    }
+
+    const currentTradeEntry = {
+        notes: form.notes,
+        entry_date: form.entry_date,
+        position_type: form.position_type,
+        entry_price: form.entry_price,
+        stop_price: form.stop_price,
+        target_price: form.target_price,
+        trade_status: form.trade_status,
+        rrr: form.rrr,
+    }
+
+    // Deep comparison function
+    const isEqual = (obj1, obj2) => {
+        return JSON.stringify(obj1) === JSON.stringify(obj2)
+    }
+
+    return !isEqual(originalChecklist, currentChecklist) || !isEqual(originalTradeEntry, currentTradeEntry)
 })
 
 const evaluationScore = () => {
