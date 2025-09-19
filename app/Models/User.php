@@ -69,9 +69,16 @@ class User extends Authenticatable
     /**
      * Get the trade entries associated with the user.
      */
-
     public function tradeEntries()
     {
         return $this->hasMany(TradeEntry::class);
+    }
+
+    /**
+     * Get the analysis trackers associated with the user.
+     */
+    public function analysisTrackers()
+    {
+        return $this->hasMany(AnalysisTracker::class);
     }
 }

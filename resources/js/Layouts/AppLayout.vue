@@ -59,6 +59,15 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a v-ripple @click="navigateTo(route('analysis-tracker.index'))" :class="[
+                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                            isActive(route('analysis-tracker.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                        ]">
+                                            <i class="pi pi-search mr-2"></i>
+                                            <span class="font-medium">Analysis Tracker</span>
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a v-ripple @click="navigateTo(route('trade-management.index'))" :class="[
                                             'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
                                             isActive(route('trade-management.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'

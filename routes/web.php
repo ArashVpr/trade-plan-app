@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalysisTrackerController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -56,6 +57,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])->name('checklists.edit');
     Route::put('/checklists/{checklist}', [ChecklistController::class, 'update'])->name('checklists.update');
     Route::post('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
+
+    // Analysis Tracker
+    Route::get('/analysis-tracker', [AnalysisTrackerController::class, 'index'])->name('analysis-tracker.index');
+    Route::post('/analysis-tracker', [AnalysisTrackerController::class, 'store'])->name('analysis-tracker.store');
+    Route::put('/analysis-tracker/{id}', [AnalysisTrackerController::class, 'update'])->name('analysis-tracker.update');
+    Route::delete('/analysis-tracker/{id}/remove-metric', [AnalysisTrackerController::class, 'removeMetric'])->name('analysis-tracker.remove-metric');
+    Route::delete('/analysis-tracker/{id}', [AnalysisTrackerController::class, 'destroy'])->name('analysis-tracker.destroy');
+    Route::get('/analysis-tracker/{symbol}/start-checklist', [AnalysisTrackerController::class, 'startChecklist'])->name('analysis-tracker.start-checklist');
 
     // Trade Management
     Route::get('/trade-management', [TradeManagementController::class, 'index'])->name('trade-management.index');

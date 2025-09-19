@@ -200,15 +200,18 @@ class ChecklistController extends Controller
         return to_route('checklists.index');
     }
 
-    public function checklistWeights()
+    public function checklistWeights(Request $request)
     {
         $settings = ChecklistWeights::firstOrCreate(
             ['user_id' => Auth::id()],
         );
         $instruments = Instrument::active()->get();
+        
         return Inertia::render('ChecklistWizard', [
             'settings' => $settings,
             'instruments' => $instruments,
+            'prefilledData' => $request->query('prefilled'),
+            'symbol' => $request->query('symbol'),
         ]);
     }
 }
