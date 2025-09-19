@@ -51,7 +51,7 @@ class AnalysisTracker extends Model
     public function calculateCompletionPercentage(): int
     {
         $metrics = $this->tracked_metrics ?? [];
-        $totalFields = 10; // 6 zone qualifiers + 2 technicals + 2 fundamentals (main ones)
+        $totalFields = 12; // 6 zone qualifiers + 2 technicals + 4 fundamentals
         $completedFields = 0;
 
         // Count zone qualifiers
@@ -66,6 +66,8 @@ class AnalysisTracker extends Model
         // Count fundamental analysis fields  
         if (!empty($metrics['fundamentals']['valuation'])) $completedFields++;
         if (!empty($metrics['fundamentals']['seasonalConfluence'])) $completedFields++;
+        if (!empty($metrics['fundamentals']['nonCommercials'])) $completedFields++;
+        if (!empty($metrics['fundamentals']['cotIndex'])) $completedFields++;
 
         return round(($completedFields / $totalFields) * 100);
     }

@@ -46,7 +46,7 @@
             <Card>
                 <template #title>
                     <div class="flex items-center gap-2">
-                        <i class="pi pi-search text-blue-900"></i>
+                        <i class="pi pi-chart-line text-blue-900"></i>
                         <span class="text-blue-900">Market Analysis Overview</span>
                     </div>
                 </template>
@@ -55,15 +55,16 @@
                         :globalFilterFields="['symbol']" v-model:filters="filters" dataKey="id">
 
                         <template #header>
-                            <div class="flex justify-between">
-                                <span class="p-input-icon-left">
-                                    <i class="pi pi-search" />
-                                    <InputText v-model="filters['global'].value" placeholder="Search symbols..." />
-                                </span>
+                            <div class="flex justify-end">
+                                <IconField iconPosition="left">
+                                    <InputIcon class="pi pi-search" />
+                                    <InputText v-model="filters['global'].value" placeholder="Search symbols..."
+                                        class="pl-8" />
+                                </IconField>
                             </div>
                         </template>
 
-                        <Column field="symbol" header="Symbol" :sortable="true">
+                        <Column field="symbol" header="Symbol" :sortable="true" :style="{ width: '100px' }">
                             <template #body="{ data }">
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono font-semibold">{{ data.symbol }}</span>
@@ -75,16 +76,20 @@
                             </template>
                         </Column>
 
-                        <Column header="Zone Qualifiers" :style="{ width: '150px' }">
+                        <Column header="Zone Qualifiers" :style="{ width: '160px' }">
                             <template #body="{ data }">
-                                <div class="flex flex-wrap gap-1">
-                                    <Chip v-for="qualifier in getZoneQualifiers(data)" :key="qualifier"
-                                        :label="qualifier" size="small" class="text-xs" />
+                                <div class="space-y-1">
+                                    <div v-if="getZoneQualifiers(data).length > 0" class="text-xs">
+                                        {{ getZoneQualifiers(data).join(', ') }}
+                                    </div>
+                                    <div v-else class="text-xs text-gray-400">
+                                        No qualifiers set
+                                    </div>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column header="Technicals" :style="{ width: '120px' }">
+                        <Column header="Technicals" :style="{ width: '140px' }">
                             <template #body="{ data }">
                                 <div class="space-y-1">
                                     <div v-if="data.tracked_metrics?.technicals?.location">
@@ -94,35 +99,41 @@
                                     <div v-if="data.tracked_metrics?.technicals?.direction">
                                         <span class="text-xs text-gray-600">Direction:</span>
                                         <span class="text-xs ml-1">{{ data.tracked_metrics.technicals.direction
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column header="Fundamentals" :style="{ width: '120px' }">
+                        <Column header="Fundamentals" :style="{ width: '170px' }">
                             <template #body="{ data }">
-                                <div class="space-y-1">
+                                <div class="space-y-1 text-xs">
                                     <div v-if="data.tracked_metrics?.fundamentals?.valuation">
-                                        <span class="text-xs text-gray-600">Valuation:</span>
-                                        <span class="text-xs ml-1">{{ data.tracked_metrics.fundamentals.valuation
-                                        }}</span>
+                                        <span class="text-gray-600">Valuation:</span>
+                                        <span class="ml-1">{{ data.tracked_metrics.fundamentals.valuation }}</span>
                                     </div>
                                     <div v-if="data.tracked_metrics?.fundamentals?.seasonalConfluence">
-                                        <span class="text-xs text-gray-600">Seasonal:</span>
-                                        <span class="text-xs ml-1">{{
-                                            data.tracked_metrics.fundamentals.seasonalConfluence }}</span>
+                                        <span class="text-gray-600">Seasonality:</span>
+                                        <span class="ml-1">{{ data.tracked_metrics.fundamentals.seasonalConfluence
+                                            }}</span>
+                                    </div>
+                                    <div v-if="data.tracked_metrics?.fundamentals?.nonCommercials">
+                                        <span class="text-gray-600">Non-Comm:</span>
+                                        <span class="ml-1">{{ data.tracked_metrics.fundamentals.nonCommercials }}</span>
+                                    </div>
+                                    <div v-if="data.tracked_metrics?.fundamentals?.cotIndex">
+                                        <span class="text-gray-600">COT Index:</span>
+                                        <span class="ml-1">{{ data.tracked_metrics.fundamentals.cotIndex }}</span>
                                     </div>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column header="Progress" :style="{ width: '120px' }">
+                        <Column field="completion_percentage" header="Progress" :sortable="true" :style="{ width: '140px' }">
                             <template #body="{ data }">
                                 <div class="space-y-2">
                                     <ProgressBar :value="data.completion_percentage"
                                         :class="getProgressBarClass(data.completion_percentage)" />
-                                    <div class="text-xs text-center">{{ data.completion_percentage }}%</div>
                                 </div>
                             </template>
                         </Column>
@@ -174,7 +185,8 @@
             <div class="space-y-4">
                 <div class="field">
                     <label class="block text-sm font-medium mb-2">Symbol</label>
-                    <Select v-model="newSymbol" :options="symbolOptions" placeholder="Select a symbol" class="w-full" />
+                    <AutoComplete v-model="newSymbol" :suggestions="filteredSymbols" @complete="searchSymbol"
+                        placeholder="Search for a symbol..." class="w-full" dropdown forceSelection />
                 </div>
             </div>
             <template #footer>
@@ -217,6 +229,7 @@ const showAddSymbolDialog = ref(false)
 const showEditDialog = ref(false)
 const selectedTracker = ref(null)
 const newSymbol = ref('')
+const filteredSymbols = ref([])
 
 // Filters for DataTable
 const filters = ref({
@@ -246,6 +259,13 @@ const averageCompletion = computed(() => {
 })
 
 // Methods
+const searchSymbol = (event) => {
+    const query = event.query.toLowerCase()
+    filteredSymbols.value = symbolOptions.value.filter(symbol =>
+        symbol.toLowerCase().includes(query)
+    )
+}
+
 const getZoneQualifiers = (tracker) => {
     return tracker.tracked_metrics?.zone_qualifiers || []
 }
