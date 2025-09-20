@@ -99,7 +99,7 @@
                                     <div v-if="data.tracked_metrics?.technicals?.direction">
                                         <span class="text-xs text-gray-600">Direction:</span>
                                         <span class="text-xs ml-1">{{ data.tracked_metrics.technicals.direction
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                             </template>
@@ -115,7 +115,7 @@
                                     <div v-if="data.tracked_metrics?.fundamentals?.seasonalConfluence">
                                         <span class="text-gray-600">Seasonality:</span>
                                         <span class="ml-1">{{ data.tracked_metrics.fundamentals.seasonalConfluence
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                     <div v-if="data.tracked_metrics?.fundamentals?.nonCommercials">
                                         <span class="text-gray-600">Non-Comm:</span>
@@ -129,7 +129,8 @@
                             </template>
                         </Column>
 
-                        <Column field="completion_percentage" header="Progress" :sortable="true" :style="{ width: '140px' }">
+                        <Column field="completion_percentage" header="Progress" :sortable="true"
+                            :style="{ width: '140px' }">
                             <template #body="{ data }">
                                 <div class="space-y-2">
                                     <ProgressBar :value="data.completion_percentage"
@@ -138,7 +139,8 @@
                             </template>
                         </Column>
 
-                        <Column header="Last Updated" :style="{ width: '100px' }">
+                        <Column field="last_updated_at" header="Last Updated" :sortable="true"
+                            :style="{ width: '100px' }">
                             <template #body="{ data }">
                                 <div class="text-xs">
                                     <div>{{ formatDate(data.last_updated_at) }}</div>

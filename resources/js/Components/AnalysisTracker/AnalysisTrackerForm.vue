@@ -44,13 +44,13 @@
             <template #content>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="field">
-                        <label class="block text-sm font-medium mb-2">Price Location</label>
+                        <label class="block text-sm font-medium mb-2">Location</label>
                         <Select v-model="technicals.location" :options="locationOptions"
                             placeholder="Select price location" class="w-full" />
                     </div>
 
                     <div class="field">
-                        <label class="block text-sm font-medium mb-2">Market Direction</label>
+                        <label class="block text-sm font-medium mb-2">Direction</label>
                         <Select v-model="technicals.direction" :options="directionOptions"
                             placeholder="Select market direction" class="w-full" />
                     </div>
@@ -67,7 +67,7 @@
                 </div>
             </template>
             <template #content>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="field">
                         <label class="block text-sm font-medium mb-2">Valuation</label>
                         <Select v-model="fundamentals.valuation" :options="valuationOptions"
@@ -75,14 +75,14 @@
                     </div>
 
                     <div class="field">
-                        <label class="block text-sm font-medium mb-2">Seasonal Confluence</label>
+                        <label class="block text-sm font-medium mb-2">Seasonality</label>
                         <Select v-model="fundamentals.seasonalConfluence" :options="seasonalOptions"
-                            placeholder="Select seasonal confluence" class="w-full" />
+                            placeholder="Select seasonality" class="w-full" />
                     </div>
 
                     <div class="field">
                         <label class="block text-sm font-medium mb-2">Non-Commercials</label>
-                        <Select v-model="fundamentals.nonCommercials" :options="cotOptions"
+                        <Select v-model="fundamentals.nonCommercials" :options="nonCommercialsOptions"
                             placeholder="Select non-commercials" class="w-full" />
                     </div>
 
@@ -90,12 +90,6 @@
                         <label class="block text-sm font-medium mb-2">COT Index</label>
                         <Select v-model="fundamentals.cotIndex" :options="cotIndexOptions"
                             placeholder="Select COT index" class="w-full" />
-                    </div>
-
-                    <div class="field">
-                        <label class="block text-sm font-medium mb-2">Commercials</label>
-                        <Select v-model="fundamentals.commercials" :options="cotOptions"
-                            placeholder="Select commercials" class="w-full" />
                     </div>
                 </div>
             </template>
@@ -131,8 +125,7 @@ const fundamentals = ref({
     valuation: '',
     seasonalConfluence: '',
     nonCommercials: '',
-    cotIndex: '',
-    commercials: ''
+    cotIndex: ''
 })
 
 // Options for dropdowns
@@ -141,7 +134,7 @@ const zoneQualifierOptions = [
 ]
 
 const locationOptions = [
-    'Very Expensive', 'Expensive', 'Fair Value', 'Cheap', 'Very Cheap'
+    'Very Expensive', 'Expensive', 'Equilibrium', 'Cheap', 'Very Cheap'
 ]
 
 const directionOptions = [
@@ -156,12 +149,12 @@ const seasonalOptions = [
     'Bullish', 'Neutral', 'Bearish'
 ]
 
-const cotOptions = [
-    'Bullish', 'Neutral', 'Bearish'
+const nonCommercialsOptions = [
+    'Bullish Divergence', 'Neutral', 'Bearish Divergence'
 ]
 
 const cotIndexOptions = [
-    'Extremely Bullish', 'Bullish', 'Neutral', 'Bearish', 'Extremely Bearish'
+    'Bullish', 'Neutral', 'Bearish'
 ]
 
 // Computed properties
