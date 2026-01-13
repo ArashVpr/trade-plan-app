@@ -18,7 +18,7 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'AUDUSD', 'name' => 'Australian Dollar vs US Dollar', 'type' => 'forex', 'category' => 'major'],
             ['symbol' => 'USDCAD', 'name' => 'US Dollar vs Canadian Dollar', 'type' => 'forex', 'category' => 'major'],
             ['symbol' => 'NZDUSD', 'name' => 'New Zealand Dollar vs US Dollar', 'type' => 'forex', 'category' => 'major'],
-            ['symbol' => 'USDX', 'name' => 'US Dollar Index', 'type' => 'forex', 'category' => 'index'],
+            ['symbol' => 'USDX', 'name' => 'US Dollar Index', 'type' => 'forex', 'category' => 'major'],
 
             // Forex Minors
             ['symbol' => 'EURGBP', 'name' => 'Euro vs British Pound', 'type' => 'forex', 'category' => 'minor'],
@@ -80,7 +80,6 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'IBEX', 'name' => 'IBEX 35 Index', 'type' => 'index', 'category' => null],
             ['symbol' => 'EU50', 'name' => 'Euro Stoxx 50 Index', 'type' => 'index', 'category' => null],
             
-
 
             // US Top 100 Stocks (sample - top 20 for brevity, can be expanded)
             ['symbol' => 'AAPL', 'name' => 'Apple Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NASDAQ'],
