@@ -47,12 +47,11 @@ class RegisterController extends Controller
                 'required',
                 'string',
                 'confirmed',
+                // Relaxed for demo/showcase: removed strict symbols requirement
                 Password::min(8)
                     ->letters()
                     ->mixedCase()
                     ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
             ],
             'password_confirmation' => [
                 'required',
@@ -72,7 +71,7 @@ class RegisterController extends Controller
             'password.letters' => 'Password must contain at least one letter.',
             'password.mixed' => 'Password must contain both uppercase and lowercase letters.',
             'password.numbers' => 'Password must contain at least one number.',
-            'password.symbols' => 'Password must contain at least one symbol.',
+            // symbol requirement removed for demo
             'password.uncompromised' => 'This password has been compromised in a data breach. Please choose a different password.',
             'password_confirmation.required' => 'Password confirmation is required.',
             'password_confirmation.same' => 'Password confirmation does not match.',
