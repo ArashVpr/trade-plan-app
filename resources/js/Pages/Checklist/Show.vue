@@ -8,6 +8,8 @@
                 <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
                     @click="router.get(route('checklists.index'))" />
                 <div class="flex gap-2">
+                    <Button label="Track Similar Setups" icon="pi pi-search" severity="info" outlined
+                        @click="router.get(route('analysis-tracker.index'))" />
                     <Button label="Edit" icon="pi pi-pencil" severity="success"
                         @click="router.get(route('checklists.edit', checklist.id))" />
                     <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDelete" />

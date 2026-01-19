@@ -92,7 +92,8 @@
                             </div>
 
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers ({{selectedZoneQualifiersCount }})</h3>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers
+                                    ({{ selectedZoneQualifiersCount }})</h3>
                                 <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
                                     <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
                                         {{ qualifier }}
@@ -143,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { useToast } from 'primevue/usetoast';
@@ -167,6 +168,14 @@ const props = defineProps({
     instruments: {
         type: Array,
         default: () => []
+    },
+    prefilledData: {
+        type: Object,
+        default: null
+    },
+    symbol: {
+        type: String,
+        default: ''
     }
 })
 
@@ -211,6 +220,35 @@ const orderEntryData = ref({
 const progressCount = ref(0);
 const message = ref('');
 const messageType = ref('');
+
+// Initialize data with prefilled values if available
+onMounted(() => {
+    if (props.prefilledData) {
+        // Initialize zone qualifiers
+        if (props.prefilledData.zone_qualifiers) {
+            zoneQualifiersData.value.selectedZoneQualifiers = [...props.prefilledData.zone_qualifiers]
+        }
+
+        // Initialize technicals
+        if (props.prefilledData.technicals) {
+            technicalsData.value.location = props.prefilledData.technicals.location || ''
+            technicalsData.value.direction = props.prefilledData.technicals.direction || ''
+        }
+
+        // Initialize fundamentals
+        if (props.prefilledData.fundamentals) {
+            fundamentalsData.value.valuation = props.prefilledData.fundamentals.valuation || ''
+            fundamentalsData.value.seasonalConfluence = props.prefilledData.fundamentals.seasonalConfluence || ''
+            fundamentalsData.value.nonCommercials = props.prefilledData.fundamentals.nonCommercials || ''
+            fundamentalsData.value.cotIndex = props.prefilledData.fundamentals.cotIndex || ''
+        }
+    }
+
+    // Set symbol if provided
+    if (props.symbol) {
+        zoneQualifiersData.value.symbol = props.symbol
+    }
+})
 
 // Zone qualifiers for reference
 const zoneQualifiers = [
