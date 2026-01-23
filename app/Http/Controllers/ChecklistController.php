@@ -141,28 +141,29 @@ class ChecklistController extends Controller
     }
     public function update(Request $request, Checklist $checklist)
     {
-        if ($checklist->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized');
-        }
+        try {
+            if ($checklist->user_id !== Auth::id()) {
+                abort(403, 'Unauthorized');
+            }
 
-        // Parse JSON strings from FormData if they exist
-        $technicals = $request->input('technicals');
-        $fundamentals = $request->input('fundamentals');
-        $zoneQualifiers = $request->input('zone_qualifiers');
-        $existingScreenshots = $request->input('existing_screenshots');
+            // Parse JSON strings from FormData if they exist
+            $technicals = $request->input('technicals');
+            $fundamentals = $request->input('fundamentals');
+            $zoneQualifiers = $request->input('zone_qualifiers');
+            $existingScreenshots = $request->input('existing_screenshots');
 
-        if (is_string($technicals)) {
-            $technicals = json_decode($technicals, true);
-        }
-        if (is_string($fundamentals)) {
-            $fundamentals = json_decode($fundamentals, true);
-        }
-        if (is_string($zoneQualifiers)) {
-            $zoneQualifiers = json_decode($zoneQualifiers, true);
-        }
-        if (is_string($existingScreenshots)) {
-            $existingScreenshots = json_decode($existingScreenshots, true);
-        }
+            if (is_string($technicals)) {
+                $technicals = json_decode($technicals, true);
+            }
+            if (is_string($fundamentals)) {
+                $fundamentals = json_decode($fundamentals, true);
+            }
+            if (is_string($zoneQualifiers)) {
+                $zoneQualifiers = json_decode($zoneQualifiers, true);
+            }
+            if (is_string($existingScreenshots)) {
+                $existingScreenshots = json_decode($existingScreenshots, true);
+            }
 
         $validated = $request->validate([
             'zone_qualifiers' => 'nullable',
@@ -179,7 +180,7 @@ class ChecklistController extends Controller
             'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
             'screenshots' => 'nullable|array|max:5',
-            'screenshots.*' => 'file|image|max:5120', // Max 5MB per image
+            'screenshots.*' => 'nullable|file|image|max:5120', // Max 5MB per image
             'existing_screenshots' => 'nullable',
         ]);
 
@@ -237,8 +238,21 @@ class ChecklistController extends Controller
                 if (($validated['screenshots'] ?? null) && is_array($validated['screenshots'])) {
                     foreach ($validated['screenshots'] as $screenshot) {
                         if (count($screenshotPaths) < 5) {
-                            $path = $screenshot->store('trade-screenshots', 'public');
-                            $screenshotPaths[] = $path;
+                            try {
+                                $path = $screenshot->store('trade-screenshots', 'public');
+                                if ($path) {
+                                    $screenshotPaths[] = $path;
+                                } else {
+                                    Log::warning('Failed to store screenshot for checklist ' . $checklist->id);
+                                }
+                            } catch (\Exception $e) {
+                                Log::error('Screenshot storage error: ' . $e->getMessage(), [
+                                    'checklist_id' => $checklist->id,
+                                    'error' => $e
+                                ]);
+                                // Continue with other screenshots
+                                continue;
+                            }
                         }
                     }
                 }
@@ -253,14 +267,31 @@ class ChecklistController extends Controller
                 $tradeData['user_id'] = Auth::id();
 
                 // Update or create the related trade entry
-                $checklist->tradeEntry()->updateOrCreate(
-                    ['checklist_id' => $checklist->id,],
-                    $tradeData
-                );
+                try {
+                    $checklist->tradeEntry()->updateOrCreate(
+                        ['checklist_id' => $checklist->id,],
+                        $tradeData
+                    );
+                } catch (\Exception $e) {
+                    Log::error('Trade entry update error: ' . $e->getMessage(), [
+                        'checklist_id' => $checklist->id,
+                        'tradeData' => $tradeData,
+                        'error' => $e
+                    ]);
+                    throw $e;
+                }
             }
         });
 
-        return to_route('checklists.show', $checklist->id, 303)->with('success', 'Checklist updated successfully!');
+            return to_route('checklists.show', $checklist->id, 303)->with('success', 'Checklist updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('Checklist update error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'checklist_id' => $checklist->id,
+                'user_id' => Auth::id()
+            ]);
+            throw $e;
+        }
     }
 
     public function destroy(Checklist $checklist)
