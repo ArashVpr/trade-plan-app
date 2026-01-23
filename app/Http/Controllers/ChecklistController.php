@@ -49,44 +49,60 @@ class ChecklistController extends Controller
             'entry_price' => 'nullable|numeric',
             'stop_price' => 'nullable|numeric',
             'target_price' => 'nullable|numeric',
-            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled,',
+            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
             'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
+            'screenshots' => 'nullable|array|max:5',
+            'screenshots.*' => 'file|image|max:5120', // Max 5MB per image
         ]);
 
-        // Persist checklist and capture its ID
-        $checklist = Checklist::create([
-            'user_id' => Auth::id(),
-            'zone_qualifiers' => $validated['zone_qualifiers'],
-            'technicals' => $validated['technicals'],
-            'fundamentals' => $validated['fundamentals'],
-            'score' => $validated['score'],
-            'symbol' => $validated['symbol'],
-        ]);
-
-        // Only create trade entry if order details are provided
-        if ($validated['entry_date'] && $validated['position_type'] && $validated['entry_price'] && $validated['stop_price'] && $validated['target_price']) {
-            $tradeEntryData = [
+        // Wrap in transaction to ensure data consistency
+        return DB::transaction(function () use ($validated, $request) {
+            // Persist checklist and capture its ID
+            $checklist = Checklist::create([
                 'user_id' => Auth::id(),
-                'checklist_id' => $checklist->id,
-                'entry_date' => $validated['entry_date'],
-                'position_type' => $validated['position_type'],
-                'entry_price' => $validated['entry_price'],
-                'stop_price' => $validated['stop_price'],
-                'target_price' => $validated['target_price'],
-                'rrr' => $validated['rrr'],
-                'notes' => $validated['notes'],
-            ];
+                'zone_qualifiers' => $validated['zone_qualifiers'],
+                'technicals' => $validated['technicals'],
+                'fundamentals' => $validated['fundamentals'],
+                'score' => $validated['score'],
+                'symbol' => $validated['symbol'],
+            ]);
 
-            // Only include trade_status if it has a value, otherwise let DB default to 'pending'
-            if (!empty($validated['trade_status'])) {
-                $tradeEntryData['trade_status'] = $validated['trade_status'];
+            // Only create trade entry if order details are provided
+            if (($validated['entry_date'] ?? null) && ($validated['position_type'] ?? null) && ($validated['entry_price'] ?? null) && ($validated['stop_price'] ?? null) && ($validated['target_price'] ?? null)) {
+                $tradeEntryData = [
+                    'user_id' => Auth::id(),
+                    'checklist_id' => $checklist->id,
+                    'entry_date' => $validated['entry_date'],
+                    'position_type' => $validated['position_type'],
+                    'entry_price' => $validated['entry_price'],
+                    'stop_price' => $validated['stop_price'],
+                    'target_price' => $validated['target_price'],
+                    'rrr' => $validated['rrr'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                ];
+
+                // Handle multiple screenshot uploads - check both array and bracket notation
+                $screenshotPaths = [];
+                if ($validated['screenshots'] ?? null) {
+                    // Screenshots passed through validation
+                    foreach ($validated['screenshots'] as $screenshot) {
+                        $path = $screenshot->store('trade-screenshots', 'public');
+                        $screenshotPaths[] = $path;
+                    }
+                }
+                $tradeEntryData['screenshot_paths'] = $screenshotPaths;
+
+                // Only include trade_status if it has a value, otherwise let DB default to 'pending'
+                if (!empty($validated['trade_status'])) {
+                    $tradeEntryData['trade_status'] = $validated['trade_status'];
+                }
+
+                TradeEntry::create($tradeEntryData);
             }
 
-            TradeEntry::create($tradeEntryData);
-        }
-
-        return to_route('checklists.index')->with('success', 'Checklist created successfully!');
+            return to_route('checklists.index')->with('success', 'Checklist created successfully!');
+        });
     }
     public function show(Checklist $checklist)
     {
@@ -129,40 +145,77 @@ class ChecklistController extends Controller
             abort(403, 'Unauthorized');
         }
 
+        // Parse JSON strings from FormData if they exist
+        $technicals = $request->input('technicals');
+        $fundamentals = $request->input('fundamentals');
+        $zoneQualifiers = $request->input('zone_qualifiers');
+        $existingScreenshots = $request->input('existing_screenshots');
+
+        if (is_string($technicals)) {
+            $technicals = json_decode($technicals, true);
+        }
+        if (is_string($fundamentals)) {
+            $fundamentals = json_decode($fundamentals, true);
+        }
+        if (is_string($zoneQualifiers)) {
+            $zoneQualifiers = json_decode($zoneQualifiers, true);
+        }
+        if (is_string($existingScreenshots)) {
+            $existingScreenshots = json_decode($existingScreenshots, true);
+        }
+
         $validated = $request->validate([
-            'zone_qualifiers' => 'array|nullable',
-            'technicals' => 'array|required',
-            'technicals.location' => 'required|string|in:Very Expensive,Expensive,EQ,Cheap,Very Cheap',
-            'technicals.direction' => 'required|string|in:Correction,Impulsion',
-            'fundamentals' => 'array|required',
-            'fundamentals.valuation' => 'required|string|in:Overvalued,Neutral,Undervalued',
-            'fundamentals.seasonalConfluence' => 'required|string|in:Bullish,Neutral,Bearish',
-            'fundamentals.nonCommercials' => 'required|string|in:Bullish Divergence,Neutral,Bearish Divergence',
-            'fundamentals.cotIndex' => 'required|string|in:Bullish,Neutral,Bearish',
-            'score' => 'required|integer|min:0|max:170',
+            'zone_qualifiers' => 'nullable',
+            'technicals' => 'nullable',
+            'fundamentals' => 'nullable',
+            'score' => 'required|integer|min:0|max:100',
             // Order entry - now optional for updates too
             'entry_date' => 'nullable|date',
             'position_type' => 'nullable|in:Long,Short',
             'entry_price' => 'nullable|numeric',
             'stop_price' => 'nullable|numeric',
             'target_price' => 'nullable|numeric',
-            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled,',
+            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
             'rrr' => 'nullable|numeric',
             'notes' => 'nullable|string',
+            'screenshots' => 'nullable|array|max:5',
+            'screenshots.*' => 'file|image|max:5120', // Max 5MB per image
+            'existing_screenshots' => 'nullable',
         ]);
 
         // Update both Checklist and its TradeEntry atomically
-        DB::transaction(function () use ($checklist, $validated) {
+        DB::transaction(function () use ($checklist, $validated, $request, $technicals, $fundamentals, $zoneQualifiers, $existingScreenshots) {
             // Update checklist fields (excluding symbol)
-            $checklist->update(Arr::only($validated, [
-                'zone_qualifiers',
-                'technicals',
-                'fundamentals',
-                'score',
-            ]));
+            $checklistData = [];
 
-            // Only update/create trade entry if order details are provided
-            if ($validated['entry_date'] && $validated['position_type'] && $validated['entry_price'] && $validated['stop_price'] && $validated['target_price']) {
+            if ($zoneQualifiers) {
+                $checklistData['zone_qualifiers'] = $zoneQualifiers;
+            }
+            if ($technicals) {
+                $checklistData['technicals'] = $technicals;
+            }
+            if ($fundamentals) {
+                $checklistData['fundamentals'] = $fundamentals;
+            }
+            if (isset($validated['score'])) {
+                $checklistData['score'] = $validated['score'];
+            }
+
+            if (!empty($checklistData)) {
+                $checklist->update($checklistData);
+            }
+
+            // Create/update trade entry if ANY order field has a value
+            $hasTradeDetails = ($validated['entry_date'] ?? null) ||
+                ($validated['position_type'] ?? null) ||
+                ($validated['entry_price'] ?? null) ||
+                ($validated['stop_price'] ?? null) ||
+                ($validated['target_price'] ?? null) ||
+                ($validated['notes'] ?? null) ||
+                ($validated['screenshots'] ?? null) ||
+                ($existingScreenshots ?? null);
+
+            if ($hasTradeDetails) {
                 // Prepare trade entry data
                 $tradeData = Arr::only($validated, [
                     'entry_date',
@@ -173,6 +226,23 @@ class ChecklistController extends Controller
                     'rrr',
                     'notes'
                 ]);
+
+                // Handle multiple screenshot uploads
+                $screenshotPaths = $existingScreenshots ?? [];
+                if (!is_array($screenshotPaths)) {
+                    $screenshotPaths = [];
+                }
+
+                // Check both validated screenshots and request files
+                if (($validated['screenshots'] ?? null) && is_array($validated['screenshots'])) {
+                    foreach ($validated['screenshots'] as $screenshot) {
+                        if (count($screenshotPaths) < 5) {
+                            $path = $screenshot->store('trade-screenshots', 'public');
+                            $screenshotPaths[] = $path;
+                        }
+                    }
+                }
+                $tradeData['screenshot_paths'] = $screenshotPaths;
 
                 // Only include trade_status if it has a value, otherwise let DB default to 'pending'
                 if (!empty($validated['trade_status'])) {
@@ -206,7 +276,7 @@ class ChecklistController extends Controller
             ['user_id' => Auth::id()],
         );
         $instruments = Instrument::active()->get();
-        
+
         return Inertia::render('ChecklistWizard', [
             'settings' => $settings,
             'instruments' => $instruments,

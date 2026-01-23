@@ -11,6 +11,10 @@ class TradeEntry extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'screenshot_paths' => 'array',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

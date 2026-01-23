@@ -246,20 +246,75 @@
                         <div class="p-4 border border-gray-200 rounded-lg">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                                 <i class="pi pi-image text-blue-900"></i>
-                                Chart Screenshot
+                                Chart Screenshots (Max 5)
                             </h3>
-                            <div class="field">
-                                <div
-                                    class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
-                                    <i class="pi pi-upload text-gray-400 text-2xl mb-2"></i>
-                                    <input type="file" @change="onFileChange" accept="image/*"
-                                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                                    <p class="text-xs text-gray-500 mt-2">
-                                        Upload a screenshot of your trading chart
-                                    </p>
+
+                            <!-- Existing Screenshots -->
+                            <div v-if="existingImages.length > 0" class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Current Images</label>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div v-for="(image, index) in existingImages" :key="image"
+                                        class="relative border border-gray-200 rounded-lg p-2">
+                                        <img :src="`/storage/${image}`" :alt="`Screenshot ${index + 1}`"
+                                            class="w-full h-32 object-cover rounded cursor-pointer"
+                                            @click="viewImage(`/storage/${image}`)" />
+                                        <Button icon="pi pi-times" @click="removeExistingImage(index)" rounded text
+                                            severity="danger" class="absolute top-1 right-1" size="small" />
+                                    </div>
                                 </div>
-                                <Message v-if="$errors.screenshot" severity="error" :closable="false">{{
-                                    $errors.screenshot }}</Message>
+                            </div>
+
+                            <!-- New Screenshots Upload -->
+                            <div class="field">
+                                <label v-if="existingImages.length > 0" class="block text-sm font-medium mb-2">Add New
+                                    Images</label>
+                                <FileUpload ref="fileupload" name="screenshots[]" :multiple="true" accept="image/*"
+                                    :maxFileSize="5000000" :fileLimit="Math.max(0, 5 - existingImages.length)"
+                                    customUpload @select="onFilesSelect" @remove="onFileRemove"
+                                    :disabled="existingImages.length >= 5" class="w-full">
+                                    <template #header="{ chooseCallback, clearCallback, files }">
+                                        <div class="flex flex-wrap justify-between items-center gap-4">
+                                            <div class="flex gap-2">
+                                                <Button @click="chooseCallback()" icon="pi pi-images" label="Choose"
+                                                    outlined severity="secondary" size="small"
+                                                    :disabled="existingImages.length >= 5" />
+                                                <Button @click="clearCallback()" icon="pi pi-times" label="Clear"
+                                                    outlined severity="danger" size="small"
+                                                    :disabled="!files || files.length === 0" />
+                                            </div>
+                                            <span class="text-sm text-gray-600">{{ existingImages.length +
+                                                (files?.length || 0) }}/5 total</span>
+                                        </div>
+                                    </template>
+                                    <template #content="{ files, removeFileCallback }">
+                                        <div v-if="files.length > 0" class="pt-4">
+                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                <div v-for="(file, index) of files"
+                                                    :key="file.name + file.type + file.size"
+                                                    class="relative border border-gray-200 rounded-lg p-2">
+                                                    <img role="presentation" :alt="file.name" :src="file.objectURL"
+                                                        class="w-full h-32 object-cover rounded" />
+                                                    <div class="mt-2 text-xs text-gray-600 truncate">{{ file.name }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500">{{ formatSize(file.size) }}</div>
+                                                    <Button icon="pi pi-times" @click="removeFileCallback(index)"
+                                                        rounded text severity="danger" class="absolute top-1 right-1"
+                                                        size="small" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template #empty>
+                                        <div class="flex items-center justify-center flex-col py-8">
+                                            <i class="pi pi-image text-gray-400 text-4xl mb-3"></i>
+                                            <p class="text-gray-600">Drag and drop images here or click Choose</p>
+                                            <p class="text-xs text-gray-500 mt-1">Max {{ Math.max(0, 5 -
+                                                existingImages.length) }} more images, 5MB each</p>
+                                        </div>
+                                    </template>
+                                </FileUpload>
+                                <Message v-if="$errors.screenshots" severity="error" :closable="false">{{
+                                    $errors.screenshots }}</Message>
                             </div>
                         </div>
                     </div>
@@ -349,11 +404,44 @@ const formatDate = (date) => {
 }
 
 // File upload handler
-const onFileChange = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-        form.screenshot = file
+const existingImages = ref([...(props.tradeEntry?.screenshot_paths || [])])
+
+const onFilesSelect = (event) => {
+    // Validate total doesn't exceed 5
+    const totalImages = existingImages.value.length + event.files.length
+    if (totalImages > 5) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Upload Limit',
+            detail: `Cannot add ${event.files.length} images. You can only have 5 total. Currently have ${existingImages.value.length} existing image(s).`,
+            life: 3000
+        })
+        // Clear the selected files
+        event.files = []
+        return
     }
+    form.screenshots = event.files
+}
+
+const onFileRemove = (event) => {
+    form.screenshots = event.files
+}
+
+const removeExistingImage = (index) => {
+    existingImages.value.splice(index, 1)
+    form.existing_screenshots = existingImages.value
+}
+
+const viewImage = (src) => {
+    window.open(src, '_blank')
+}
+
+const formatSize = (bytes) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
 // Form submission handler
@@ -366,10 +454,42 @@ const submitForm = (event) => {
         form.entry_date = formatDate(form.entry_date)
     }
 
-    // Use the Inertia form submission
-    form.put(route('checklists.update', props.checklist.id), {
+    // Create FormData manually to properly handle files + nested objects
+    const formData = new FormData()
+
+    // Add all form fields
+    formData.append('zone_qualifiers', JSON.stringify(form.zone_qualifiers))
+    formData.append('technicals', JSON.stringify(form.technicals))
+    formData.append('fundamentals', JSON.stringify(form.fundamentals))
+    formData.append('score', form.score)
+    formData.append('notes', form.notes)
+    formData.append('entry_date', form.entry_date)
+    formData.append('position_type', form.position_type)
+    formData.append('entry_price', form.entry_price)
+    formData.append('stop_price', form.stop_price)
+    formData.append('target_price', form.target_price)
+    formData.append('trade_status', form.trade_status)
+    formData.append('rrr', form.rrr)
+    formData.append('existing_screenshots', JSON.stringify(existingImages.value))
+
+    // Add new screenshot files
+    if (form.screenshots && form.screenshots.length > 0) {
+        form.screenshots.forEach((file, index) => {
+            formData.append(`screenshots[${index}]`, file)
+        })
+    }
+
+    // Add method spoofing for PUT request
+    formData.append('_method', 'PUT')
+
+    // Use router.post with FormData directly
+    router.post(route('checklists.update', props.checklist.id), formData, {
+        onSuccess: () => {
+            // Backend already sends success message via redirect
+            // Clear the new screenshots array after successful submission
+            form.screenshots = [];
+        },
         onError: () => {
-            // Handle validation or other errors
             toast.add({
                 severity: 'error',
                 summary: 'Error',
@@ -397,7 +517,8 @@ const form = useForm({
     target_price: props.tradeEntry?.target_price || '',
     trade_status: props.tradeEntry?.trade_status || '',
     rrr: props.tradeEntry?.rrr || '',
-    screenshot: null
+    screenshots: [],
+    existing_screenshots: [...(props.tradeEntry?.screenshot_paths || [])]
 })
 
 const canSubmit = computed(() => {
@@ -411,6 +532,10 @@ const canSubmit = computed(() => {
         form.zone_qualifiers.length > 0
 
     if (!isValid) return false
+
+    // Check total image count (existing + new) doesn't exceed 5
+    const totalImages = existingImages.value.length + (form.screenshots?.length || 0)
+    if (totalImages > 5) return false
 
     // Then check if there are any changes
     const hasChanges = hasFormChanges.value
@@ -461,7 +586,13 @@ const hasFormChanges = computed(() => {
         return JSON.stringify(obj1) === JSON.stringify(obj2)
     }
 
-    return !isEqual(originalChecklist, currentChecklist) || !isEqual(originalTradeEntry, currentTradeEntry)
+    // Check for screenshot changes
+    const hasScreenshotChanges = form.screenshots.length > 0 ||
+        !isEqual(existingImages.value, props.tradeEntry?.screenshot_paths || [])
+
+    return !isEqual(originalChecklist, currentChecklist) ||
+        !isEqual(originalTradeEntry, currentTradeEntry) ||
+        hasScreenshotChanges
 })
 
 // Calculate directional bias in real-time

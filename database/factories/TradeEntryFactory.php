@@ -39,7 +39,7 @@ class TradeEntryFactory extends Factory
             'target_price' => $targetPrice,
             'rrr' => round($targetDistance / $stopDistance, 2),
             'trade_status' => 'pending',
-            'screenshot_path' => $this->faker->optional(0.3)->imageUrl(800, 600, 'business', true, 'Chart'),
+            'screenshot_paths' => $this->faker->optional(0.3) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Chart')] : [],
             'notes' => $this->faker->optional(0.6)->sentence(),
         ];
     }
@@ -52,7 +52,7 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'pending',
-                'screenshot_path' => $this->faker->optional(0.4)->imageUrl(800, 600, 'business', true, 'Setup'),
+                'screenshot_paths' => $this->faker->optional(0.4) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Setup')] : [],
                 'notes' => $this->faker->optional(0.7)->sentence(),
             ];
         });
@@ -67,7 +67,7 @@ class TradeEntryFactory extends Factory
             return [
                 'trade_status' => 'active',
                 'entry_date' => $this->faker->dateTimeBetween('-1 week', 'now'),
-                'screenshot_path' => $this->faker->optional(0.6)->imageUrl(800, 600, 'business', true, 'Active'),
+                'screenshot_paths' => $this->faker->optional(0.6) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Active')] : [],
                 'notes' => $this->faker->optional(0.5)->sentence(),
             ];
         });
@@ -95,7 +95,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => $statusMap[$trade_status],
                 'rrr' => $rrr,
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
-                'screenshot_path' => $this->faker->optional(0.7)->imageUrl(800, 600, 'business', true, 'Closed'),
+                'screenshot_paths' => $this->faker->optional(0.7) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Closed')] : [],
                 'notes' => $this->getOutcomeNote($trade_status),
             ];
         });
@@ -111,7 +111,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => 'win',
                 'rrr' => $this->calculateRRByOutcome('win'),
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
-                'screenshot_path' => $this->faker->optional(0.8)->imageUrl(800, 600, 'business', true, 'Win'),
+                'screenshot_paths' => $this->faker->optional(0.8) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Win')] : [],
                 'notes' => $this->getOutcomeNote('win'),
             ];
         });
@@ -127,7 +127,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => 'loss',
                 'rrr' => $this->calculateRRByOutcome('loss'),
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
-                'screenshot_path' => $this->faker->optional(0.6)->imageUrl(800, 600, 'business', true, 'Loss'),
+                'screenshot_paths' => $this->faker->optional(0.6) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Loss')] : [],
                 'notes' => $this->getOutcomeNote('loss'),
             ];
         });
@@ -143,7 +143,7 @@ class TradeEntryFactory extends Factory
                 'trade_status' => 'breakeven',
                 'rrr' => $this->calculateRRByOutcome('breakeven'),
                 'entry_date' => $this->faker->dateTimeBetween('-3 weeks', '-1 day'),
-                'screenshot_path' => $this->faker->optional(0.5)->imageUrl(800, 600, 'business', true, 'Breakeven'),
+                'screenshot_paths' => $this->faker->optional(0.5) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Breakeven')] : [],
                 'notes' => $this->getOutcomeNote('breakeven'),
             ];
         });
@@ -157,7 +157,7 @@ class TradeEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'trade_status' => 'cancelled',
-                'screenshot_path' => $this->faker->optional(0.2)->imageUrl(800, 600, 'business', true, 'Cancelled'),
+                'screenshot_paths' => $this->faker->optional(0.2) ? [$this->faker->imageUrl(800, 600, 'business', true, 'Cancelled')] : [],
                 'notes' => $this->faker->randomElement([
                     'Market conditions changed, cancelled order.',
                     'Better opportunity emerged, cancelled this trade.',

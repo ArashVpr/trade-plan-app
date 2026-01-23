@@ -224,11 +224,20 @@
                             <Textarea :value="tradeEntry.notes || 'None'" readonly rows="3" class="w-full" />
                         </div>
 
-                        <!-- Screenshot -->
-                        <div v-if="tradeEntry.screenshot_path" class="field mt-4">
-                            <label class="block text-sm font-medium mb-1">Screenshot</label>
-                            <Image :src="`/storage/${tradeEntry.screenshot_path}`" alt="Trading Screenshot" preview
-                                class="max-w-full h-auto rounded border" />
+                        <!-- Screenshots Gallery -->
+                        <div v-if="tradeEntry.screenshot_paths && tradeEntry.screenshot_paths.length > 0" class="field mt-4">
+                            <label class="block text-sm font-medium mb-2">Screenshots</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                <div v-for="(path, index) in tradeEntry.screenshot_paths" 
+                                    :key="path" 
+                                    class="border border-gray-200 rounded-lg overflow-hidden">
+                                    <Image 
+                                        :src="`/storage/${path}`" 
+                                        :alt="`Screenshot ${index + 1}`" 
+                                        preview
+                                        class="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity" />
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </Card>

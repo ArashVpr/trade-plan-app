@@ -213,7 +213,7 @@ const orderEntryData = ref({
     targetPrice: '',
     rrr: '',
     trade_status: '',
-    screenshot: null,
+    screenshots: [],
     notes: ''
 });
 
@@ -368,7 +368,7 @@ function updateProgress() {
         (orderEntryData.value.positionType ? 1 : 0) +
         (orderEntryData.value.trade_status ? 1 : 0) +
         (orderEntryData.value.rrr ? 1 : 0) +
-        (orderEntryData.value.screenshot ? 1 : 0);
+        (orderEntryData.value.screenshots?.length ? 1 : 0);
 }
 
 function resetWizard() {
@@ -396,7 +396,7 @@ function resetWizard() {
         targetPrice: '',
         rrr: '',
         trade_status: '',
-        screenshot: null,
+        screenshots: [],
         notes: ''
     };
     progressCount.value = 0;
@@ -419,10 +419,17 @@ function submitChecklist() {
         position_type: orderEntryData.value.positionType,
         trade_status: orderEntryData.value.trade_status,
         rrr: orderEntryData.value.rrr,
-        screenshot: orderEntryData.value.screenshot
     };
 
+    // Add screenshots as individual file objects for proper FormData handling
+    if (orderEntryData.value.screenshots && orderEntryData.value.screenshots.length > 0) {
+        orderEntryData.value.screenshots.forEach((file, index) => {
+            submitData[`screenshots[${index}]`] = file;
+        });
+    }
+
     router.post(route('checklists.store'), submitData, {
+        forceFormData: true,
         preserveState: true,
         onSuccess: () => {
             toastRef.value?.showSuccess('Success', 'Checklist saved successfully!')

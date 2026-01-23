@@ -66,10 +66,11 @@
                                 </template>
                             </Column>
 
-                            <Column header="Trade Status" :style="{ width: '100px' }">
+                            <Column header="Trade Status" :style="{ width: '120px' }">
                                 <template #body="slotProps">
                                     <Tag :value="getTradeStatus(slotProps.data)"
-                                        :severity="getTradeStatusSeverity(slotProps.data)" />
+                                        :severity="getTradeStatusSeverity(slotProps.data)"
+                                        class="whitespace-nowrap" />
                                 </template>
                             </Column>
 
@@ -82,6 +83,14 @@
                                 </template>
                             </Column>
 
+                            <Column header="Images" :style="{ width: '80px' }">
+                                <template #body="slotProps">
+                                    <div v-if="slotProps.data.trade_entry?.screenshot_paths && slotProps.data.trade_entry.screenshot_paths.length > 0" class="flex items-center justify-center">
+                                        <Tag :value="slotProps.data.trade_entry.screenshot_paths.length" icon="pi pi-image" severity="info" />
+                                    </div>
+                                    <span v-else class="text-gray-400 text-sm">—</span>
+                                </template>
+                            </Column>
 
                             <Column header="Actions" :style="{ width: '140px' }">
                                 <template #body="slotProps">

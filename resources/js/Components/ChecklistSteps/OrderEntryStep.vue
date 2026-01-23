@@ -60,9 +60,73 @@
         </div>
 
         <div class="field">
-            <label class="block text-sm font-medium mb-2">Chart Screenshot</label>
-            <FileUpload mode="basic" name="screenshot" :auto="false" accept="image/*" :maxFileSize="10000000"
-                @select="onFileSelect" chooseLabel="Choose File" class="w-full" />
+            <label class="block text-sm font-medium mb-2">Chart Screenshots (Max 5)</label>
+            <FileUpload 
+                ref="fileupload"
+                name="screenshots[]"
+                :multiple="true"
+                accept="image/*"
+                :maxFileSize="5000000"
+                :fileLimit="5"
+                customUpload
+                @select="onFilesSelect"
+                @remove="onFileRemove"
+                class="w-full">
+                <template #header="{ chooseCallback, clearCallback, files }">
+                    <div class="flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex gap-2">
+                            <Button 
+                                @click="chooseCallback()" 
+                                icon="pi pi-images" 
+                                label="Choose" 
+                                outlined 
+                                severity="secondary"
+                                size="small" />
+                            <Button 
+                                @click="clearCallback()" 
+                                icon="pi pi-times" 
+                                label="Clear" 
+                                outlined 
+                                severity="danger" 
+                                size="small"
+                                :disabled="!files || files.length === 0" />
+                        </div>
+                        <span class="text-sm text-gray-600">{{ files?.length || 0 }}/5 files</span>
+                    </div>
+                </template>
+                <template #content="{ files, removeFileCallback }">
+                    <div v-if="files.length > 0" class="pt-4">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div v-for="(file, index) of files" 
+                                :key="file.name + file.type + file.size" 
+                                class="relative border border-gray-200 rounded-lg p-2">
+                                <img 
+                                    role="presentation" 
+                                    :alt="file.name" 
+                                    :src="file.objectURL" 
+                                    class="w-full h-32 object-cover rounded" />
+                                <div class="mt-2 text-xs text-gray-600 truncate">{{ file.name }}</div>
+                                <div class="text-xs text-gray-500">{{ formatSize(file.size) }}</div>
+                                <Button 
+                                    icon="pi pi-times" 
+                                    @click="removeFileCallback(index)" 
+                                    rounded 
+                                    text 
+                                    severity="danger" 
+                                    class="absolute top-1 right-1" 
+                                    size="small" />
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <template #empty>
+                    <div class="flex items-center justify-center flex-col py-8">
+                        <i class="pi pi-image text-gray-400 text-4xl mb-3"></i>
+                        <p class="text-gray-600">Drag and drop images here or click Choose</p>
+                        <p class="text-xs text-gray-500 mt-1">Max 5 images, 5MB each</p>
+                    </div>
+                </template>
+            </FileUpload>
         </div>
 
         <div class="field">
@@ -103,7 +167,19 @@ const updateData = (key, value) => {
     emit('progress-updated')
 }
 
-const onFileSelect = (event) => {
-    updateData('screenshot', event.files[0])
+const onFilesSelect = (event) => {
+    updateData('screenshots', event.files)
+}
+
+const onFileRemove = (event) => {
+    updateData('screenshots', event.files)
+}
+
+const formatSize = (bytes) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 </script>
