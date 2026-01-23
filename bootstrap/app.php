@@ -25,17 +25,15 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, $request) {
-            // Handle Inertia requests
-            if ($request->is('api/*') || $request->header('X-Inertia')) {
-                // Return JSON errors for API and Inertia requests
-                if ($e instanceof ValidationException) {
-                    return response()->json([
-                        'message' => 'Validation failed',
-                        'errors' => $e->errors(),
-                    ], 422);
-                }
+            // Handle validation exceptions specifically
+            if ($e instanceof ValidationException) {
+                // For Inertia requests, validation errors should be returned as validation response
+                // Let Laravel's default handling take over - it will use Inertia's automatic error page
+                return null;
+            }
 
-                // Don't expose sensitive error details in production
+            // For API requests only, return JSON
+            if ($request->is('api/*')) {
                 $message = app()->environment('production')
                     ? 'Something went wrong. Please try again later.'
                     : $e->getMessage();
@@ -45,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 500);
             }
 
-            // For web requests, let Laravel handle with custom error pages
+            // For all other requests (including Inertia), let Laravel handle with custom error pages
             return null;
         });
 
