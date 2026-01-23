@@ -225,16 +225,13 @@
                         </div>
 
                         <!-- Screenshots Gallery -->
-                        <div v-if="tradeEntry.screenshot_paths && tradeEntry.screenshot_paths.length > 0" class="field mt-4">
+                        <div v-if="tradeEntry.screenshot_paths && tradeEntry.screenshot_paths.length > 0"
+                            class="field mt-4">
                             <label class="block text-sm font-medium mb-2">Screenshots</label>
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                <div v-for="(path, index) in tradeEntry.screenshot_paths" 
-                                    :key="path" 
+                                <div v-for="(path, index) in tradeEntry.screenshot_paths" :key="path"
                                     class="border border-gray-200 rounded-lg overflow-hidden">
-                                    <Image 
-                                        :src="`/storage/${path}`" 
-                                        :alt="`Screenshot ${index + 1}`" 
-                                        preview
+                                    <Image :src="`/storage/${path}`" :alt="`Screenshot ${index + 1}`" preview
                                         class="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity" />
                                 </div>
                             </div>
@@ -323,48 +320,40 @@ const getPositionDisplay = (positionType) => {
  * Get human-readable trade status - matches DashboardController logic
  */
 const getTradeStatus = (tradeEntry) => {
-    if (!tradeEntry) {
+    if (!tradeEntry || !tradeEntry.trade_status) {
         return 'Analysis Only'
     }
 
     // Check if we have the new trade_status field (after migration)
-    if (tradeEntry.trade_status) {
-        switch (tradeEntry.trade_status) {
-            case 'pending': return 'Pending'
-            case 'active': return 'Open'
-            case 'win': return 'Win'
-            case 'loss': return 'Loss'
-            case 'breakeven': return 'Breakeven'
-            case 'cancelled': return 'Cancelled'
-            default: return 'Unknown'
-        }
+    switch (tradeEntry.trade_status) {
+        case 'pending': return 'Pending'
+        case 'active': return 'Open'
+        case 'win': return 'Win'
+        case 'loss': return 'Loss'
+        case 'breakeven': return 'Breakeven'
+        case 'cancelled': return 'Cancelled'
+        default: return 'Unknown'
     }
-
-    return 'Trade Pending'
 }
 
 /**
  * Get PrimeVue severity for trade status - matches DashboardController logic
  */
 const getTradeStatusSeverity = (tradeEntry) => {
-    if (!tradeEntry) {
+    if (!tradeEntry || !tradeEntry.trade_status) {
         return 'info' // Blue for analysis only
     }
 
     // Check if we have the new trade_status field
-    if (tradeEntry.trade_status) {
-        switch (tradeEntry.trade_status) {
-            case 'pending': return 'warn'   // Yellow  
-            case 'active': return 'info'    // Yellow
-            case 'win': return 'success'     // Green
-            case 'loss': return 'danger'     // Red  
-            case 'breakeven': return 'warn' // Yellow
-            case 'cancelled': return 'secondary' // Gray
-            default: return 'secondary'
-        }
+    switch (tradeEntry.trade_status) {
+        case 'pending': return 'warn'   // Yellow  
+        case 'active': return 'info'    // Yellow
+        case 'win': return 'success'     // Green
+        case 'loss': return 'danger'     // Red  
+        case 'breakeven': return 'warn' // Yellow
+        case 'cancelled': return 'secondary' // Gray
+        default: return 'secondary'
     }
-
-    return 'warn' // Yellow for pending
 }
 
 const confirmDelete = () => {

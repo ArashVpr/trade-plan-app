@@ -69,8 +69,7 @@
                             <Column header="Trade Status" :style="{ width: '120px' }">
                                 <template #body="slotProps">
                                     <Tag :value="getTradeStatus(slotProps.data)"
-                                        :severity="getTradeStatusSeverity(slotProps.data)"
-                                        class="whitespace-nowrap" />
+                                        :severity="getTradeStatusSeverity(slotProps.data)" class="whitespace-nowrap" />
                                 </template>
                             </Column>
 
@@ -85,8 +84,10 @@
 
                             <Column header="Images" :style="{ width: '80px' }">
                                 <template #body="slotProps">
-                                    <div v-if="slotProps.data.trade_entry?.screenshot_paths && slotProps.data.trade_entry.screenshot_paths.length > 0" class="flex items-center justify-center">
-                                        <Tag :value="slotProps.data.trade_entry.screenshot_paths.length" icon="pi pi-image" severity="info" />
+                                    <div v-if="slotProps.data.trade_entry?.screenshot_paths && slotProps.data.trade_entry.screenshot_paths.length > 0"
+                                        class="flex items-center justify-center">
+                                        <Tag :value="slotProps.data.trade_entry.screenshot_paths.length"
+                                            icon="pi pi-image" severity="info" />
                                     </div>
                                     <span v-else class="text-gray-400 text-sm">—</span>
                                 </template>
@@ -96,12 +97,12 @@
                                 <template #body="slotProps">
                                     <div class="flex gap-1">
                                         <Link :href="route('checklists.show', slotProps.data.id)">
-                                        <Button icon="pi pi-eye" size="small" severity="info" text
-                                            v-tooltip="'View Details'" />
+                                            <Button icon="pi pi-eye" size="small" severity="info" text
+                                                v-tooltip="'View Details'" />
                                         </Link>
                                         <Link :href="route('checklists.edit', slotProps.data.id)">
-                                        <Button icon="pi pi-pencil" size="small" severity="success" text
-                                            v-tooltip="'Edit'" />
+                                            <Button icon="pi pi-pencil" size="small" severity="success" text
+                                                v-tooltip="'Edit'" />
                                         </Link>
                                         <Button icon="pi pi-trash" size="small" severity="danger" text
                                             @click="confirmDelete(slotProps.data.id)" v-tooltip="'Delete'" />
@@ -193,47 +194,40 @@ const getScoreSeverity = (score) => {
 const getTradeStatus = (checklist) => {
     const tradeEntry = checklist.trade_entry
 
-    if (!tradeEntry) {
+    if (!tradeEntry || !tradeEntry.trade_status) {
         return 'Analysis Only'
     }
 
     // Check if we have the new trade_status field (after migration)
-    if (tradeEntry.trade_status) {
-        switch (tradeEntry.trade_status) {
-            case 'pending': return 'Pending'
-            case 'active': return 'Open'
-            case 'win': return 'Win'
-            case 'loss': return 'Loss'
-            case 'breakeven': return 'Breakeven'
-            case 'cancelled': return 'Cancelled'
-            default: return 'Unknown'
-        }
+    switch (tradeEntry.trade_status) {
+        case 'pending': return 'Pending'
+        case 'active': return 'Open'
+        case 'win': return 'Win'
+        case 'loss': return 'Loss'
+        case 'breakeven': return 'Breakeven'
+        case 'cancelled': return 'Cancelled'
+        default: return 'Unknown'
     }
-
-    return 'Trade Pending'
 }
 
 // Helper function to get trade status severity - matches Dashboard and Show.vue
 const getTradeStatusSeverity = (checklist) => {
     const tradeEntry = checklist.trade_entry
 
-    if (!tradeEntry) {
+    if (!tradeEntry || !tradeEntry.trade_status) {
         return 'info'  // Blue for analysis only
     }
 
     // Check if we have the new trade_status field
-    if (tradeEntry.trade_status) {
-        switch (tradeEntry.trade_status) {
-            case 'pending': return 'info'   // Blue
-            case 'active': return 'warn'    // Yellow
-            case 'win': return 'success' // Green
-            case 'loss': return 'danger'  // Red
-            case 'breakeven': return 'info' // Yellow
-            case 'cancelled': return 'secondary' // Gray
-            default: return 'secondary'
-        }
+    switch (tradeEntry.trade_status) {
+        case 'pending': return 'info'   // Blue
+        case 'active': return 'warn'    // Yellow
+        case 'win': return 'success' // Green
+        case 'loss': return 'danger'  // Red
+        case 'breakeven': return 'info' // Yellow
+        case 'cancelled': return 'secondary' // Gray
+        default: return 'secondary'
     }
-    return 'secondary'  // Default for unknown status
 }
 
 const confirmDelete = (checklistId) => {
