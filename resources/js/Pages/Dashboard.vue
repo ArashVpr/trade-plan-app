@@ -64,7 +64,12 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <Chart type="line" :data="weeklyTrendData" :options="chartOptions" class="w-full h-64" />
+                            <Chart
+                                v-if="weeklyTrendData && weeklyTrendData.datasets && weeklyTrendData.datasets.length > 0"
+                                type="line" :data="weeklyTrendData" :options="chartOptions" class="w-full h-64" />
+                            <div v-else class="flex items-center justify-center h-64 text-gray-400">
+                                No data available
+                            </div>
                         </div>
                     </template>
                 </Card>
@@ -78,8 +83,13 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <Chart type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
+                            <Chart
+                                v-if="scoreDistributionData && scoreDistributionData.datasets && scoreDistributionData.datasets.length > 0"
+                                type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
                                 class="w-full h-64" />
+                            <div v-else class="flex items-center justify-center h-64 text-gray-400">
+                                No data available
+                            </div>
                         </div>
                     </template>
                 </Card>
@@ -100,7 +110,7 @@
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -211,7 +221,7 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                            }}%</span>
+                                                                }}%</span>
                                                         </div>
                                                     </template>
                                                 </Column>
@@ -619,7 +629,7 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
@@ -697,25 +707,35 @@ const props = defineProps({
 })
 
 // Chart data for weekly trend
-const weeklyTrendData = computed(() => ({
-    labels: props.stats.weekly_trend.map(item => item.week),
-    datasets: [
-        {
-            label: 'Checklists Created',
-            data: props.stats.weekly_trend.map(item => item.count),
-            fill: false,
-            borderColor: '#3B82F6',
-            backgroundColor: '#3B82F6',
-            tension: 0.4,
-            pointBackgroundColor: '#3B82F6',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2
-        }
-    ]
-}))
+const weeklyTrendData = computed(() => {
+    if (!props.stats?.weekly_trend || props.stats.weekly_trend.length === 0) {
+        return null
+    }
+
+    return {
+        labels: props.stats.weekly_trend.map(item => item.week),
+        datasets: [
+            {
+                label: 'Checklists Created',
+                data: props.stats.weekly_trend.map(item => item.count),
+                fill: false,
+                borderColor: '#3B82F6',
+                backgroundColor: '#3B82F6',
+                tension: 0.4,
+                pointBackgroundColor: '#3B82F6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2
+            }
+        ]
+    }
+})
 
 // Chart data for score distribution
 const scoreDistributionData = computed(() => {
+    if (!props.stats?.score_distribution || props.stats.score_distribution.length === 0) {
+        return null
+    }
+
     // Define color mapping for each score range    
     const colorMap = {
         'Excellent (80-100)': '#10B981', // Green
@@ -745,6 +765,7 @@ const scoreDistributionData = computed(() => {
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false, // Disable animations to prevent null reference errors
     plugins: {
         legend: {
             display: false
@@ -763,6 +784,7 @@ const chartOptions = {
 const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false, // Disable animations to prevent null reference errors
     plugins: {
         legend: {
             position: 'bottom',

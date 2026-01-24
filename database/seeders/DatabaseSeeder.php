@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             InstrumentSeeder::class,
             ChecklistSeeder::class,
-            TradeManagementItemSeeder::class,
         ]);
     }
 }

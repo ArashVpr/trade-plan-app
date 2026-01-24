@@ -55,7 +55,8 @@
                             <!-- Chart -->
                             <div class="flex justify-center">
                                 <div class="w-64 h-64">
-                                    <Doughnut :data="chartData" :options="chartOptions" />
+                                    <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                        class="w-full md:w-[30rem]" />
                                 </div>
                             </div>
 
@@ -155,7 +156,7 @@
                                         <Slider v-model="form.zone_flip_weight" :min="0" :max="100" :step="1"
                                             class="w-full" />
                                         <small v-if="errors.zone_flip_weight" class="p-error">{{ errors.zone_flip_weight
-                                        }}</small>
+                                            }}</small>
                                     </div>
 
                                     <div class="flex flex-col gap-2">
@@ -167,7 +168,7 @@
                                         <Slider v-model="form.zone_lol_weight" :min="0" :max="100" :step="1"
                                             class="w-full" />
                                         <small v-if="errors.zone_lol_weight" class="p-error">{{ errors.zone_lol_weight
-                                        }}</small>
+                                            }}</small>
                                     </div>
 
                                     <div class="flex flex-col gap-2">
@@ -352,11 +353,7 @@ import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { Doughnut } from 'vue-chartjs'
-import { Chart, registerables } from 'chart.js'
 import AppLayout from '@/Layouts/AppLayout.vue'
-
-Chart.register(...registerables)
 
 const props = defineProps({
     weights: Object,

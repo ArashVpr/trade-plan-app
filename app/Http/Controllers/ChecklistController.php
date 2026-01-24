@@ -16,23 +16,323 @@ use App\Models\Instrument;
 
 class ChecklistController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $checklists = Checklist::with('tradeEntry')
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
-        $instruments = Instrument::active()->get();
-
-        // Get user's checklist weights for directional bias calculation
+        // Get user's checklist weights FIRST for bias calculation logic
         $settings = ChecklistWeights::firstOrCreate(
             ['user_id' => Auth::id()],
         );
+
+        // Get sorting parameters
+        $sortField = $request->get('sortField', 'created_at');
+        $sortOrder = $request->get('sortOrder', 'desc');
+
+        // Get search and filter parameters
+        $search = $request->get('search', '');
+        $biasFilters = $request->get('bias', []);
+        $positionFilters = $request->get('position', []);
+        $tradeStatusFilters = $request->get('tradeStatus', []);
+
+        // --- PREPARE BIAS CALCULATION SQL (Used in Search & Filters) ---
+        // Construct the weighted sum SQL expression based on user settings
+        $techVeryExpChp = (int)$settings->technical_very_exp_chp_weight;
+        $techExpChp = (int)$settings->technical_exp_chp_weight;
+        $fundValuation = (int)$settings->fundamental_valuation_weight;
+        $fundSeasonal = (int)$settings->fundamental_seasonal_weight;
+        $fundNonComm = (int)$settings->fundamental_noncommercial_divergence_weight;
+        $fundCot = (int)$settings->fundamental_cot_index_weight;
+
+        // Calculate maxSum for confidence percentage
+        $maxTechWeight = max($techVeryExpChp, $techExpChp);
+        $maxSum = (1 * $maxTechWeight) + $fundValuation + $fundSeasonal + $fundNonComm + $fundCot;
+        $maxSum = $maxSum > 0 ? $maxSum : 1;
+
+        $weightedSumSql = "
+            (
+                /* Technical Location */
+                (CASE 
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(technicals, '$.location')) IN ('Very Cheap', 'Cheap') THEN 
+                        CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(technicals, '$.location')) = 'Very Cheap' THEN {$techVeryExpChp} ELSE {$techExpChp} END
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(technicals, '$.location')) IN ('Very Expensive', 'Expensive') THEN 
+                        CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(technicals, '$.location')) = 'Very Expensive' THEN -{$techVeryExpChp} ELSE -{$techExpChp} END
+                    ELSE 0 
+                END) +
+                
+                /* Fundamental Valuation */
+                (CASE 
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.valuation')) = 'Undervalued' THEN {$fundValuation}
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.valuation')) = 'Overvalued' THEN -{$fundValuation}
+                    ELSE 0 
+                END) +
+                
+                /* Fundamental Seasonality */
+                (CASE 
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.seasonalConfluence')) = 'Bullish' THEN {$fundSeasonal}
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.seasonalConfluence')) = 'Bearish' THEN -{$fundSeasonal}
+                    ELSE 0 
+                END) +
+                
+                /* Fundamental NonCommercials */
+                (CASE 
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.nonCommercials')) = 'Bullish Divergence' THEN {$fundNonComm}
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.nonCommercials')) = 'Bearish Divergence' THEN -{$fundNonComm}
+                    ELSE 0 
+                END) +
+                
+                /* Fundamental COT Index */
+                (CASE 
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.cotIndex')) = 'Bullish' THEN {$fundCot}
+                    WHEN JSON_UNQUOTE(JSON_EXTRACT(fundamentals, '$.cotIndex')) = 'Bearish' THEN -{$fundCot}
+                    ELSE 0 
+                END)
+            )
+        ";
+        $confidenceSql = "ROUND((ABS({$weightedSumSql}) / {$maxSum}) * 100)";
+        // -------------------------------------------------------------
+
+        // Build query with sorting
+        $query = Checklist::with('tradeEntry')
+            ->where('checklists.user_id', Auth::id());
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search, $weightedSumSql, $confidenceSql) {
+                // 1. Symbol Search
+                $q->where('checklists.symbol', 'LIKE', "%{$search}%");
+
+                // 2. Score Search (if numeric)
+                if (is_numeric($search)) {
+                    $q->orWhere('checklists.score', (int)$search);
+                }
+
+                // 3. Trade Entry Fields
+                $q->orWhereHas('tradeEntry', function ($subQ) use ($search) {
+                    $subQ->where('trade_status', 'LIKE', "%{$search}%")
+                        ->orWhere('position_type', 'LIKE', "%{$search}%");
+                });
+
+                // 4. Handle "Analysis Only" (rows without trade entry)
+                if (stripos($search, 'Analysis') !== false || stripos($search, 'Only') !== false) {
+                    $q->orWhereDoesntHave('tradeEntry');
+                }
+
+                // 5. Bias Keyword Search (using calculated SQL)
+                $term = strtolower($search);
+                // "Lean Buy" specific
+                if (str_contains($term, 'lean buy')) {
+                    $q->orWhereRaw("{$weightedSumSql} > 0 AND {$confidenceSql} <= 50 AND {$confidenceSql} > 20");
+                }
+                // "Lean Sell" specific
+                else if (str_contains($term, 'lean sell')) {
+                    $q->orWhereRaw("{$weightedSumSql} < 0 AND {$confidenceSql} <= 50 AND {$confidenceSql} > 20");
+                }
+                // Generic "Buy" (includes Lean, Strong, Normal)
+                else if (str_contains($term, 'buy')) {
+                    $q->orWhereRaw("{$weightedSumSql} > 0");
+                }
+                // Generic "Sell" (includes Lean, Strong, Normal)
+                else if (str_contains($term, 'sell')) {
+                    // Avoid overlapping with "Close" or similar if needed, but "sell" is distinct enough usually
+                    $q->orWhereRaw("{$weightedSumSql} < 0");
+                }
+                // "Neutral"
+                else if (str_contains($term, 'neutral')) {
+                    $q->orWhereRaw("{$confidenceSql} <= 20");
+                }
+            });
+        }
+
+        // Apply bias filter using complex weighted logic
+        if (!empty($biasFilters)) {
+            $query->where(function ($q) use ($biasFilters, $weightedSumSql, $confidenceSql) {
+                foreach ($biasFilters as $bias) {
+                    switch ($bias) {
+                        case 'buy':
+                            // Merged Strong Buy logic (>= 51)
+                            $q->orWhereRaw("{$weightedSumSql} > 0 AND {$confidenceSql} >= 51");
+                            break;
+                        case 'lean_buy':
+                            $q->orWhereRaw("{$weightedSumSql} > 0 AND {$confidenceSql} <= 50 AND {$confidenceSql} > 20");
+                            break;
+                        case 'neutral':
+                            $q->orWhereRaw("{$confidenceSql} <= 20");
+                            break;
+                        case 'lean_sell':
+                            $q->orWhereRaw("{$weightedSumSql} < 0 AND {$confidenceSql} <= 50 AND {$confidenceSql} > 20");
+                            break;
+                        case 'sell':
+                            // Merged Strong Sell logic (>= 51)
+                            $q->orWhereRaw("{$weightedSumSql} < 0 AND {$confidenceSql} >= 51");
+                            break;
+                    }
+                }
+            });
+        }
+
+
+        // Apply position filter
+        if (!empty($positionFilters)) {
+            $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
+                ->select('checklists.*')
+                ->whereIn('trade_entries.position_type', $positionFilters);
+        }
+
+        // Apply trade status filter
+        if (!empty($tradeStatusFilters)) {
+            if (in_array('analysis_only', $tradeStatusFilters)) {
+                // For analysis_only, we need rows where trade_entry doesn't exist
+                $hasOtherStatuses = count(array_diff($tradeStatusFilters, ['analysis_only'])) > 0;
+                if ($hasOtherStatuses) {
+                    $otherStatuses = array_diff($tradeStatusFilters, ['analysis_only']);
+                    if (empty($query->getQuery()->joins)) {
+                        $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
+                            ->select('checklists.*');
+                    }
+                    $query->where(function ($q) use ($otherStatuses) {
+                        $q->whereIn('trade_entries.trade_status', $otherStatuses)
+                            ->orWhereNull('trade_entries.id');
+                    });
+                } else {
+                    // Only analysis_only selected
+                    $query->doesntHave('tradeEntry');
+                }
+            } else {
+                if (empty($query->getQuery()->joins)) {
+                    $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
+                        ->select('checklists.*');
+                }
+                $query->whereIn('trade_entries.trade_status', $tradeStatusFilters);
+            }
+        }
+
+        // Apply sorting based on field
+        switch ($sortField) {
+            case 'symbol':
+                $query->orderBy('checklists.symbol', $sortOrder);
+                break;
+            case 'score':
+                $query->orderBy('checklists.score', $sortOrder);
+                break;
+            case 'bias':
+                // Sort by a calculated bias score (bullish signals count - bearish signals count)
+                // This gives a numerical value we can sort by
+                $query->orderByRaw(
+                    "CAST(JSON_UNQUOTE(JSON_EXTRACT(checklists.technicals, '$.bullish_count')) AS SIGNED) - 
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(checklists.technicals, '$.bearish_count')) AS SIGNED) + 
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(checklists.fundamentals, '$.bullish_count')) AS SIGNED) - 
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(checklists.fundamentals, '$.bearish_count')) AS SIGNED) {$sortOrder}"
+                );
+                break;
+            case 'created_at':
+            case 'date':
+                $query->orderBy('checklists.created_at', $sortOrder);
+                break;
+            case 'entry_date':
+                if (empty($query->getQuery()->joins)) {
+                    $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id');
+                }
+                $query->select('checklists.*')
+                    ->selectRaw('MAX(trade_entries.entry_date) as te_entry_date')
+                    ->groupBy('checklists.id')
+                    ->orderBy('te_entry_date', $sortOrder);
+                break;
+            case 'position_type':
+                if (empty($query->getQuery()->joins)) {
+                    $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id');
+                }
+                $query->select('checklists.*')
+                    ->selectRaw('MAX(trade_entries.position_type) as te_position_type')
+                    ->groupBy('checklists.id')
+                    ->orderBy('te_position_type', $sortOrder);
+                break;
+            case 'trade_status':
+                if (empty($query->getQuery()->joins)) {
+                    $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id');
+                }
+                $query->select('checklists.*')
+                    ->selectRaw('MAX(trade_entries.trade_status) as te_trade_status')
+                    ->groupBy('checklists.id')
+                    ->orderBy('te_trade_status', $sortOrder);
+                break;
+            case 'rrr':
+                if (empty($query->getQuery()->joins)) {
+                    $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id');
+                }
+                $query->select('checklists.*')
+                    ->selectRaw('MAX(trade_entries.rrr) as te_rrr')
+                    ->groupBy('checklists.id')
+                    ->orderBy('te_rrr', $sortOrder);
+                break;
+            default:
+                $query->orderBy('checklists.created_at', $sortOrder);
+        }
+
+        $checklists = $query->paginate(10);
+
+        // Calculate statistics
+        $totalChecklists = Checklist::where('user_id', Auth::id())->count();
+
+        $analysisOnly = Checklist::where('user_id', Auth::id())
+            ->doesntHave('tradeEntry')
+            ->count();
+
+        $pendingOrders = TradeEntry::whereHas('checklist', function ($q) {
+            $q->where('user_id', Auth::id());
+        })
+            ->where('trade_status', 'pending')
+            ->count();
+
+        $activePositions = TradeEntry::whereHas('checklist', function ($q) {
+            $q->where('user_id', Auth::id());
+        })
+            ->where('trade_status', 'active')
+            ->count();
+
+        $wins = TradeEntry::whereHas('checklist', function ($q) {
+            $q->where('user_id', Auth::id());
+        })
+            ->where('trade_status', 'win')
+            ->count();
+
+        $losses = TradeEntry::whereHas('checklist', function ($q) {
+            $q->where('user_id', Auth::id());
+        })
+            ->where('trade_status', 'loss')
+            ->count();
+
+        $breakeven = TradeEntry::whereHas('checklist', function ($q) {
+            $q->where('user_id', Auth::id());
+        })
+            ->where('trade_status', 'breakeven')
+            ->count();
+
+        $cancelled = TradeEntry::whereHas('checklist', function ($q) {
+            $q->where('user_id', Auth::id());
+        })
+            ->where('trade_status', 'cancelled')
+            ->count();
+
+        $instruments = Instrument::active()->get();
+
+        // Get user's checklist weights for directional bias calculation
+        // $settings = ChecklistWeights::firstOrCreate(
+        //    ['user_id' => Auth::id()],
+        // );
 
         return Inertia::render('Checklist/Index', [
             'checklists' => $checklists,
             'instruments' => $instruments,
             'settings' => $settings,
+            'statistics' => [
+                'total' => $totalChecklists,
+                'analysisOnly' => $analysisOnly,
+                'pending' => $pendingOrders,
+                'active' => $activePositions,
+                'wins' => $wins,
+                'losses' => $losses,
+                'breakeven' => $breakeven,
+                'cancelled' => $cancelled,
+            ],
         ]);
     }
     public function store(Request $request)

@@ -73,12 +73,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(TradeEntry::class);
     }
-
-    /**
-     * Get the analysis trackers associated with the user.
-     */
-    public function analysisTrackers()
-    {
-        return $this->hasMany(AnalysisTracker::class);
-    }
 }

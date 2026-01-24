@@ -8,8 +8,6 @@
                 <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
                     @click="router.get(route('checklists.index'))" />
                 <div class="flex gap-2">
-                    <Button label="Track Similar Setups" icon="pi pi-search" severity="info" outlined
-                        @click="router.get(route('analysis-tracker.index'))" />
                     <Button label="Edit" icon="pi pi-pencil" severity="success"
                         @click="router.get(route('checklists.edit', checklist.id))" />
                     <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDelete" />
@@ -248,8 +246,17 @@
                         </div>
                     </template>
                     <template #content>
-                        <div class="w-full h-80">
-                            <Radar :data="chartData" :options="chartOptions" />
+                        <!-- Custom Static Legend -->
+                        <div class="flex justify-center gap-6 mb-6 text-base flex-wrap">
+                            <div v-for="(label, index) in ['Zone Qualifiers', 'Technicals', 'Fundamentals']"
+                                :key="label" class="flex items-center gap-2">
+                                <span class="inline-block w-4 h-4 rounded-sm bg-emerald-500"></span>
+                                <span class="font-semibold">{{ getLegendText(label) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full h-[500px] flex justify-center">
+                            <Chart type="radar" :data="chartData" :options="chartOptions" class="w-full" />
                         </div>
                     </template>
                 </Card>
@@ -264,16 +271,12 @@
 
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { Radar } from 'vue-chartjs'
-import { Chart, registerables } from 'chart.js'
 import { computed, onMounted } from 'vue'
 import { route } from 'ziggy-js'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { useDirectionalBias } from '@/composables/useDirectionalBias.js'
-
-Chart.register(...registerables)
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -407,6 +410,17 @@ const calculateCategoryScores = (checklist) => {
     return scores;
 };
 
+// Helper function to generate legend text
+const getLegendText = (label) => {
+    const scores = calculateCategoryScores(props.checklist);
+    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
+    const key = label.replace(' ', '');
+    const value = scores[key];
+    const max = maxValues[key];
+    const percentage = ((value / max) * 100).toFixed(1);
+    return `${label} (${value}/${max}, ${percentage}%)`;
+};
+
 const chartData = computed(() => {
     const scores = calculateCategoryScores(props.checklist);
     const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
@@ -427,72 +441,85 @@ const chartData = computed(() => {
                 return value === max ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.2)';
             },
             borderColor: 'rgba(16, 185, 129, 1)',
-            borderWidth: 2,
+            borderWidth: 3,
             pointBackgroundColor: 'rgba(16, 185, 129, 1)',
             pointBorderColor: '#fff',
+            pointBorderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 8,
             pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgba(16, 185, 129, 1)'
+            pointHoverBorderColor: 'rgba(16, 185, 129, 1)',
+            pointHoverBorderWidth: 3
         }]
     };
 });
 
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-        r: {
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-                stepSize: 25,
-                callback: (value) => `${value}%`
-            },
-            pointLabels: {
-                font: {
-                    size: 14
-                }
-            }
-        }
-    },
-    plugins: {
-        legend: {
-            display: true,
-            position: 'top',
-            labels: {
-                font: {
-                    size: 18
+const chartOptions = computed(() => {
+    const scores = calculateCategoryScores(props.checklist);
+    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: {
+            mode: 'index'
+        },
+        scales: {
+            r: {
+                beginAtZero: true,
+                max: 100,
+                min: 0,
+                ticks: {
+                    stepSize: 25,
+                    callback: (value) => `${value}%`,
+                    font: {
+                        size: 14,
+                        weight: '500'
+                    },
+                    color: '#4B5563',
+                    backdropColor: 'transparent'
                 },
-                generateLabels: (chart) => {
-                    const data = chart.data;
-                    const scores = calculateCategoryScores(props.checklist); // Calculate scores for display
-                    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
-                    return data.labels.map((label, i) => {
-                        const key = label.replace(' ', ''); // Ensure label matches scores key
-                        const value = scores[key]; // Use corrected key to access scores
-                        const max = maxValues[key];
-                        const percentage = (value / max) * 100;
-                        return {
-                            text: `${label} (${value}/${max}, ${percentage.toFixed(1)}%)`,
-                            fillStyle: value === max ? 'gold' : 'rgba(16, 185, 129, 1)',
-                            font: { size: 18 }
-                        };
-                    });
+                pointLabels: {
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: '#1F2937',
+                    padding: 15
+                },
+                grid: {
+                    color: 'rgba(156, 163, 175, 0.3)',
+                    lineWidth: 1
+                },
+                angleLines: {
+                    color: 'rgba(156, 163, 175, 0.3)',
+                    lineWidth: 1
                 }
             }
         },
-        tooltip: {
-            callbacks: {
-                label: (context) => {
-                    const label = context.label || ''
-                    const value = context.raw || 0
-                    const scores = calculateCategoryScores(props.checklist)
-                    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 }
-                    const max = maxValues[label]
-                    const rawScore = scores[label]
-                    return `${label}: ${rawScore}/${max} (${value.toFixed(1)}%)`
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                enabled: true,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: { size: 14, weight: 'bold' },
+                bodyFont: { size: 13 },
+                callbacks: {
+                    label: (context) => {
+                        const label = context.label || ''
+                        const value = context.raw || 0
+                        const key = label.replace(' ', '')
+                        const max = maxValues[key]
+                        const rawScore = scores[key]
+                        return `${label}: ${rawScore}/${max} (${value.toFixed(1)}%)`
+                    }
                 }
             }
         }
     }
-}
+})
 </script>
