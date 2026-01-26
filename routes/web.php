@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     // User profile
     Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [UserProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/avatar', [UserProfileController::class, 'uploadAvatar'])->name('profile.avatar');
     Route::put('/profile/password', [UserProfileController::class, 'updatePassword'])->name('profile.password');
     Route::put('/profile/notifications', [UserProfileController::class, 'updateNotifications'])->name('profile.notifications');
     Route::put('/profile/checklist-weights', [UserProfileController::class, 'updateChecklistWeights'])->name('profile.checklist-weights');

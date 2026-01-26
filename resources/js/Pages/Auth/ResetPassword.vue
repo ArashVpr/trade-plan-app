@@ -1,14 +1,15 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div>
-                <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+                <div
+                    class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
                     <i class="pi pi-chart-line text-2xl text-blue-600"></i>
                 </div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                     Reset your password
                 </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
+                <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
                     Enter your new password below
                 </p>
             </div>
@@ -20,15 +21,17 @@
                         <input type="hidden" name="username" :value="form.email" autocomplete="username" />
 
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Email Address
                             </label>
                             <InputText id="email" name="email" v-model="form.email" type="email" autocomplete="username"
-                                readonly class="w-full bg-gray-50" />
+                                readonly
+                                class="w-full bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700" />
                         </div>
 
                         <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="password"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 New Password
                             </label>
                             <Password v-model="form.password" toggleMask class="w-full"
@@ -49,11 +52,12 @@
                                 </template>
                             </Password>
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                            }}</small>
+                                }}</small>
                         </div>
 
                         <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="password_confirmation"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Confirm New Password
                             </label>
                             <Password v-model="form.password_confirmation" :feedback="false" toggleMask class="w-full"
@@ -72,7 +76,7 @@
 
                         <div class="text-center">
                             <Link :href="route('login')" class="text-sm font-medium text-blue-600 hover:text-blue-500">
-                            Back to Sign In
+                                Back to Sign In
                             </Link>
                         </div>
                     </form>

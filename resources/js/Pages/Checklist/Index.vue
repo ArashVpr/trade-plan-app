@@ -1,35 +1,38 @@
 <template>
     <AppLayout>
         <div class="max-w-5xl mx-auto">
-            <h1 class="text-3xl font text-blue-900 mb-6 text-center">Checklist History</h1>
+            <h1 class="text-3xl font text-blue-900 dark:text-blue-300 mb-6 text-center">Checklist History</h1>
             <Card>
                 <template #title>
                     <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-blue-900">Saved Checklists</h2>
+                        <h2 class="text-xl font-semibold text-blue-900 dark:text-blue-300">Saved Checklists</h2>
                         <div class="flex gap-3 flex-wrap items-center">
                             <div
-                                class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full border border-blue-200">
+                                class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-200 dark:border-blue-800">
                                 <i class="pi pi-clock text-blue-600 text-sm"></i>
                                 <span class="text-sm font-semibold text-blue-700">{{ statistics.pending }}</span>
                                 <span class="text-xs text-blue-600">Pending</span>
                             </div>
                             <div
-                                class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-full border border-amber-200">
-                                <i class="pi pi-chart-line text-amber-600 text-sm"></i>
-                                <span class="text-sm font-semibold text-amber-700">{{ statistics.active }}</span>
-                                <span class="text-xs text-amber-600">Active</span>
+                                class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 rounded-full border border-amber-200 dark:border-amber-800">
+                                <i class="pi pi-chart-line text-amber-600 dark:text-amber-200 text-sm"></i>
+                                <span class="text-sm font-semibold text-amber-700 dark:text-amber-100">{{
+                                    statistics.active }}</span>
+                                <span class="text-xs text-amber-600 dark:text-amber-200">Active</span>
                             </div>
                             <div
-                                class="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-200">
-                                <i class="pi pi-check-circle text-green-600 text-sm"></i>
-                                <span class="text-sm font-semibold text-green-700">{{ statistics.wins }}</span>
-                                <span class="text-xs text-green-600">Wins</span>
+                                class="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-full border border-green-200 dark:border-green-800">
+                                <i class="pi pi-check-circle text-green-600 dark:text-green-200 text-sm"></i>
+                                <span class="text-sm font-semibold text-green-700 dark:text-green-100">{{
+                                    statistics.wins }}</span>
+                                <span class="text-xs text-green-600 dark:text-green-200">Wins</span>
                             </div>
                             <div
-                                class="flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-full border border-red-200">
-                                <i class="pi pi-times-circle text-red-600 text-sm"></i>
-                                <span class="text-sm font-semibold text-red-700">{{ statistics.losses }}</span>
-                                <span class="text-xs text-red-600">Losses</span>
+                                class="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 rounded-full border border-red-200 dark:border-red-800">
+                                <i class="pi pi-times-circle text-red-600 dark:text-red-200 text-sm"></i>
+                                <span class="text-sm font-semibold text-red-700 dark:text-red-100">{{ statistics.losses
+                                }}</span>
+                                <span class="text-xs text-red-600 dark:text-red-200">Losses</span>
                             </div>
                         </div>
                     </div>
@@ -51,7 +54,7 @@
                                             class="!px-0 hover:bg-transparent text-red-600 hover:text-red-700 font-semibold"
                                             @click="clearAllFilters" />
                                     </div>
-                                    <div v-else class="text-lg font-semibold text-slate-700">
+                                    <div v-else class="text-lg font-semibold text-slate-700 dark:text-slate-300">
                                         Checklists
                                     </div>
                                 </div>
@@ -68,11 +71,12 @@
                         </template>
                         <template #empty>
                             <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
-                                <div class="bg-slate-50 rounded-full p-4 mb-4">
-                                    <i class="pi pi-search text-4xl text-slate-300"></i>
+                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-full p-4 mb-4">
+                                    <i class="pi pi-search text-4xl text-slate-300 dark:text-slate-500"></i>
                                 </div>
-                                <h3 class="text-lg font-medium text-slate-900 mb-1">No checklists found</h3>
-                                <p class="text-slate-500 mb-6 max-w-sm">
+                                <h3 class="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No checklists
+                                    found</h3>
+                                <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
                                     We couldn't find any results matching your search or filters.
                                 </p>
                                 <Button
@@ -87,14 +91,14 @@
                             </div>
                         </template>
                         <template #loading>
-                            <div class="text-center py-8 text-gray-500">
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                                 Loading data...
                             </div>
                         </template>
 
                         <Column field="created_at" header="Date" sortable :style="{ width: '110px' }">
                             <template #body="slotProps">
-                                <span class="font-medium text-slate-700">
+                                <span class="font-medium text-slate-700 dark:text-slate-300">
                                     {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
                                 </span>
                             </template>
@@ -102,7 +106,8 @@
 
                         <Column field="symbol" header="Symbol" sortable :style="{ width: '110px' }">
                             <template #body="slotProps">
-                                <div class="font-bold text-blue-900">{{ slotProps.data.symbol || 'N/A' }}</div>
+                                <div class="font-bold text-blue-900 dark:text-blue-300">{{ slotProps.data.symbol ||
+                                    'N/A' }}</div>
                             </template>
                         </Column>
 
@@ -130,7 +135,7 @@
                                         :severity="getDirectionalBias(slotProps.data).severity"
                                         class="text-xs font-bold" />
                                 </div>
-                                <span v-else class="text-slate-400 text-xs italic">No Signals</span>
+                                <span v-else class="text-slate-400 dark:text-slate-500 text-xs italic">No Signals</span>
                             </template>
                         </Column>
 
@@ -151,14 +156,14 @@
                                 <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
                                     :severity="slotProps.data.trade_entry?.position_type === 'Long' ? 'success' : 'danger'"
                                     v-if="slotProps.data.trade_entry?.position_type" />
-                                <span v-else class="text-slate-400 text-sm">-</span>
+                                <span v-else class="text-slate-400 dark:text-slate-500 text-sm">-</span>
                             </template>
                         </Column>
 
                         <Column field="entry_date" header="Entry&#160;Date" sortable
                             :style="{ width: '130px', whiteSpace: 'nowrap' }">
                             <template #body="slotProps">
-                                <span class="text-sm border-b border-dotted border-slate-300">
+                                <span class="text-sm border-b border-dotted border-slate-300 dark:border-slate-600">
                                     {{ slotProps.data.trade_entry?.entry_date ?
                                         new Date(slotProps.data.trade_entry.entry_date).toLocaleDateString() : '-'
                                     }}
@@ -186,7 +191,7 @@
 
                         <Column field="rrr" header="R:R" sortable :style="{ width: '80px' }">
                             <template #body="slotProps">
-                                <span class="font-mono font-semibold text-slate-600">
+                                <span class="font-mono font-semibold text-slate-600 dark:text-slate-300">
                                     {{ slotProps.data.trade_entry?.rrr ?
                                         Number(slotProps.data.trade_entry.rrr).toFixed(2) : '-' }}
                                 </span>
@@ -245,7 +250,6 @@
             </ConfirmDialog> -->
         </div>
         <ConfirmDialog></ConfirmDialog>
-        <Toast />
     </AppLayout>
 </template>
 

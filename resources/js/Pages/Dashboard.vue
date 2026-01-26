@@ -1,13 +1,11 @@
 <template>
     <AppLayout>
-        <!-- Toast for notifications -->
-        <Toast />
 
         <div class="max-w-7xl mx-auto">
             <!-- Page Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-blue-900 mb-2">Trading Dashboard</h1>
-                <p class="text-gray-600">Overview of your trading activity and performance</p>
+                <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-2">Trading Dashboard</h1>
+                <p class="text-gray-600 dark:text-gray-400">Overview of your trading activity and performance</p>
             </div>
 
             <!-- Overview Cards -->
@@ -16,8 +14,9 @@
                     <template #content>
                         <div class="p-4">
                             <i class="pi pi-list text-4xl text-blue-600 mb-3"></i>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ stats.overview.total_checklists }}</h3>
-                            <p class="text-gray-600">Total Checklists</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{
+                                stats.overview.total_checklists }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Total Checklists</p>
                         </div>
                     </template>
                 </Card>
@@ -26,8 +25,9 @@
                     <template #content>
                         <div class="p-4">
                             <i class="pi pi-calendar text-4xl text-green-600 mb-3"></i>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ stats.overview.weekly_checklists }}</h3>
-                            <p class="text-gray-600">This Week</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{
+                                stats.overview.weekly_checklists }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">This Week</p>
                         </div>
                     </template>
                 </Card>
@@ -36,8 +36,9 @@
                     <template #content>
                         <div class="p-4">
                             <i class="pi pi-chart-bar text-4xl text-purple-600 mb-3"></i>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ stats.overview.monthly_checklists }}</h3>
-                            <p class="text-gray-600">This Month</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{
+                                stats.overview.monthly_checklists }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">This Month</p>
                         </div>
                     </template>
                 </Card>
@@ -46,8 +47,9 @@
                     <template #content>
                         <div class="p-4">
                             <i class="pi pi-star text-4xl text-yellow-600 mb-3"></i>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ stats.overview.avg_score }}</h3>
-                            <p class="text-gray-600">Average Score</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ stats.overview.avg_score
+                            }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Average Score</p>
                         </div>
                     </template>
                 </Card>
@@ -59,7 +61,8 @@
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Weekly Activity Trend</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Weekly Activity Trend
+                            </h3>
                         </div>
                     </template>
                     <template #content>
@@ -78,7 +81,7 @@
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Score Distribution</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Score Distribution</h3>
                         </div>
                     </template>
                     <template #content>
@@ -101,7 +104,8 @@
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">Top Performing Symbols</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Top Performing Symbols
+                            </h3>
                         </div>
                     </template>
                     <template #content>
@@ -109,7 +113,8 @@
                             <DataTable :value="stats.top_symbols" class="p-datatable-sm">
                                 <Column field="symbol" header="Symbol">
                                     <template #body="slotProps">
-                                        <span class="font-mono font-bold text-blue-900">{{ slotProps.data.symbol
+                                        <span class="font-mono font-bold text-blue-900 dark:text-blue-300">{{
+                                            slotProps.data.symbol
                                         }}</span>
                                     </template>
                                 </Column>
@@ -118,7 +123,8 @@
                                     <template #body="slotProps">
                                         <ProgressBar :value="slotProps.data.avg_score" :showValue="false"
                                             class="mb-1" />
-                                        <small class="text-gray-600">{{ slotProps.data.avg_score }}/100</small>
+                                        <small class="text-gray-600 dark:text-gray-400">{{ slotProps.data.avg_score
+                                        }}/100</small>
                                     </template>
                                 </Column>
                             </DataTable>
@@ -132,15 +138,17 @@
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">🔍 Winning Patterns Analysis</h3>
-                            <p class="text-sm text-gray-600 mt-1">Discover what consistently makes your trades
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">🔍 Winning Patterns
+                                Analysis</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Discover what consistently makes
+                                your trades
                                 successful</p>
                         </div>
                     </template>
                     <template #content>
                         <div class="p-4">
                             <div v-if="(stats.pattern_analysis.total_wins || 0) === 0"
-                                class="text-center py-8 text-gray-500">
+                                class="text-center py-8 text-gray-500 dark:text-gray-400">
                                 <i class="pi pi-chart-line text-3xl mb-3"></i>
                                 <p>No winning trades yet to analyze patterns</p>
                             </div>
@@ -148,11 +156,12 @@
                             <div v-else class="space-y-6">
                                 <!-- Recommendations -->
                                 <div v-if="stats.pattern_analysis.recommendations.length > 0">
-                                    <h4 class="text-md font-semibold text-blue-900 mb-3">💡 Key Insights &
+                                    <h4 class="text-md font-semibold text-blue-900 dark:text-blue-300 mb-3">💡 Key
+                                        Insights &
                                         Recommendations</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div v-for="rec in stats.pattern_analysis.recommendations" :key="rec.title"
-                                            class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                                            class="bg-gradient-to-r from-blue-50 dark:from-blue-900/20 to-indigo-50 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                                             <div class="flex items-start gap-3">
                                                 <div class="flex-shrink-0">
                                                     <i :class="{
@@ -163,9 +172,13 @@
                                                     }" class="text-lg"></i>
                                                 </div>
                                                 <div class="flex-1">
-                                                    <h5 class="font-semibold text-gray-900 text-sm">{{ rec.title }}</h5>
-                                                    <p class="text-gray-700 text-xs mt-1">{{ rec.description }}</p>
-                                                    <p class="text-blue-800 text-xs mt-2 font-medium">→ {{ rec.action }}
+                                                    <h5 class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                                                        {{ rec.title }}</h5>
+                                                    <p class="text-gray-700 dark:text-gray-300 text-xs mt-1">{{
+                                                        rec.description }}</p>
+                                                    <p
+                                                        class="text-blue-800 dark:text-blue-200 text-xs mt-2 font-medium">
+                                                        → {{ rec.action }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -232,10 +245,13 @@
                                         <TabPanel value="1">
                                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                 <div v-for="(count, range) in stats.pattern_analysis.score_patterns"
-                                                    :key="range" class="text-center p-4 bg-gray-50 rounded-lg">
-                                                    <div class="text-2xl font-bold text-blue-900">{{ count }}</div>
-                                                    <div class="text-sm text-gray-600">{{ range }} Score</div>
-                                                    <div class="text-xs text-gray-500 mt-1">
+                                                    :key="range"
+                                                    class="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                                    <div class="text-2xl font-bold text-blue-900 dark:text-blue-300">{{
+                                                        count }}</div>
+                                                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ range }}
+                                                        Score</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                         {{ Math.round((count / stats.pattern_analysis.total_wins) * 100)
                                                         }}% of wins
                                                     </div>
@@ -248,11 +264,13 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                 <div v-for="(count, symbol) in stats.pattern_analysis.symbol_patterns"
                                                     :key="symbol"
-                                                    class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                                                    <span class="font-mono font-bold text-blue-900">{{ symbol }}</span>
+                                                    class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                                    <span
+                                                        class="font-mono font-bold text-blue-900 dark:text-blue-300">{{
+                                                            symbol }}</span>
                                                     <div class="text-right">
                                                         <div class="font-semibold">{{ count }} wins</div>
-                                                        <div class="text-xs text-gray-600">
+                                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                                             {{ Math.round((count / stats.pattern_analysis.total_wins) *
                                                                 100) }}%
                                                         </div>
@@ -265,10 +283,13 @@
                                         <TabPanel value="3">
                                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                 <div v-for="(count, pattern) in stats.pattern_analysis.zone_patterns"
-                                                    :key="pattern" class="text-center p-4 bg-green-50 rounded-lg">
-                                                    <div class="text-2xl font-bold text-green-900">{{ count }}</div>
-                                                    <div class="text-sm text-gray-600">{{ pattern }}</div>
-                                                    <div class="text-xs text-gray-500 mt-1">
+                                                    :key="pattern"
+                                                    class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                                    <div class="text-2xl font-bold text-green-900 dark:text-green-300">
+                                                        {{ count }}</div>
+                                                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ pattern }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                         {{ Math.round((count / stats.pattern_analysis.total_wins) * 100)
                                                         }}% of wins
                                                     </div>
@@ -281,14 +302,16 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div v-for="(data, pattern) in stats.pattern_analysis.technical_patterns"
                                                     :key="pattern"
-                                                    class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                                    class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                                                     <div class="flex items-center gap-3">
-                                                        <span class="font-semibold text-blue-900">{{ pattern }}</span>
+                                                        <span class="font-semibold text-blue-900 dark:text-blue-300">{{
+                                                            pattern }}</span>
                                                     </div>
                                                     <div class="text-right">
-                                                        <div class="text-xl font-bold text-blue-900">{{ data.count }}
+                                                        <div class="text-xl font-bold text-blue-900 dark:text-blue-300">
+                                                            {{ data.count }}
                                                         </div>
-                                                        <div class="text-xs text-gray-600">
+                                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                                             {{ data.percentage }}% of wins
                                                         </div>
                                                     </div>
@@ -301,14 +324,14 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div v-for="(data, pattern) in stats.pattern_analysis.fundamental_patterns"
                                                     :key="pattern"
-                                                    class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                                                    class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200 dark:border-purple-800">
                                                     <div class="flex items-center gap-3">
                                                         <span class="font-semibold text-purple-900">{{ pattern }}</span>
                                                     </div>
                                                     <div class="text-right">
                                                         <div class="text-xl font-bold text-purple-900">{{ data.count }}
                                                         </div>
-                                                        <div class="text-xs text-gray-600">
+                                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                                             {{ data.percentage }}% of wins
                                                         </div>
                                                     </div>
@@ -321,18 +344,22 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div v-for="(data, pattern) in stats.pattern_analysis.directional_bias_patterns"
                                                     :key="pattern"
-                                                    class="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
+                                                    class="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 dark:border-indigo-800">
                                                     <div class="flex items-center gap-3">
                                                         <div class="flex-shrink-0">
                                                             <i :class="getBiasIcon(pattern)"
                                                                 :style="{ color: getBiasColor(pattern) }"></i>
                                                         </div>
-                                                        <span class="font-semibold text-indigo-900">{{ pattern }}</span>
+                                                        <span
+                                                            class="font-semibold text-indigo-900 dark:text-indigo-300">{{
+                                                                pattern }}</span>
                                                     </div>
                                                     <div class="text-right">
-                                                        <div class="text-xl font-bold text-indigo-900">{{ data.count }}
+                                                        <div
+                                                            class="text-xl font-bold text-indigo-900 dark:text-indigo-300">
+                                                            {{ data.count }}
                                                         </div>
-                                                        <div class="text-xs text-gray-600">
+                                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                                             {{ data.percentage }}% of wins
                                                         </div>
                                                     </div>
@@ -352,105 +379,113 @@
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">🎯 Trading Style Profile</h3>
-                            <p class="text-sm text-gray-600 mt-1">Discover your unique trading personality and
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">🎯 Trading Style Profile
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Discover your unique trading
+                                personality and
                                 analytical strengths</p>
                         </div>
                     </template>
                     <template #content>
                         <div class="p-4">
                             <div v-if="(stats.pattern_analysis.total_wins || 0) === 0"
-                                class="text-center py-8 text-gray-500">
+                                class="text-center py-8 text-gray-500 dark:text-gray-400">
                                 <i class="pi pi-chart-line text-3xl mb-3"></i>
                                 <p>No winning trades yet to analyze your trading style</p>
                             </div>
 
                             <div v-else class="space-y-6">
                                 <div class="text-center mb-6">
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-2">What Type of Trader Are You?
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">What Type of
+                                        Trader Are You?
                                     </h4>
-                                    <p class="text-sm text-gray-600">Your winning trades reveal whether you excel as a
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Your winning trades reveal
+                                        whether you excel as a
                                         chart reader, macro analyst, zone specialist, or well-rounded trader</p>
                                 </div>
 
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <!-- Zone Specialist -->
                                     <div
-                                        class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                                        <div class="text-3xl font-bold text-green-900 mb-2">
+                                        class="text-center p-6 bg-gradient-to-br from-green-50 dark:from-green-900/20 to-green-100 dark:to-green-900/40 rounded-lg border border-green-200 dark:border-green-800">
+                                        <div class="text-3xl font-bold text-green-900 dark:text-green-300 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis?.zones_focused || 0 }}
                                         </div>
                                         <div class="text-sm font-semibold text-green-800 mb-1">🗺️ Zone Specialist</div>
-                                        <div class="text-xs text-gray-600">
+                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.zones_focused || 0)
                                                     /
                                                     stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                             Masters supply/demand zones
                                         </div>
                                     </div>
 
                                     <!-- Chart Reader -->
                                     <div
-                                        class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                                        <div class="text-3xl font-bold text-blue-900 mb-2">
+                                        class="text-center p-6 bg-gradient-to-br from-blue-50 dark:from-blue-900/20 to-blue-100 dark:to-blue-900/40 rounded-lg border border-blue-200 dark:border-blue-800">
+                                        <div class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis?.technicals_focused || 0 }}
                                         </div>
-                                        <div class="text-sm font-semibold text-blue-800 mb-1">⚙️ Chart Reader
+                                        <div class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">⚙️
+                                            Chart Reader
                                         </div>
-                                        <div class="text-xs text-gray-600">
+                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.technicals_focused
                                                     || 0)
                                                     / stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                             Excels at technical price action
                                         </div>
                                     </div>
 
                                     <!-- Macro Analyst -->
                                     <div
-                                        class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                                        class="text-center p-6 bg-gradient-to-br from-purple-50 dark:from-purple-900/20 to-purple-100 dark:to-purple-900/40 rounded-lg border border-purple-200 dark:border-purple-800">
                                         <div class="text-3xl font-bold text-purple-900 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis?.fundamentals_focused || 0 }}
                                         </div>
                                         <div class="text-sm font-semibold text-purple-800 mb-1">📈 Macro Analyst
                                         </div>
-                                        <div class="text-xs text-gray-600">
+                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.fundamentals_focused
                                                     || 0) /
                                                     stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                             Leverages economic fundamentals
                                         </div>
                                     </div>
 
                                     <!-- Well-Rounded Trader -->
                                     <div
-                                        class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                                        <div class="text-3xl font-bold text-gray-900 mb-2">
+                                        class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <div class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                             {{ stats.pattern_analysis.alignment_analysis?.balanced || 0 }}
                                         </div>
-                                        <div class="text-sm font-semibold text-gray-800 mb-1">⚖️ Well-Rounded</div>
-                                        <div class="text-xs text-gray-600">
+                                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">⚖️
+                                            Well-Rounded</div>
+                                        <div class="text-xs text-gray-600 dark:text-gray-400">
                                             {{ stats.pattern_analysis.total_wins > 0 ?
                                                 Math.round(((stats.pattern_analysis.alignment_analysis?.balanced || 0) /
                                                     stats.pattern_analysis.total_wins) * 100) : 0 }}% of wins
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                             Balances multiple approaches
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Trading Style Insights -->
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-                                    <h5 class="font-semibold text-blue-900 mb-3">💡 Your Trading DNA</h5>
+                                <div
+                                    class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-6">
+                                    <h5 class="font-semibold text-blue-900 dark:text-blue-300 mb-3">💡 Your Trading DNA
+                                    </h5>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div v-if="(stats.pattern_analysis.alignment_analysis?.zones_focused || 0) > 0"
                                             class="flex items-start gap-2">
@@ -481,7 +516,7 @@
                                         </div>
                                         <div v-if="(stats.pattern_analysis.alignment_analysis?.balanced || 0) > 0"
                                             class="flex items-start gap-2">
-                                            <span class="text-gray-600">⚖️</span>
+                                            <span class="text-gray-600 dark:text-gray-400">⚖️</span>
                                             <div>
                                                 <span class="font-medium">Well-Rounded Trader:</span> You're the
                                                 complete package - combining technical, fundamental, and zone analysis.
@@ -501,8 +536,10 @@
                 <Card>
                     <template #header>
                         <div class="p-4 border-b">
-                            <h3 class="text-lg font-semibold text-gray-900">🎯 Directional Bias Analysis</h3>
-                            <p class="text-sm text-gray-600 mt-1">Discover your market direction tendencies and
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">🎯 Directional Bias
+                                Analysis</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Discover your market direction
+                                tendencies and
                                 conviction patterns</p>
                         </div>
                     </template>
@@ -511,53 +548,56 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Bullish Trades -->
                                 <div
-                                    class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                                    <div class="text-4xl font-bold text-green-900 mb-2">
+                                    class="text-center p-6 bg-gradient-to-br from-green-50 dark:from-green-900/20 to-green-100 dark:to-green-900/40 rounded-lg border border-green-200 dark:border-green-800">
+                                    <div class="text-4xl font-bold text-green-900 dark:text-green-300 mb-2">
                                         {{ getBullishWins() }}
                                     </div>
                                     <div class="text-sm font-semibold text-green-800 mb-1">📈 Bullish Setups</div>
-                                    <div class="text-xs text-gray-600">
+                                    <div class="text-xs text-gray-600 dark:text-gray-400">
                                         {{ getBullishPercentage() }}% of winning trades
                                     </div>
-                                    <div class="text-xs text-gray-500 mt-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                         Long position winners
                                     </div>
                                 </div>
 
                                 <!-- Bearish Trades -->
                                 <div
-                                    class="text-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200">
+                                    class="text-center p-6 bg-gradient-to-br from-red-50 dark:from-red-900/20 to-red-100 dark:to-red-900/40 rounded-lg border border-red-200 dark:border-red-800">
                                     <div class="text-4xl font-bold text-red-900 mb-2">
                                         {{ getBearishWins() }}
                                     </div>
                                     <div class="text-sm font-semibold text-red-800 mb-1">📉 Bearish Setups</div>
-                                    <div class="text-xs text-gray-600">
+                                    <div class="text-xs text-gray-600 dark:text-gray-400">
                                         {{ getBearishPercentage() }}% of winning trades
                                     </div>
-                                    <div class="text-xs text-gray-500 mt-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                         Short position winners
                                     </div>
                                 </div>
 
                                 <!-- Neutral Trades -->
                                 <div
-                                    class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                                    <div class="text-4xl font-bold text-gray-900 mb-2">
+                                    class="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <div class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                         {{ getNeutralWins() }}
                                     </div>
-                                    <div class="text-sm font-semibold text-gray-800 mb-1">⚖️ Neutral Setups</div>
-                                    <div class="text-xs text-gray-600">
+                                    <div class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">⚖️ Neutral
+                                        Setups</div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-400">
                                         {{ getNeutralPercentage() }}% of winning trades
                                     </div>
-                                    <div class="text-xs text-gray-500 mt-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                         Mixed signal winners
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Directional Insights -->
-                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mt-6">
-                                <h5 class="font-semibold text-indigo-900 mb-3">🎯 Your Directional Edge</h5>
+                            <div
+                                class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mt-6">
+                                <h5 class="font-semibold text-indigo-900 dark:text-indigo-300 mb-3">🎯 Your Directional
+                                    Edge</h5>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div v-if="getBullishWins() > getBearishWins() && getBullishWins() > getNeutralWins()"
                                         class="flex items-start gap-2">
@@ -605,7 +645,7 @@
             <Card>
                 <template #header>
                     <div class="p-4 border-b flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Activity</h3>
                         <Button label="View All" size="small" text @click="router.get(route('checklists.index'))" />
                     </div>
                 </template>
@@ -635,7 +675,8 @@
                             </Column>
                             <Column field="created_at" header="Created">
                                 <template #body="slotProps">
-                                    <small class="text-gray-600">{{ slotProps.data.created_at }}</small>
+                                    <small class="text-gray-600 dark:text-gray-400">{{ slotProps.data.created_at
+                                    }}</small>
                                 </template>
                             </Column>
                             <Column field="has_trade_entry" header="Status">
@@ -810,56 +851,56 @@ const parseSetupTags = (setupString) => {
             trimmed.includes('Expensive') || trimmed.includes('Cheap')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs'
+                class: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs'
             })
         }
         // Technical Direction Tags
         else if (trimmed.includes('Impulsion') || trimmed.includes('Correction')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs'
+                class: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded text-xs'
             })
         }
         // Fundamental Valuation Tags
         else if (trimmed.includes('Overvalued') || trimmed.includes('Undervalued')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs'
+                class: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs'
             })
         }
         // Seasonal Tags
         else if (trimmed.includes('Seasonal')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs'
+                class: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs'
             })
         }
         // COT Divergence Tags
         else if (trimmed.includes('COT Divergence')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs'
+                class: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 px-2 py-1 rounded text-xs'
             })
         }
         // COT Index Tags
         else if (trimmed.includes('COT')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs'
+                class: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs'
             })
         }
         // Zone Qualifiers Tags
         else if (trimmed.includes('Zone')) {
             tags.push({
                 text: trimmed,
-                class: 'bg-green-100 text-green-800 px-2 py-1 rounded text-xs'
+                class: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs'
             })
         }
         // Default styling for unmatched parts
         else {
             tags.push({
                 text: trimmed,
-                class: 'bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs'
+                class: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-xs'
             })
         }
     })
@@ -893,13 +934,13 @@ const getBiasSeverityForSetup = (bias) => {
 
 // Helper function for bias tag styling
 const getBiasTagClass = (bias) => {
-    if (bias.includes('Strong Buy')) return 'bg-green-200 text-green-900 px-2 py-1 rounded text-xs font-bold'
-    if (bias.includes('Buy') && !bias.includes('Strong') && !bias.includes('Lean')) return 'bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold'
-    if (bias.includes('Lean Buy')) return 'bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-bold'
-    if (bias.includes('Strong Sell')) return 'bg-red-200 text-red-900 px-2 py-1 rounded text-xs font-bold'
-    if (bias.includes('Sell') && !bias.includes('Strong') && !bias.includes('Lean')) return 'bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold'
-    if (bias.includes('Lean Sell')) return 'bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-bold'
-    return 'bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Strong Buy')) return 'bg-green-200 dark:bg-green-900/40 text-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Buy') && !bias.includes('Strong') && !bias.includes('Lean')) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Lean Buy')) return 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-200 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Strong Sell')) return 'bg-red-200 dark:bg-red-900/40 text-red-900 dark:text-red-200 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Sell') && !bias.includes('Strong') && !bias.includes('Lean')) return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs font-bold'
+    if (bias.includes('Lean Sell')) return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-200 px-2 py-1 rounded text-xs font-bold'
+    return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-xs font-bold'
 }
 
 // Helper functions for directional bias analysis

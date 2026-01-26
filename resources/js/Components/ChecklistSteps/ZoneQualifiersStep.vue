@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
-        <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-            <i class="pi pi-map-marker text-blue-900"></i>
+        <h2 class="text-2xl font-semibold text-blue-900 dark:text-blue-300 mb-4 flex items-center gap-2">
+            <i class="pi pi-map-marker text-blue-900 dark:text-blue-300"></i>
             Zone Qualifiers
         </h2>
 
@@ -14,7 +14,7 @@
                     <template #option="slotProps">
                         <div class="flex flex-col">
                             <span class="font-semibold">{{ slotProps.option.code }}</span>
-                            <span class="text-sm text-gray-500">{{ slotProps.option.label.split(' - ')[1] ||
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ slotProps.option.label.split(' - ')[1] ||
                                 slotProps.option.label }}</span>
                         </div>
                     </template>
@@ -28,7 +28,7 @@
                 <Checkbox :model-value="modelValue.selectedZoneQualifiers"
                     @update:model-value="updateData('selectedZoneQualifiers', $event)" :value="qualifier"
                     :inputId="`qualifier-${index}`" class="mr-3" />
-                <label :for="`qualifier-${index}`" class="text-gray-700">
+                <label :for="`qualifier-${index}`" class="text-gray-700 dark:text-gray-300">
                     {{ qualifier }}
                 </label>
             </div>

@@ -4,8 +4,8 @@
             <div class="max-w-4xl mx-auto">
                 <!-- Header -->
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-blue-900 mb-2">User Profile</h1>
-                    <p class="text-gray-600">Manage your account settings and preferences</p>
+                    <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-2">User Profile</h1>
+                    <p class="text-gray-600 dark:text-gray-400">Manage your account settings and preferences</p>
                 </div>
 
                 <!-- Tab Menu -->
@@ -65,7 +65,7 @@
                                 <small v-if="profileForm.errors.bio" class="p-error">
                                     {{ profileForm.errors.bio }}
                                 </small>
-                                <small class="text-gray-500">
+                                <small class="text-gray-500 dark:text-gray-400">
                                     {{ profileForm.bio?.length || 0 }}/500 characters
                                 </small>
                             </div>
@@ -74,14 +74,17 @@
                             <div class="flex flex-col gap-2">
                                 <label class="font-medium">Profile Picture</label>
                                 <div class="flex items-center gap-4">
-                                    <Avatar :image="user.avatar_path ? `/storage/${user.avatar_path}` : null"
-                                        :label="user.name.charAt(0).toUpperCase()" size="xlarge" shape="circle"
+                                    <Avatar 
+                                        :image="avatarSrc || undefined" 
+                                        :label="!avatarSrc ? user.name.charAt(0).toUpperCase() : undefined"
+                                        size="xlarge" 
+                                        shape="circle" 
                                         class="border" />
                                     <div>
-                                        <FileUpload mode="basic" accept="image/*" :maxFileSize="2000000"
-                                            @upload="onAvatarUpload" :auto="true" chooseLabel="Change Picture"
+                                        <FileUpload mode="basic" name="avatar" accept="image/*" :maxFileSize="2000000"
+                                            @select="onAvatarSelect" chooseLabel="Change Picture"
                                             class="p-button-outlined p-button-sm" />
-                                        <small class="block text-gray-500 mt-1">
+                                        <small class="block text-gray-500 dark:text-gray-400 mt-1">
                                             Max file size: 2MB. Accepted formats: JPG, PNG, GIF
                                         </small>
                                     </div>
@@ -160,153 +163,15 @@
 
                         <!-- Last Login Info -->
                         <Divider />
-                        <div class="flex items-center justify-between text-sm text-gray-600">
+                        <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                             <span>Last login:</span>
                             <span>{{ formatDate(user.last_login_at) || 'Never' }}</span>
                         </div>
                     </template>
                 </Card>
 
-                <!-- Checklist Weights Tab -->
-                <Card v-if="activeTab === 2" class="mb-6">
-                    <template #title>
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-sliders-h"></i>
-                            Checklist Weights
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="space-y-6">
-                            <!-- Description -->
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div class="flex items-start gap-3">
-                                    <i class="pi pi-info-circle text-blue-600 mt-1"></i>
-                                    <div>
-                                        <h3 class="font-medium text-blue-900 mb-1">About Checklist Weights</h3>
-                                        <p class="text-blue-800 text-sm">
-                                            Adjust the importance of each factor in your trade analysis. Higher weights
-                                            mean that factor has more influence on your overall checklist score.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <form @submit.prevent="updateChecklistWeights" class="space-y-8">
-                                <!-- Zone Qualifiers Section -->
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                        <i class="pi pi-map-marker text-blue-600"></i>
-                                        Zone Qualifiers
-                                    </h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Fresh Zone</label>
-                                            <InputNumber v-model="weightsForm.zone_fresh_weight" :min="0" :max="100"
-                                                suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Original Zone</label>
-                                            <InputNumber v-model="weightsForm.zone_original_weight" :min="0" :max="100"
-                                                suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Flip Zone</label>
-                                            <InputNumber v-model="weightsForm.zone_flip_weight" :min="0" :max="100"
-                                                suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Liquidity Zone</label>
-                                            <InputNumber v-model="weightsForm.zone_lol_weight" :min="0" :max="100"
-                                                suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Min Profit Margin</label>
-                                            <InputNumber v-model="weightsForm.zone_min_profit_margin_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Big Brother</label>
-                                            <InputNumber v-model="weightsForm.zone_big_brother_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Technical Analysis Section -->
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                        <i class="pi pi-chart-line text-green-600"></i>
-                                        Technical Analysis
-                                    </h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Very Expensive CHP</label>
-                                            <InputNumber v-model="weightsForm.technical_very_exp_chp_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Expensive CHP</label>
-                                            <InputNumber v-model="weightsForm.technical_exp_chp_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Impulsive Direction</label>
-                                            <InputNumber v-model="weightsForm.technical_direction_impulsive_weight"
-                                                :min="0" :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Correction Direction</label>
-                                            <InputNumber v-model="weightsForm.technical_direction_correction_weight"
-                                                :min="0" :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Fundamental Analysis Section -->
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                        <i class="pi pi-globe text-purple-600"></i>
-                                        Fundamental Analysis
-                                    </h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Valuation</label>
-                                            <InputNumber v-model="weightsForm.fundamental_valuation_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Seasonal</label>
-                                            <InputNumber v-model="weightsForm.fundamental_seasonal_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">COT Index</label>
-                                            <InputNumber v-model="weightsForm.fundamental_cot_index_weight" :min="0"
-                                                :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                        <div class="flex flex-col gap-2">
-                                            <label class="font-medium">Non-Commercial Divergence</label>
-                                            <InputNumber
-                                                v-model="weightsForm.fundamental_noncommercial_divergence_weight"
-                                                :min="0" :max="100" suffix=" pts" class="w-full" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Actions -->
-                                <div class="flex justify-between items-center pt-4 border-t">
-                                    <Button type="button" label="Reset to Defaults" severity="secondary" outlined
-                                        icon="pi pi-refresh" @click="resetToDefaults" />
-                                    <Button type="submit" :loading="weightsForm.processing" icon="pi pi-save"
-                                        label="Save Weights" />
-                                </div>
-                            </form>
-                        </div>
-                    </template>
-                </Card>
-
                 <!-- Account Management Tab -->
-                <Card v-if="activeTab === 3" class="mb-6">
+                <Card v-if="activeTab === 2" class="mb-6">
                     <template #title>
                         <div class="flex items-center gap-2">
                             <i class="pi pi-exclamation-triangle text-red-500"></i>
@@ -316,9 +181,10 @@
                     <template #content>
                         <div class="space-y-6">
                             <!-- Account Deletion -->
-                            <div class="border border-red-200 rounded-lg p-4 bg-red-50">
-                                <h3 class="text-lg font-medium text-red-800 mb-2">Delete Account</h3>
-                                <p class="text-red-700 mb-4">
+                            <div
+                                class="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+                                <h3 class="text-lg font-medium text-red-800 dark:text-red-200 mb-2">Delete Account</h3>
+                                <p class="text-red-700 dark:text-red-200 mb-4">
                                     Once you delete your account, all of your checklists, trade entries, and personal
                                     data will be permanently removed. This action cannot be undone.
                                 </p>
@@ -335,8 +201,10 @@
         <Dialog v-model:visible="confirmDelete" modal header="Confirm Account Deletion" :style="{ width: '450px' }">
             <div class="space-y-4">
                 <p>Are you absolutely sure you want to delete your account?</p>
-                <p class="text-red-600 font-medium">This action cannot be undone and will permanently delete:</p>
-                <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+                <p class="text-red-600 dark:text-red-300 font-medium">This action cannot be undone and will permanently
+                    delete:
+                </p>
+                <ul class="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside space-y-1">
                     <li>All your checklists and analysis</li>
                     <li>All your trade entries and history</li>
                     <li>Your profile and settings</li>
@@ -363,8 +231,6 @@
             </template>
         </Dialog>
 
-        <!-- Toast for notifications -->
-        <Toast />
     </AppLayout>
 </template>
 
@@ -389,9 +255,14 @@ const activeTab = ref(0)
 const tabItems = [
     { label: 'Profile', icon: 'pi pi-user' },
     { label: 'Security', icon: 'pi pi-shield' },
-    { label: 'Checklist Weights', icon: 'pi pi-sliders-h' },
     { label: 'Account', icon: 'pi pi-exclamation-triangle' },
 ]
+
+// Avatar state (cache-busted on reloads)
+const avatarVersion = ref(0)
+const avatarSrc = computed(() =>
+    props.user.avatar_path ? `/storage/${props.user.avatar_path}?v=${avatarVersion.value}` : null,
+)
 
 // Profile form
 const profileForm = useForm({
@@ -544,14 +415,61 @@ const deleteAccount = () => {
     })
 }
 
-const onAvatarUpload = (event) => {
-    // This would handle avatar upload
-    console.log('Avatar upload:', event)
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'Avatar upload functionality to be implemented',
-        life: 3000,
+const onAvatarSelect = (event) => {
+    const file = event.files[0]
+    if (!file) return
+
+    // Validate file size
+    if (file.size > 2000000) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'File size exceeds 2MB limit',
+            life: 3000,
+        })
+        return
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select a valid image file',
+            life: 3000,
+        })
+        return
+    }
+
+    // Create FormData and upload
+    const formData = new FormData()
+    formData.append('avatar', file)
+
+    router.post(route('profile.avatar'), formData, {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            router.reload({
+                only: ['user'],
+                onFinish: () => {
+                    avatarVersion.value += 1
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Profile picture updated successfully!',
+                        life: 3000,
+                    })
+                },
+            })
+        },
+        onError: () => {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to upload profile picture',
+                life: 3000,
+            })
+        },
     })
 }
 

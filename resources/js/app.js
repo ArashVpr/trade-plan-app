@@ -82,36 +82,193 @@ const TradingTheme = definePreset(Aura, {
         }
       },
       dark: {
-        // Dark theme colors for your trading app
-        primary: { color: '{blue.400}' },
-        surface: { 0: '{gray.950}', 50: '{gray.900}' },
-        text: { color: '{gray.200}' }
-      }
-    },
-    // Add this to your theme for specific component styling
-    components: {
-      button: {
-        borderRadius: '6px',
-        paddingX: '1rem',
-        paddingY: '0.5rem'
-      },
-      card: {
-        shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-        borderRadius: '8px'
-      },
-      datatable: {
-        headerBackground: '{surface.100}',
-        headerBorderColor: '{border.color}'
+        primary: {
+          color: '{blue.400}',
+          contrastColor: '{gray.900}',
+          hoverColor: '{blue.300}',
+          activeColor: '{blue.200}'
+        },
+        highlight: {
+          background: 'rgba(96, 165, 250, 0.16)',
+          focusBackground: 'rgba(96, 165, 250, 0.24)',
+          color: 'rgba(255,255,255,0.87)',
+          focusColor: 'rgba(255,255,255,0.87)'
+        },
+        surface: {
+          0: '{gray.900}', // Cards/Containers
+          50: '{gray.950}', // Body
+          100: '{gray.800}',
+          200: '{gray.700}',
+          300: '{gray.600}',
+          400: '{gray.500}',
+          500: '{gray.400}',
+          600: '{gray.300}',
+          700: '{gray.200}',
+          800: '{gray.100}',
+          900: '{gray.50}',
+          950: '#ffffff'
+        },
+        text: {
+          color: '{gray.100}',
+          hoverColor: '#ffffff',
+          mutedColor: '{gray.400}',
+          highlightColor: '{blue.400}'
+        },
+        content: {
+          background: '{gray.900}',
+          hoverBackground: '{gray.800}',
+          borderColor: '{gray.700}',
+          color: '{gray.100}',
+          hoverColor: '#ffffff'
+        },
+        border: {
+          color: '{gray.700}',
+          hoverColor: '{gray.600}'
+        },
+        overlay: {
+          select: {
+            background: '{gray.900}',
+            borderColor: '{gray.700}',
+            color: '{gray.100}'
+          }
+        }
       }
     },
     typography: {
       fontFamily: '"Inter", "Segoe UI", sans-serif',
       fontSize: {
         xs: '0.75rem',
-        sm: '0.875rem', 
+        sm: '0.875rem',
         base: '1rem',
         lg: '1.125rem',
         xl: '1.25rem'
+      }
+    }
+  },
+  components: {
+    button: {
+      borderRadius: '6px',
+      paddingX: '1rem',
+      paddingY: '0.5rem'
+    },
+    card: {
+      shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      borderRadius: '8px'
+    },
+    datatable: {
+      headerBackground: '{surface.100}',
+      headerBorderColor: '{border.color}'
+    },
+    inputtext: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{surface.0}',
+            disabledBackground: '{surface.100}',
+            filledBackground: '{surface.50}',
+            borderColor: '{border.color}',
+            color: '{text.color}',
+            disabledColor: '{text.mutedColor}',
+            placeholderColor: '{text.mutedColor}'
+          }
+        },
+        dark: {
+          root: {
+            background: '{surface.100}',
+            disabledBackground: '{surface.200}',
+            filledBackground: '{surface.100}',
+            borderColor: '{border.color}',
+            hoverBorderColor: '{border.hoverColor}',
+            focusBorderColor: '{primary.color}',
+            invalidBorderColor: '{red.400}',
+            color: '{text.color}',
+            disabledColor: '{text.mutedColor}',
+            placeholderColor: '{text.mutedColor}',
+            invalidPlaceholderColor: '{red.400}',
+            shadow: '0 0 #0000',
+            paddingX: '0.75rem',
+            paddingY: '0.5rem',
+            borderRadius: '{border.radius.md}',
+            focusRing: {
+              width: '1px',
+              style: 'solid',
+              color: '{primary.color}',
+              offset: '0',
+              shadow: 'none'
+            },
+            transitionDuration: '{transition.duration}'
+          }
+        }
+      }
+    },
+    textarea: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{surface.0}',
+            disabledBackground: '{surface.100}',
+            filledBackground: '{surface.50}',
+            borderColor: '{border.color}',
+            color: '{text.color}',
+            disabledColor: '{text.mutedColor}',
+            placeholderColor: '{text.mutedColor}'
+          }
+        },
+        dark: {
+          root: {
+            background: '{surface.100}',
+            disabledBackground: '{surface.200}',
+            filledBackground: '{surface.100}',
+            borderColor: '{border.color}',
+            color: '{text.color}',
+            disabledColor: '{text.mutedColor}',
+            placeholderColor: '{text.mutedColor}'
+          }
+        }
+      }
+    },
+    select: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{surface.0}',
+            disabledBackground: '{surface.100}',
+            filledBackground: '{surface.50}',
+            borderColor: '{border.color}',
+            color: '{text.color}',
+            disabledColor: '{text.mutedColor}',
+            placeholderColor: '{text.mutedColor}'
+          }
+        },
+        dark: {
+          root: {
+            background: '{surface.100}',
+            disabledBackground: '{surface.200}',
+            filledBackground: '{surface.100}',
+            borderColor: '{border.color}',
+            color: '{text.color}',
+            disabledColor: '{text.mutedColor}',
+            placeholderColor: '{text.mutedColor}'
+          }
+        }
+      }
+    },
+    drawer: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{surface.0}',
+            borderColor: '{content.borderColor}',
+            color: '{text.color}'
+          }
+        },
+        dark: {
+          root: {
+            background: '{surface.0}',
+            borderColor: '{content.borderColor}',
+            color: '{text.color}'
+          }
+        }
       }
     }
   }
@@ -130,7 +287,7 @@ createInertiaApp({
           preset: TradingTheme,
           options: {
             prefix: 'p',
-            darkModeSelector: 'system',
+            darkModeSelector: '.app-dark',
             cssLayer: false
           }
         }

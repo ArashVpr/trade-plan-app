@@ -1,14 +1,15 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div>
-                <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+                <div
+                    class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
                     <i class="pi pi-chart-line text-2xl text-blue-600"></i>
                 </div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                     Create your account
                 </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
+                <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
                     Join Trade Plan App and start improving your trading
                 </p>
             </div>
@@ -17,7 +18,7 @@
                 <template #content>
                     <form @submit.prevent="submit" class="space-y-6" method="post" action="/register">
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Full Name
                             </label>
                             <InputText id="name" name="name" v-model="form.name" type="text" autocomplete="name"
@@ -27,7 +28,7 @@
                         </div>
 
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Email Address
                             </label>
                             <InputText id="email" name="email" v-model="form.email" type="email" autocomplete="username"
@@ -37,7 +38,8 @@
                         </div>
 
                         <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="password"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Password
                             </label>
                             <Password v-model="form.password" toggleMask class="w-full"
@@ -59,11 +61,12 @@
                                 </template>
                             </Password>
                             <small v-if="form.errors.password" class="p-error block mt-1">{{ form.errors.password
-                                }}</small>
+                            }}</small>
                         </div>
 
                         <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="password_confirmation"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Confirm Password
                             </label>
                             <Password v-model="form.password_confirmation" :feedback="false" toggleMask class="w-full"
@@ -81,10 +84,10 @@
                         </div>
 
                         <div class="text-center">
-                            <span class="text-sm text-gray-600">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
                                 Already have an account?
                                 <Link :href="route('login')" class="font-medium text-blue-600 hover:text-blue-500">
-                                Sign in
+                                    Sign in
                                 </Link>
                             </span>
                         </div>

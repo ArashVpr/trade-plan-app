@@ -18,16 +18,16 @@
                 <div v-for="(dataset, index) in chartData.datasets" :key="index" class="flex items-center gap-2">
                     <div class="w-4 h-4 rounded"
                         :style="{ backgroundColor: dataset.backgroundColor || dataset.borderColor }"></div>
-                    <span class="text-sm text-gray-600">{{ dataset.label }}</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ dataset.label }}</span>
                 </div>
             </div>
         </div>
 
         <!-- Chart statistics (optional) -->
         <div v-if="showStats && stats" class="chart-stats mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div v-for="(stat, key) in stats" :key="key" class="text-center p-3 bg-gray-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-900">{{ stat.value }}</div>
-                <div class="text-sm text-gray-600">{{ stat.label }}</div>
+            <div v-for="(stat, key) in stats" :key="key" class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div class="text-2xl font-bold text-blue-900 dark:text-blue-300">{{ stat.value }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">{{ stat.label }}</div>
             </div>
         </div>
     </div>
@@ -148,7 +148,7 @@ const mergedOptions = computed(() => {
 }
 
 .chart-legend {
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--p-content-border-color);
     padding-top: 1rem;
 }
 

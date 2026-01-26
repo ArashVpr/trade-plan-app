@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist Details</h1>
+            <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-6 text-center">Checklist Details</h1>
 
             <!-- Action Buttons -->
             <div class="flex justify-between mb-6">
@@ -21,8 +21,8 @@
                 <Card>
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-line text-blue-900"></i>
-                            <span class="text-blue-900">Trade Setup Details</span>
+                            <i class="pi pi-chart-line text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Trade Setup Details</span>
                         </div>
                     </template>
                     <template #content>
@@ -51,11 +51,11 @@
                                 <div v-if="directionalBias.hasEnoughData" class="flex items-center gap-2">
                                     <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
                                         class="text-lg font-bold px-4 py-2" />
-                                    <span class="text-sm text-gray-600 font-medium">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
                                         {{ directionalBias.confidence }}%
                                     </span>
                                 </div>
-                                <div v-else class="text-sm text-gray-500">
+                                <div v-else class="text-sm text-gray-500 dark:text-gray-400">
                                     No directional signals in analysis
                                 </div>
                             </div>
@@ -63,7 +63,7 @@
                             <!-- Created Date -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Created</label>
-                                <span class="text-sm text-gray-600">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ new Date(checklist.created_at).toLocaleDateString() }}
                                 </span>
                             </div>
@@ -76,7 +76,8 @@
                                 <div class="flex flex-wrap gap-2">
                                     <Chip v-for="qualifier in checklist.zone_qualifiers" :key="qualifier"
                                         :label="qualifier" class="mb-1" />
-                                    <span v-if="checklist.zone_qualifiers.length === 0" class="text-gray-500 text-sm">
+                                    <span v-if="checklist.zone_qualifiers.length === 0"
+                                        class="text-gray-500 dark:text-gray-400 text-sm">
                                         None selected
                                     </span>
                                 </div>
@@ -133,17 +134,17 @@
                 <Card v-if="!tradeEntry">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-line text-blue-900"></i>
-                            <span class="text-blue-900">Trade Status</span>
+                            <i class="pi pi-chart-line text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Trade Status</span>
                         </div>
                     </template>
                     <template #content>
                         <div class="text-center py-8">
                             <div class="mb-4">
-                                <i class="pi pi-info-circle text-blue-900 text-6xl opacity-50"></i>
+                                <i class="pi pi-info-circle text-blue-900 dark:text-blue-300 text-6xl opacity-50"></i>
                             </div>
-                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Analysis Only</h3>
-                            <p class="text-gray-600 mb-4">
+                            <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Analysis Only</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
                                 This setup was analyzed but no trade was taken. You can edit this checklist to add order
                                 entry details if you decide to trade this setup.
                             </p>
@@ -159,8 +160,8 @@
                 <Card v-if="tradeEntry">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-money-bill text-blue-900"></i>
-                            <span class="text-blue-900">Order Entry Details</span>
+                            <i class="pi pi-money-bill text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Order Entry Details</span>
                         </div>
                     </template>
                     <template #content>
@@ -228,7 +229,7 @@
                             <label class="block text-sm font-medium mb-2">Screenshots</label>
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 <div v-for="(path, index) in tradeEntry.screenshot_paths" :key="path"
-                                    class="border border-gray-200 rounded-lg overflow-hidden">
+                                    class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                                     <Image :src="`/storage/${path}`" :alt="`Screenshot ${index + 1}`" preview
                                         class="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity" />
                                 </div>
@@ -241,8 +242,8 @@
                 <Card class="lg:col-span-2">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-pie text-blue-900"></i>
-                            <span class="text-blue-900">Score Breakdown</span>
+                            <i class="pi pi-chart-pie text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Score Breakdown</span>
                         </div>
                     </template>
                     <template #content>
@@ -265,7 +266,6 @@
 
         <!-- PrimeVue Dialog Components -->
         <ConfirmDialog />
-        <Toast />
     </AppLayout>
 </template>
 
