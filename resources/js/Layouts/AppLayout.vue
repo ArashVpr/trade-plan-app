@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
         <!-- Sidebar Drawer -->
         <Drawer v-model:visible="sidebarVisible" position="left">
             <template #container="{ closeCallback }">
@@ -56,24 +56,6 @@
                                         ]">
                                             <i class="pi pi-history mr-2"></i>
                                             <span class="font-medium">History</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a v-ripple @click="navigateTo(route('analysis-tracker.index'))" :class="[
-                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('analysis-tracker.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
-                                        ]">
-                                            <i class="pi pi-search mr-2"></i>
-                                            <span class="font-medium">Analysis Tracker</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a v-ripple @click="navigateTo(route('trade-management.index'))" :class="[
-                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('trade-management.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
-                                        ]">
-                                            <i class="pi pi-cog mr-2"></i>
-                                            <span class="font-medium">Trade Management</span>
                                         </a>
                                     </li>
                                     <li>
@@ -152,13 +134,15 @@
         </Drawer>
 
         <!-- Top Bar with Menu Button -->
-        <div class="bg-white shadow-sm border-b border-surface-200 dark:border-surface-700">
+        <div
+            class="bg-white dark:bg-gray-900 shadow-sm border-b border-surface-200 dark:border-surface-700 transition-colors duration-200">
             <div class="flex items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-4">
                     <Button icon="pi pi-bars" @click="sidebarVisible = true" text />
                     <h1 class="text-xl font-semibold text-surface-900 dark:text-surface-0">{{ pageTitle }}</h1>
                 </div>
                 <div class="flex items-center gap-2">
+                    <ThemeToggle />
                     <Button icon="pi pi-user" text severity="secondary" @click="toggleUserMenu"
                         aria-label="User Menu" />
                 </div>
@@ -176,12 +160,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import ThemeToggle from '@/Components/UI/ThemeToggle.vue'
+import { useTheme } from '@/composables/useTheme'
 
 const page = usePage()
 const sidebarVisible = ref(false)
+const { initTheme } = useTheme()
+
+// Initialize theme on component mount
+onMounted(() => {
+    initTheme()
+})
 
 // Helper function to navigate and close sidebar
 const navigateTo = (url) => {
@@ -208,9 +200,6 @@ const isActive = (routeUrl) => {
     if (routeUrl === route('checklists.index') && currentUrl.includes('/checklists')) {
         return true
     }
-    if (routeUrl === route('trade-management.index') && currentUrl.includes('/trade-management')) {
-        return true
-    }
     if (routeUrl === route('checklist-weights.index') && currentUrl.includes('/checklist-weights')) {
         return true
     }
@@ -226,10 +215,10 @@ const pageTitle = computed(() => {
     if (currentUrl === '/dashboard') return 'Dashboard'
     if (currentUrl === '/' || currentUrl === route('home')) return 'New Checklist'
     if (currentUrl.includes('/checklists')) {
+        if (currentUrl.includes('/edit')) return 'Edit Checklist'
         if (currentUrl.includes('/checklists/')) return 'Checklist Details'
         return 'Trading History'
     }
-    if (currentUrl.includes('/trade-management')) return 'Trade Management'
     if (currentUrl.includes('/checklist-weights')) return 'Checklist Weights'
     if (currentUrl.includes('/profile')) return 'User Profile'
     return 'TradePlan'

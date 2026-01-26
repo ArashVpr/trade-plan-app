@@ -1,327 +1,350 @@
 <template>
-    <div class="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-        <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Edit Checklist</h1>
+    <AppLayout>
+        <div class="max-w-6xl mx-auto p-6 bg-surface-50 dark:bg-surface-900 min-h-screen">
+            <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-6 text-center">Edit Checklist</h1>
 
-        <!-- Action Buttons -->
-        <div class="flex justify-between items-center mb-6">
-            <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
-                @click="router.get(route('checklists.show', checklist.id))" />
-            <div class="flex gap-3">
-                <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center mb-6">
+                <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
                     @click="router.get(route('checklists.show', checklist.id))" />
-                <Button label="Save Changes" icon="pi pi-save" severity="success" @click="submitForm"
-                    :disabled="!canSubmit" />
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <Card class="w-full">
-            <template #title>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-edit text-blue-900"></i>
-                        <span class="text-blue-900">Edit Trade Setup</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <Tag :value="`Score: ${form.score}/100`" :severity="getScoreSeverity(form.score)"
-                            class="text-lg font-bold px-4 py-2" />
-                        <div v-if="directionalBias?.hasEnoughData" class="flex items-center gap-2">
-                            <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
-                                class="text-sm font-bold px-3 py-1" />
-                        </div>
-                        <div v-if="form.score === 100" class="text-yellow-500 font-bold text-sm">
-                            ★ All Stars Aligned ★
-                        </div>
-                    </div>
+                <div class="flex gap-3">
+                    <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined
+                        @click="router.get(route('checklists.show', checklist.id))" />
+                    <Button label="Save Changes" icon="pi pi-save" severity="success" @click="submitForm"
+                        :disabled="!canSubmit" />
                 </div>
-            </template>
-            <template #content>
-                <form @submit.prevent="submitForm" class="space-y-8">
-                    <!-- Basic Information Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
-                        <div class="field">
-                            <label class="flex items-center gap-2 text-sm font-medium mb-2">
-                                <span>Symbol</span>
-                                <i class="pi pi-lock text-gray-400 text-xs"></i>
-                            </label>
-                            <InputText :value="props.checklist.symbol" readonly
-                                class="w-full bg-gray-50 text-gray-600 cursor-not-allowed border-gray-200" />
-                        </div>
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-2">Entry Date</label>
-                            <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon fluid
-                                iconDisplay="input" :invalid="!!$errors.entry_date" />
-                            <Message v-if="$errors.entry_date" severity="error" :closable="false">{{ $errors.entry_date
-                            }}</Message>
-                        </div>
-                        <div class="field">
-                            <label class="block text-sm font-medium mb-2">Created</label>
-                            <InputText :value="new Date(checklist.created_at).toLocaleDateString()" readonly
-                                class="w-full" />
-                        </div>
-                    </div>
+            </div>
 
-                    <!-- Analysis Sections -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Left Column: Technical & Fundamental Analysis -->
-                        <div class="space-y-6">
-                            <!-- Technical Analysis -->
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <i class="pi pi-chart-line text-blue-900"></i>
-                                    Technical Analysis
-                                </h3>
-                                <div class="grid grid-cols-1 gap-4">
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Location</label>
-                                        <Select v-model="form.technicals.location"
-                                            :options="['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
-                                            placeholder="Select Location" class="w-full"
-                                            :invalid="!!$errors['technicals.location']" />
-                                        <Message v-if="$errors['technicals.location']" severity="error"
-                                            :closable="false">{{ $errors['technicals.location'] }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Direction</label>
-                                        <Select v-model="form.technicals.direction"
-                                            :options="['Correction', 'Impulsion']" placeholder="Select Direction"
-                                            class="w-full" :invalid="!!$errors['technicals.direction']" />
-                                        <Message v-if="$errors['technicals.direction']" severity="error"
-                                            :closable="false">{{ $errors['technicals.direction'] }}</Message>
-                                    </div>
-                                </div>
+            <!-- Main Content -->
+            <Card class="w-full">
+                <template #title>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-edit text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Edit Trade Setup</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <Tag :value="`Score: ${form.score}/100`" :severity="getScoreSeverity(form.score)"
+                                class="text-lg font-bold px-4 py-2" />
+                            <div v-if="directionalBias?.hasEnoughData" class="flex items-center gap-2">
+                                <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
+                                    class="text-sm font-bold px-3 py-1" />
                             </div>
-
-                            <!-- Fundamental Analysis -->
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <i class="pi pi-globe text-blue-900"></i>
-                                    Fundamental Analysis
-                                </h3>
-                                <div class="grid grid-cols-1 gap-4">
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Valuation</label>
-                                        <Select v-model="form.fundamentals.valuation"
-                                            :options="['Overvalued', 'Neutral', 'Undervalued']"
-                                            placeholder="Select Valuation" class="w-full"
-                                            :invalid="!!$errors['fundamentals.valuation']" />
-                                        <Message v-if="$errors['fundamentals.valuation']" severity="error"
-                                            :closable="false">{{ $errors['fundamentals.valuation'] }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Seasonality</label>
-                                        <Select v-model="form.fundamentals.seasonalConfluence"
-                                            :options="['Bullish', 'Neutral', 'Bearish']"
-                                            placeholder="Select Seasonality" class="w-full"
-                                            :invalid="!!$errors['fundamentals.seasonalConfluence']" />
-                                        <Message v-if="$errors['fundamentals.seasonalConfluence']" severity="error"
-                                            :closable="false">{{ $errors['fundamentals.seasonalConfluence'] }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Non-Commercials</label>
-                                        <Select v-model="form.fundamentals.nonCommercials"
-                                            :options="['Bullish Divergence', 'Neutral', 'Bearish Divergence']"
-                                            placeholder="Select Non-Commercials" class="w-full"
-                                            :invalid="!!$errors['fundamentals.nonCommercials']" />
-                                        <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
-                                            :closable="false">{{ $errors['fundamentals.nonCommercials'] }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">CoT Index</label>
-                                        <Select v-model="form.fundamentals.cotIndex"
-                                            :options="['Bullish', 'Neutral', 'Bearish']" placeholder="Select CoT Index"
-                                            class="w-full" :invalid="!!$errors['fundamentals.cotIndex']" />
-                                        <Message v-if="$errors['fundamentals.cotIndex']" severity="error"
-                                            :closable="false">{{ $errors['fundamentals.cotIndex'] }}</Message>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: Zone Qualifiers & Order Details -->
-                        <div class="space-y-6">
-                            <!-- Zone Qualifiers -->
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <i class="pi pi-map-marker text-blue-900"></i>
-                                    Zone Qualifiers ({{ form.zone_qualifiers.length }})
-                                </h3>
-                                <div class="grid grid-cols-1 gap-2">
-                                    <div v-for="(qualifier, index) in zoneQualifiers" :key="index"
-                                        class="flex items-center">
-                                        <Checkbox v-model="form.zone_qualifiers" :value="qualifier"
-                                            :inputId="`qualifier-${index}`" class="mr-3" />
-                                        <label :for="`qualifier-${index}`" class="text-gray-700 text-sm">
-                                            {{ qualifier }}
-                                        </label>
-                                    </div>
-                                    <Message v-if="$errors.zone_qualifiers" severity="error" :closable="false">{{
-                                        $errors.zone_qualifiers }}</Message>
-                                </div>
-                            </div>
-
-                            <!-- Order Entry Details -->
-                            <div ref="orderEntryRef"
-                                class="p-4 border border-gray-200 rounded-lg transition-all duration-500"
-                                :class="{ 'border-blue-500 bg-blue-50': shouldHighlightOrderEntry }">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <i class="pi pi-money-bill text-blue-900"></i>
-                                    Order Entry Details
-                                    <Tag v-if="shouldHighlightOrderEntry" value="Focus" severity="info" class="ml-2" />
-                                </h3>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Position Type</label>
-                                        <Select v-model="form.position_type" :options="['Long', 'Short']"
-                                            placeholder="Select Position Type" class="w-full"
-                                            :invalid="!!$errors.position_type" />
-                                        <Message v-if="$errors.position_type" severity="error" :closable="false">{{
-                                            $errors.position_type }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Trade Status</label>
-                                        <Select v-model="form.trade_status" :options="[
-                                            { label: 'Order Pending', value: 'pending' },
-                                            { label: 'Position Open', value: 'active' },
-                                            { label: 'Win', value: 'win' },
-                                            { label: 'Loss', value: 'loss' },
-                                            { label: 'Breakeven', value: 'breakeven' },
-                                            { label: 'Cancelled', value: 'cancelled' }
-                                        ]" option-label="label" option-value="value" placeholder="Select Status"
-                                            class="w-full" :invalid="!!$errors.trade_status" />
-                                        <Message v-if="$errors.trade_status" severity="error" :closable="false">{{
-                                            $errors.trade_status }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Entry Price</label>
-                                        <InputText v-model="form.entry_price" type="number" step="0.0001"
-                                            placeholder="0.0000" class="w-full" :invalid="!!$errors.entry_price" />
-                                        <Message v-if="$errors.entry_price" severity="error" :closable="false">{{
-                                            $errors.entry_price }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Stop Loss</label>
-                                        <InputText v-model="form.stop_price" type="number" step="0.0001"
-                                            placeholder="0.0000" class="w-full" :invalid="!!$errors.stop_price" />
-                                        <Message v-if="$errors.stop_price" severity="error" :closable="false">{{
-                                            $errors.stop_price }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">Take Profit</label>
-                                        <InputText v-model="form.target_price" type="number" step="0.0001"
-                                            placeholder="0.0000" class="w-full" :invalid="!!$errors.target_price" />
-                                        <Message v-if="$errors.target_price" severity="error" :closable="false">{{
-                                            $errors.target_price }}</Message>
-                                    </div>
-                                    <div class="field">
-                                        <label class="block text-sm font-medium mb-1">R:R Ratio</label>
-                                        <InputText v-model="form.rrr" type="number" step="0.01" placeholder="1.50"
-                                            class="w-full" :invalid="!!$errors.rrr" />
-                                        <Message v-if="$errors.rrr" severity="error" :closable="false">{{ $errors.rrr }}
-                                        </Message>
-                                    </div>
-                                </div>
+                            <div v-if="form.score === 100" class="text-yellow-500 font-bold text-sm">
+                                ★ All Stars Aligned ★
                             </div>
                         </div>
                     </div>
-
-                    <!-- Notes & Screenshot Section -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Notes -->
-                        <div class="p-4 border border-gray-200 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                <i class="pi pi-file-edit text-blue-900"></i>
-                                Trading Notes
-                            </h3>
+                </template>
+                <template #content>
+                    <form @submit.prevent="submitForm" class="space-y-8">
+                        <!-- Basic Information Row -->
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg">
                             <div class="field">
-                                <Textarea v-model="form.notes" rows="6" class="w-full"
-                                    placeholder="Document your analysis, reasoning, and any additional context for this trade..."
-                                    :invalid="!!$errors.notes" />
-                                <Message v-if="$errors.notes" severity="error" :closable="false">{{ $errors.notes }}
-                                </Message>
+                                <label class="flex items-center gap-2 text-sm font-medium mb-2">
+                                    <span>Symbol</span>
+                                    <i class="pi pi-lock text-gray-400 dark:text-gray-500 text-xs"></i>
+                                </label>
+                                <InputText :value="props.checklist.symbol" readonly class="w-full" />
+                            </div>
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-2">Entry Date</label>
+                                <DatePicker v-model="form.entry_date" dateFormat="yy-mm-dd" class="w-full" showIcon
+                                    fluid iconDisplay="input" :invalid="!!$errors.entry_date" />
+                                <Message v-if="$errors.entry_date" severity="error" :closable="false">{{
+                                    $errors.entry_date
+                                    }}</Message>
+                            </div>
+                            <div class="field">
+                                <label class="block text-sm font-medium mb-2">Created</label>
+                                <InputText :value="new Date(checklist.created_at).toLocaleDateString()" readonly
+                                    class="w-full" />
                             </div>
                         </div>
 
-                        <!-- Screenshot Upload -->
-                        <div class="p-4 border border-gray-200 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                <i class="pi pi-image text-blue-900"></i>
-                                Chart Screenshots (Max 5)
-                            </h3>
-
-                            <!-- Existing Screenshots -->
-                            <div v-if="existingImages.length > 0" class="mb-4">
-                                <label class="block text-sm font-medium mb-2">Current Images</label>
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <div v-for="(image, index) in existingImages" :key="image"
-                                        class="relative border border-gray-200 rounded-lg p-2">
-                                        <img :src="`/storage/${image}`" :alt="`Screenshot ${index + 1}`"
-                                            class="w-full h-32 object-cover rounded cursor-pointer"
-                                            @click="viewImage(`/storage/${image}`)" />
-                                        <Button icon="pi pi-times" @click="removeExistingImage(index)" rounded text
-                                            severity="danger" class="absolute top-1 right-1" size="small" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- New Screenshots Upload -->
-                            <div class="field">
-                                <label v-if="existingImages.length > 0" class="block text-sm font-medium mb-2">Add New
-                                    Images</label>
-                                <FileUpload ref="fileupload" name="screenshots[]" :multiple="true" accept="image/*"
-                                    :maxFileSize="5000000" :fileLimit="Math.max(0, 5 - existingImages.length)"
-                                    customUpload @select="onFilesSelect" @remove="onFileRemove"
-                                    :disabled="existingImages.length >= 5" class="w-full">
-                                    <template #header="{ chooseCallback, clearCallback, files }">
-                                        <div class="flex flex-wrap justify-between items-center gap-4">
-                                            <div class="flex gap-2">
-                                                <Button @click="chooseCallback()" icon="pi pi-images" label="Choose"
-                                                    outlined severity="secondary" size="small"
-                                                    :disabled="existingImages.length >= 5" />
-                                                <Button @click="clearCallback()" icon="pi pi-times" label="Clear"
-                                                    outlined severity="danger" size="small"
-                                                    :disabled="!files || files.length === 0" />
-                                            </div>
-                                            <span class="text-sm text-gray-600">{{ existingImages.length +
-                                                (files?.length || 0) }}/5 total</span>
+                        <!-- Analysis Sections -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Left Column: Technical & Fundamental Analysis -->
+                            <div class="space-y-6">
+                                <!-- Technical Analysis -->
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-chart-line text-blue-900 dark:text-blue-300"></i>
+                                        Technical Analysis
+                                    </h3>
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Location</label>
+                                            <Select v-model="form.technicals.location"
+                                                :options="['Very Expensive', 'Expensive', 'EQ', 'Cheap', 'Very Cheap']"
+                                                placeholder="Select Location" class="w-full"
+                                                :invalid="!!$errors['technicals.location']" />
+                                            <Message v-if="$errors['technicals.location']" severity="error"
+                                                :closable="false">{{ $errors['technicals.location'] }}</Message>
                                         </div>
-                                    </template>
-                                    <template #content="{ files, removeFileCallback }">
-                                        <div v-if="files.length > 0" class="pt-4">
-                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                <div v-for="(file, index) of files"
-                                                    :key="file.name + file.type + file.size"
-                                                    class="relative border border-gray-200 rounded-lg p-2">
-                                                    <img role="presentation" :alt="file.name" :src="file.objectURL"
-                                                        class="w-full h-32 object-cover rounded" />
-                                                    <div class="mt-2 text-xs text-gray-600 truncate">{{ file.name }}
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Direction</label>
+                                            <Select v-model="form.technicals.direction"
+                                                :options="['Correction', 'Impulsion']" placeholder="Select Direction"
+                                                class="w-full" :invalid="!!$errors['technicals.direction']" />
+                                            <Message v-if="$errors['technicals.direction']" severity="error"
+                                                :closable="false">{{ $errors['technicals.direction'] }}</Message>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fundamental Analysis -->
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-globe text-blue-900 dark:text-blue-300"></i>
+                                        Fundamental Analysis
+                                    </h3>
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Valuation</label>
+                                            <Select v-model="form.fundamentals.valuation"
+                                                :options="['Overvalued', 'Neutral', 'Undervalued']"
+                                                placeholder="Select Valuation" class="w-full"
+                                                :invalid="!!$errors['fundamentals.valuation']" />
+                                            <Message v-if="$errors['fundamentals.valuation']" severity="error"
+                                                :closable="false">{{ $errors['fundamentals.valuation'] }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Seasonality</label>
+                                            <Select v-model="form.fundamentals.seasonalConfluence"
+                                                :options="['Bullish', 'Neutral', 'Bearish']"
+                                                placeholder="Select Seasonality" class="w-full"
+                                                :invalid="!!$errors['fundamentals.seasonalConfluence']" />
+                                            <Message v-if="$errors['fundamentals.seasonalConfluence']" severity="error"
+                                                :closable="false">{{ $errors['fundamentals.seasonalConfluence'] }}
+                                            </Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Non-Commercials</label>
+                                            <Select v-model="form.fundamentals.nonCommercials"
+                                                :options="['Bullish Divergence', 'Neutral', 'Bearish Divergence']"
+                                                placeholder="Select Non-Commercials" class="w-full"
+                                                :invalid="!!$errors['fundamentals.nonCommercials']" />
+                                            <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
+                                                :closable="false">{{ $errors['fundamentals.nonCommercials'] }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">CoT Index</label>
+                                            <Select v-model="form.fundamentals.cotIndex"
+                                                :options="['Bullish', 'Neutral', 'Bearish']"
+                                                placeholder="Select CoT Index" class="w-full"
+                                                :invalid="!!$errors['fundamentals.cotIndex']" />
+                                            <Message v-if="$errors['fundamentals.cotIndex']" severity="error"
+                                                :closable="false">{{ $errors['fundamentals.cotIndex'] }}</Message>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Zone Qualifiers & Order Details -->
+                            <div class="space-y-6">
+                                <!-- Zone Qualifiers -->
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-map-marker text-blue-900 dark:text-blue-300"></i>
+                                        Zone Qualifiers ({{ form.zone_qualifiers.length }})
+                                    </h3>
+                                    <div class="grid grid-cols-1 gap-2">
+                                        <div v-for="(qualifier, index) in zoneQualifiers" :key="index"
+                                            class="flex items-center">
+                                            <Checkbox v-model="form.zone_qualifiers" :value="qualifier"
+                                                :inputId="`qualifier-${index}`" class="mr-3" />
+                                            <label :for="`qualifier-${index}`"
+                                                class="text-gray-700 dark:text-gray-300 text-sm">
+                                                {{ qualifier }}
+                                            </label>
+                                        </div>
+                                        <Message v-if="$errors.zone_qualifiers" severity="error" :closable="false">{{
+                                            $errors.zone_qualifiers }}</Message>
+                                    </div>
+                                </div>
+
+                                <!-- Order Entry Details -->
+                                <div ref="orderEntryRef"
+                                    class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg transition-all duration-500"
+                                    :class="{ 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20': shouldHighlightOrderEntry }">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                                        <i class="pi pi-money-bill text-blue-900 dark:text-blue-300"></i>
+                                        Order Entry Details
+                                        <Tag v-if="shouldHighlightOrderEntry" value="Focus" severity="info"
+                                            class="ml-2" />
+                                    </h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Position Type</label>
+                                            <Select v-model="form.position_type" :options="['Long', 'Short']"
+                                                placeholder="Select Position Type" class="w-full"
+                                                :invalid="!!$errors.position_type" />
+                                            <Message v-if="$errors.position_type" severity="error" :closable="false">{{
+                                                $errors.position_type }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Trade Status</label>
+                                            <Select v-model="form.trade_status" :options="[
+                                                { label: 'Order Pending', value: 'pending' },
+                                                { label: 'Position Open', value: 'active' },
+                                                { label: 'Win', value: 'win' },
+                                                { label: 'Loss', value: 'loss' },
+                                                { label: 'Breakeven', value: 'breakeven' },
+                                                { label: 'Cancelled', value: 'cancelled' }
+                                            ]" option-label="label" option-value="value" placeholder="Select Status"
+                                                class="w-full" :invalid="!!$errors.trade_status" />
+                                            <Message v-if="$errors.trade_status" severity="error" :closable="false">{{
+                                                $errors.trade_status }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Entry Price</label>
+                                            <InputText v-model="form.entry_price" type="number" step="0.0001"
+                                                placeholder="0.0000" class="w-full" :invalid="!!$errors.entry_price" />
+                                            <Message v-if="$errors.entry_price" severity="error" :closable="false">{{
+                                                $errors.entry_price }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Stop Loss</label>
+                                            <InputText v-model="form.stop_price" type="number" step="0.0001"
+                                                placeholder="0.0000" class="w-full" :invalid="!!$errors.stop_price" />
+                                            <Message v-if="$errors.stop_price" severity="error" :closable="false">{{
+                                                $errors.stop_price }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">Take Profit</label>
+                                            <InputText v-model="form.target_price" type="number" step="0.0001"
+                                                placeholder="0.0000" class="w-full" :invalid="!!$errors.target_price" />
+                                            <Message v-if="$errors.target_price" severity="error" :closable="false">{{
+                                                $errors.target_price }}</Message>
+                                        </div>
+                                        <div class="field">
+                                            <label class="block text-sm font-medium mb-1">R:R Ratio</label>
+                                            <InputText v-model="form.rrr" type="number" step="0.01" placeholder="1.50"
+                                                class="w-full" :invalid="!!$errors.rrr" />
+                                            <Message v-if="$errors.rrr" severity="error" :closable="false">{{
+                                                $errors.rrr }}
+                                            </Message>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes & Screenshot Section -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Notes -->
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <h3
+                                    class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                                    <i class="pi pi-file-edit text-blue-900 dark:text-blue-300"></i>
+                                    Trading Notes
+                                </h3>
+                                <div class="field">
+                                    <Textarea v-model="form.notes" rows="6" class="w-full"
+                                        placeholder="Document your analysis, reasoning, and any additional context for this trade..."
+                                        :invalid="!!$errors.notes" />
+                                    <Message v-if="$errors.notes" severity="error" :closable="false">{{ $errors.notes }}
+                                    </Message>
+                                </div>
+                            </div>
+
+                            <!-- Screenshot Upload -->
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <h3
+                                    class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                                    <i class="pi pi-image text-blue-900 dark:text-blue-300"></i>
+                                    Chart Screenshots (Max 5)
+                                </h3>
+
+                                <!-- Existing Screenshots -->
+                                <div v-if="existingImages.length > 0" class="mb-4">
+                                    <label class="block text-sm font-medium mb-2">Current Images</label>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        <div v-for="(image, index) in existingImages" :key="image"
+                                            class="relative border border-gray-200 dark:border-gray-700 rounded-lg p-2">
+                                            <img :src="`/storage/${image}`" :alt="`Screenshot ${index + 1}`"
+                                                class="w-full h-32 object-cover rounded cursor-pointer"
+                                                @click="viewImage(`/storage/${image}`)" />
+                                            <Button icon="pi pi-times" @click="removeExistingImage(index)" rounded text
+                                                severity="danger" class="absolute top-1 right-1" size="small" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- New Screenshots Upload -->
+                                <div class="field">
+                                    <label v-if="existingImages.length > 0" class="block text-sm font-medium mb-2">Add
+                                        New
+                                        Images</label>
+                                    <FileUpload ref="fileupload" name="screenshots[]" :multiple="true" accept="image/*"
+                                        :maxFileSize="5000000" :fileLimit="Math.max(0, 5 - existingImages.length)"
+                                        customUpload @select="onFilesSelect" @remove="onFileRemove"
+                                        :disabled="existingImages.length >= 5" class="w-full">
+                                        <template #header="{ chooseCallback, clearCallback, files }">
+                                            <div class="flex flex-wrap justify-between items-center gap-4">
+                                                <div class="flex gap-2">
+                                                    <Button @click="chooseCallback()" icon="pi pi-images" label="Choose"
+                                                        outlined severity="secondary" size="small"
+                                                        :disabled="existingImages.length >= 5" />
+                                                    <Button @click="clearCallback()" icon="pi pi-times" label="Clear"
+                                                        outlined severity="danger" size="small"
+                                                        :disabled="!files || files.length === 0" />
+                                                </div>
+                                                <span class="text-sm text-gray-600 dark:text-gray-400">{{
+                                                    existingImages.length +
+                                                    (files?.length || 0) }}/5 total</span>
+                                            </div>
+                                        </template>
+                                        <template #content="{ files, removeFileCallback }">
+                                            <div v-if="files.length > 0" class="pt-4">
+                                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                    <div v-for="(file, index) of files"
+                                                        :key="file.name + file.type + file.size"
+                                                        class="relative border border-gray-200 dark:border-gray-700 rounded-lg p-2">
+                                                        <img role="presentation" :alt="file.name" :src="file.objectURL"
+                                                            class="w-full h-32 object-cover rounded" />
+                                                        <div
+                                                            class="mt-2 text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                            {{ file.name }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{
+                                                            formatSize(file.size) }}</div>
+                                                        <Button icon="pi pi-times" @click="removeFileCallback(index)"
+                                                            rounded text severity="danger"
+                                                            class="absolute top-1 right-1" size="small" />
                                                     </div>
-                                                    <div class="text-xs text-gray-500">{{ formatSize(file.size) }}</div>
-                                                    <Button icon="pi pi-times" @click="removeFileCallback(index)"
-                                                        rounded text severity="danger" class="absolute top-1 right-1"
-                                                        size="small" />
                                                 </div>
                                             </div>
-                                        </div>
-                                    </template>
-                                    <template #empty>
-                                        <div class="flex items-center justify-center flex-col py-8">
-                                            <i class="pi pi-image text-gray-400 text-4xl mb-3"></i>
-                                            <p class="text-gray-600">Drag and drop images here or click Choose</p>
-                                            <p class="text-xs text-gray-500 mt-1">Max {{ Math.max(0, 5 -
-                                                existingImages.length) }} more images, 5MB each</p>
-                                        </div>
-                                    </template>
-                                </FileUpload>
-                                <Message v-if="$errors.screenshots" severity="error" :closable="false">{{
-                                    $errors.screenshots }}</Message>
+                                        </template>
+                                        <template #empty>
+                                            <div class="flex items-center justify-center flex-col py-8">
+                                                <i
+                                                    class="pi pi-image text-gray-400 dark:text-gray-500 text-4xl mb-3"></i>
+                                                <p class="text-gray-600 dark:text-gray-400">Drag and drop images here or
+                                                    click Choose</p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max {{
+                                                    Math.max(0,
+                                                        5 -
+                                                    existingImages.length) }} more images, 5MB each</p>
+                                            </div>
+                                        </template>
+                                    </FileUpload>
+                                    <Message v-if="$errors.screenshots" severity="error" :closable="false">{{
+                                        $errors.screenshots }}</Message>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </template>
-        </Card>
-    </div>
+                    </form>
+                </template>
+            </Card>
+        </div>
+    </AppLayout>
 </template>
 
 <script setup>
@@ -331,6 +354,7 @@ import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
 import { useDirectionalBias } from '@/composables/useDirectionalBias'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 const toast = useToast()
 const orderEntryRef = ref(null)

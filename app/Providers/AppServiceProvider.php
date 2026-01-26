@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\AnalysisTracker;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;

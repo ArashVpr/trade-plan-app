@@ -1,8 +1,8 @@
 <template>
     <div class="space-y-6">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-semibold text-blue-900 flex items-center gap-2">
-                <i class="pi pi-money-bill text-blue-900"></i>
+            <h2 class="text-2xl font-semibold text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                <i class="pi pi-money-bill text-blue-900 dark:text-blue-300"></i>
                 Order Entry (Optional)
             </h2>
             <Chip :label="`Symbol: ${symbol || '—'}`" />
@@ -61,69 +61,40 @@
 
         <div class="field">
             <label class="block text-sm font-medium mb-2">Chart Screenshots (Max 5)</label>
-            <FileUpload 
-                ref="fileupload"
-                name="screenshots[]"
-                :multiple="true"
-                accept="image/*"
-                :maxFileSize="5000000"
-                :fileLimit="5"
-                customUpload
-                @select="onFilesSelect"
-                @remove="onFileRemove"
-                class="w-full">
+            <FileUpload ref="fileupload" name="screenshots[]" :multiple="true" accept="image/*" :maxFileSize="5000000"
+                :fileLimit="5" customUpload @select="onFilesSelect" @remove="onFileRemove" class="w-full">
                 <template #header="{ chooseCallback, clearCallback, files }">
                     <div class="flex flex-wrap justify-between items-center gap-4">
                         <div class="flex gap-2">
-                            <Button 
-                                @click="chooseCallback()" 
-                                icon="pi pi-images" 
-                                label="Choose" 
-                                outlined 
-                                severity="secondary"
-                                size="small" />
-                            <Button 
-                                @click="clearCallback()" 
-                                icon="pi pi-times" 
-                                label="Clear" 
-                                outlined 
-                                severity="danger" 
-                                size="small"
-                                :disabled="!files || files.length === 0" />
+                            <Button @click="chooseCallback()" icon="pi pi-images" label="Choose" outlined
+                                severity="secondary" size="small" />
+                            <Button @click="clearCallback()" icon="pi pi-times" label="Clear" outlined severity="danger"
+                                size="small" :disabled="!files || files.length === 0" />
                         </div>
-                        <span class="text-sm text-gray-600">{{ files?.length || 0 }}/5 files</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ files?.length || 0 }}/5 files</span>
                     </div>
                 </template>
                 <template #content="{ files, removeFileCallback }">
                     <div v-if="files.length > 0" class="pt-4">
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div v-for="(file, index) of files" 
-                                :key="file.name + file.type + file.size" 
-                                class="relative border border-gray-200 rounded-lg p-2">
-                                <img 
-                                    role="presentation" 
-                                    :alt="file.name" 
-                                    :src="file.objectURL" 
+                            <div v-for="(file, index) of files" :key="file.name + file.type + file.size"
+                                class="relative border border-gray-200 dark:border-gray-700 rounded-lg p-2">
+                                <img role="presentation" :alt="file.name" :src="file.objectURL"
                                     class="w-full h-32 object-cover rounded" />
-                                <div class="mt-2 text-xs text-gray-600 truncate">{{ file.name }}</div>
-                                <div class="text-xs text-gray-500">{{ formatSize(file.size) }}</div>
-                                <Button 
-                                    icon="pi pi-times" 
-                                    @click="removeFileCallback(index)" 
-                                    rounded 
-                                    text 
-                                    severity="danger" 
-                                    class="absolute top-1 right-1" 
-                                    size="small" />
+                                <div class="mt-2 text-xs text-gray-600 dark:text-gray-400 truncate">{{ file.name }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ formatSize(file.size) }}</div>
+                                <Button icon="pi pi-times" @click="removeFileCallback(index)" rounded text
+                                    severity="danger" class="absolute top-1 right-1" size="small" />
                             </div>
                         </div>
                     </div>
                 </template>
                 <template #empty>
                     <div class="flex items-center justify-center flex-col py-8">
-                        <i class="pi pi-image text-gray-400 text-4xl mb-3"></i>
-                        <p class="text-gray-600">Drag and drop images here or click Choose</p>
-                        <p class="text-xs text-gray-500 mt-1">Max 5 images, 5MB each</p>
+                        <i class="pi pi-image text-gray-400 dark:text-gray-500 text-4xl mb-3"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Drag and drop images here or click Choose</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max 5 images, 5MB each</p>
                     </div>
                 </template>
             </FileUpload>

@@ -4,8 +4,8 @@
             <div class="max-w-6xl mx-auto">
                 <!-- Header Section -->
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-blue-900 mb-2">Checklist Weights</h1>
-                    <p class="text-gray-600">
+                    <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-2">Checklist Weights</h1>
+                    <p class="text-gray-600 dark:text-gray-400">
                         Customize the scoring weights for your trade analysis. Higher weights give more influence on the
                         final score.
                     </p>
@@ -51,40 +51,46 @@
                         </div>
                     </template>
                     <template #content>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
                             <!-- Chart -->
-                            <div class="flex justify-center">
-                                <div class="w-64 h-64">
-                                    <Doughnut :data="chartData" :options="chartOptions" />
+                            <div class="flex items-center justify-center">
+                                <div class="w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-80 max-w-full">
+                                    <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                        class="w-full h-full" />
                                 </div>
                             </div>
 
                             <!-- Chart Legend & Stats -->
                             <div class="space-y-4">
                                 <div class="space-y-3">
-                                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                    <div
+                                        class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                         <div class="flex items-center gap-2">
-                                            <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                                            <div class="w-4 h-4 bg-blue-100 dark:bg-blue-900/40 rounded-full"></div>
                                             <span class="font-medium">Zone Qualifiers</span>
                                         </div>
                                         <div class="text-right">
                                             <div class="font-bold text-blue-600">{{ zoneWeightTotal }} </div>
-                                            <div class="text-sm text-gray-500">{{ zonePercentage }}%</div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ zonePercentage }}%
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                    <div
+                                        class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                                         <div class="flex items-center gap-2">
                                             <div class="w-4 h-4 bg-green-500 rounded-full"></div>
                                             <span class="font-medium">Technical Analysis</span>
                                         </div>
                                         <div class="text-right">
                                             <div class="font-bold text-green-600">{{ technicalWeightTotal }} </div>
-                                            <div class="text-sm text-gray-500">{{ technicalPercentage }}%</div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ technicalPercentage
+                                                }}%</div>
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                                    <div
+                                        class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                                         <div class="flex items-center gap-2">
                                             <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
                                             <span class="font-medium">Fundamental Analysis</span>
@@ -92,7 +98,8 @@
                                         <div class="text-right">
                                             <div class="font-bold text-purple-600">{{ fundamentalWeightTotal }}
                                             </div>
-                                            <div class="text-sm text-gray-500">{{ fundamentalPercentage }}%</div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{
+                                                fundamentalPercentage }}%</div>
                                         </div>
                                     </div>
                                 </div>
@@ -123,7 +130,8 @@
                             <template #content>
                                 <div class="space-y-4">
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Fresh Zone</span>
                                             <span class="text-blue-600 font-semibold">{{ form.zone_fresh_weight }}
                                             </span>
@@ -135,7 +143,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Original Zone</span>
                                             <span class="text-blue-600 font-semibold">{{ form.zone_original_weight }}
                                             </span>
@@ -147,7 +156,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Flip Zone</span>
                                             <span class="text-blue-600 font-semibold">{{ form.zone_flip_weight }}
                                             </span>
@@ -159,7 +169,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Liquidity Zone</span>
                                             <span class="text-blue-600 font-semibold">{{ form.zone_lol_weight }}
                                             </span>
@@ -171,7 +182,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Min Profit Margin</span>
                                             <span class="text-blue-600 font-semibold">{{
                                                 form.zone_min_profit_margin_weight }} </span>
@@ -183,7 +195,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Big Brother</span>
                                             <span class="text-blue-600 font-semibold">{{ form.zone_big_brother_weight }}
                                             </span>
@@ -208,13 +221,15 @@
                                 <div class="space-y-6">
                                     <!-- Location Section -->
                                     <div>
-                                        <h3 class="text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-                                            <i class="pi pi-map text-gray-500 text-sm"></i>
+                                        <h3
+                                            class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                                            <i class="pi pi-map text-gray-500 dark:text-gray-400 text-sm"></i>
                                             Location
                                         </h3>
                                         <div class="space-y-4">
                                             <div class="flex flex-col gap-2">
-                                                <label class="font-medium text-gray-700 flex justify-between">
+                                                <label
+                                                    class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                                     <span>Very Expensive / Very Cheap</span>
                                                     <span class="text-green-600 font-semibold">{{
                                                         form.technical_very_exp_chp_weight }} </span>
@@ -226,7 +241,8 @@
                                             </div>
 
                                             <div class="flex flex-col gap-2">
-                                                <label class="font-medium text-gray-700 flex justify-between">
+                                                <label
+                                                    class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                                     <span>Expensive / Cheap</span>
                                                     <span class="text-green-600 font-semibold">{{
                                                         form.technical_exp_chp_weight }} </span>
@@ -241,13 +257,15 @@
 
                                     <!-- Direction Section -->
                                     <div>
-                                        <h3 class="text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-                                            <i class="pi pi-arrow-right text-gray-500 text-sm"></i>
+                                        <h3
+                                            class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                                            <i class="pi pi-arrow-right text-gray-500 dark:text-gray-400 text-sm"></i>
                                             Direction
                                         </h3>
                                         <div class="space-y-4">
                                             <div class="flex flex-col gap-2">
-                                                <label class="font-medium text-gray-700 flex justify-between">
+                                                <label
+                                                    class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                                     <span>Impulsive</span>
                                                     <span class="text-green-600 font-semibold">{{
                                                         form.technical_direction_impulsive_weight }} </span>
@@ -260,7 +278,8 @@
                                             </div>
 
                                             <div class="flex flex-col gap-2">
-                                                <label class="font-medium text-gray-700 flex justify-between">
+                                                <label
+                                                    class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                                     <span>Correction</span>
                                                     <span class="text-green-600 font-semibold">{{
                                                         form.technical_direction_correction_weight }} </span>
@@ -287,7 +306,8 @@
                             <template #content>
                                 <div class="space-y-4">
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Valuation</span>
                                             <span class="text-purple-600 font-semibold">{{
                                                 form.fundamental_valuation_weight }} </span>
@@ -299,7 +319,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Seasonality</span>
                                             <span class="text-purple-600 font-semibold">{{
                                                 form.fundamental_seasonal_weight }} </span>
@@ -311,7 +332,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>COT Index</span>
                                             <span class="text-purple-600 font-semibold">{{
                                                 form.fundamental_cot_index_weight }} </span>
@@ -323,7 +345,8 @@
                                     </div>
 
                                     <div class="flex flex-col gap-2">
-                                        <label class="font-medium text-gray-700 flex justify-between">
+                                        <label
+                                            class="font-medium text-gray-700 dark:text-gray-300 flex justify-between">
                                             <span>Non-Commercial Divergence</span>
                                             <span class="text-purple-600 font-semibold">{{
                                                 form.fundamental_noncommercial_divergence_weight }} </span>
@@ -342,8 +365,6 @@
             </div>
         </div>
 
-        <!-- Toast for notifications -->
-        <Toast />
     </AppLayout>
 </template>
 
@@ -352,11 +373,7 @@ import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { Doughnut } from 'vue-chartjs'
-import { Chart, registerables } from 'chart.js'
 import AppLayout from '@/Layouts/AppLayout.vue'
-
-Chart.register(...registerables)
 
 const props = defineProps({
     weights: Object,
@@ -436,7 +453,7 @@ const chartData = computed(() => {
                 data: [zoneWeightTotal.value, technicalWeightTotal.value, fundamentalWeightTotal.value],
                 backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6'],
                 borderColor: ['#2563EB', '#059669', '#7C3AED'],
-                borderWidth: 2,
+                borderWidth: 6,
                 hoverBackgroundColor: ['#60A5FA', '#34D399', '#A78BFA'],
                 hoverBorderColor: ['#1D4ED8', '#047857', '#6D28D9'],
             }
@@ -447,7 +464,8 @@ const chartData = computed(() => {
 const chartOptions = computed(() => {
     return {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
+        aspectRatio: 1,
         plugins: {
             legend: {
                 display: false, // We'll use custom legend
@@ -464,7 +482,8 @@ const chartOptions = computed(() => {
                 }
             }
         },
-        cutout: '60%', // Makes it a doughnut instead of pie
+        layout: { padding: 0 },
+        cutout: '50%', // Makes it a doughnut instead of pie (thicker ring)
     };
 });
 
@@ -476,7 +495,7 @@ const balanceIndicatorClass = computed(() => {
 
     // Check if all three categories have exactly the same points
     if (zone === technical && technical === fundamental && zone > 0) {
-        return 'bg-gradient-to-r from-blue-50 via-green-50 to-purple-50 border border-gray-300 text-gray-800';
+        return 'bg-gradient-to-r from-blue-50 via-green-50 to-purple-50 dark:from-blue-900/30 dark:via-green-900/30 dark:to-purple-900/30 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100';
     }
 
     const zonePercent = zonePercentage.value;
@@ -485,12 +504,12 @@ const balanceIndicatorClass = computed(() => {
 
     // Find the category with the highest percentage
     if (zonePercent >= technicalPercent && zonePercent >= fundamentalPercent) {
-        return 'bg-blue-50 border border-blue-200 text-blue-800';
+        return 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200';
     }
     if (technicalPercent >= zonePercent && technicalPercent >= fundamentalPercent) {
-        return 'bg-green-50 border border-green-200 text-green-800';
+        return 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200';
     }
-    return 'bg-purple-50 border border-purple-200 text-purple-800';
+    return 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-200';
 });
 
 const balanceIcon = computed(() => {

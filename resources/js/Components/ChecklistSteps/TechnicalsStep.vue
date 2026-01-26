@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
-        <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-            <i class="pi pi-chart-line text-blue-900"></i>
+        <h2 class="text-2xl font-semibold text-blue-900 dark:text-blue-300 mb-4 flex items-center gap-2">
+            <i class="pi pi-chart-line text-blue-900 dark:text-blue-300"></i>
             Technical Analysis
         </h2>
 

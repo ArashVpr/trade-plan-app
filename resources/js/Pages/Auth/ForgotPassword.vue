@@ -1,17 +1,16 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <!-- Toast for notifications -->
-        <Toast />
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
 
         <div class="max-w-md w-full space-y-8">
             <div>
-                <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+                <div
+                    class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
                     <i class="pi pi-chart-line text-2xl text-blue-600"></i>
                 </div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                     Forgot your password?
                 </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
+                <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
                     Enter your email address and we'll send you a link to reset your password
                 </p>
             </div>
@@ -20,7 +19,7 @@
                 <template #content>
                     <form @submit.prevent="submit" class="space-y-6">
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Email Address
                             </label>
                             <InputText id="email" v-model="form.email" type="email" autocomplete="email" required
@@ -37,13 +36,13 @@
                         <div class="text-center space-y-2">
                             <div class="text-sm">
                                 <Link :href="route('login')" class="font-medium text-blue-600 hover:text-blue-500">
-                                Back to Sign In
+                                    Back to Sign In
                                 </Link>
                             </div>
-                            <div class="text-sm text-gray-600">
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
                                 Don't have an account?
                                 <Link :href="route('register')" class="font-medium text-blue-600 hover:text-blue-500">
-                                Sign up
+                                    Sign up
                                 </Link>
                             </div>
                         </div>

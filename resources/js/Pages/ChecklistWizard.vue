@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="max-w-6xl mx-auto">
-            <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Trade Setup Checklist</h1>
+            <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-6 text-center">Trade Setup Checklist</h1>
 
             <!-- Step Indicator -->
             <Card class="mb-6">
@@ -64,59 +64,67 @@
                 <Card>
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-bar text-blue-900"></i>
-                            <span class="text-blue-900">Trade Setup Summary</span>
+                            <i class="pi pi-chart-bar text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Trade Setup Summary</span>
                         </div>
                     </template>
                     <template #content>
                         <div class="space-y-6">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Technicals</h3>
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Technicals</h3>
                                 <div class="space-y-1">
-                                    <p class="text-sm text-gray-600">Location: {{ technicalsData.location || 'Not selected' }}
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Location: {{
+                                        technicalsData.location || 'Not selected' }}
                                     </p>
-                                    <p class="text-sm text-gray-600">Direction: {{ technicalsData.direction || 'Not selected' }}
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Direction: {{
+                                        technicalsData.direction || 'Not selected' }}
                                     </p>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Fundamentals</h3>
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fundamentals</h3>
                                 <div class="space-y-1">
-                                    <p class="text-sm text-gray-600">Valuation: {{ fundamentalsData.valuation || 'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">Seasonality: {{ fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">Non-Commercials: {{ fundamentalsData.nonCommercials || 'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">CoT Index: {{ fundamentalsData.cotIndex || 'Not selected' }}</p>
-                                    <p class="text-sm text-gray-600">Commercials: {{ fundamentalsData.commercials || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Valuation: {{
+                                        fundamentalsData.valuation || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Seasonality: {{
+                                        fundamentalsData.seasonalConfluence || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Non-Commercials: {{
+                                        fundamentalsData.nonCommercials || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">CoT Index: {{
+                                        fundamentalsData.cotIndex || 'Not selected' }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Commercials: {{
+                                        fundamentalsData.commercials || 'Not selected' }}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Zone Qualifiers
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zone Qualifiers
                                     ({{ selectedZoneQualifiersCount }})</h3>
-                                <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                                <ul class="list-disc pl-5 text-sm text-gray-600 dark:text-gray-400 space-y-1">
                                     <li v-for="qualifier in zoneQualifiersData.selectedZoneQualifiers" :key="qualifier">
                                         {{ qualifier }}
                                     </li>
                                     <li v-if="zoneQualifiersData.selectedZoneQualifiers.length === 0"
-                                        class="text-gray-500">
+                                        class="text-gray-500 dark:text-gray-400">
                                         None selected</li>
                                 </ul>
                             </div>
 
                             <!-- Directional Bias -->
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Directional Bias</h3>
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Directional Bias
+                                </h3>
                                 <div v-if="directionalBias.hasEnoughData" class="space-y-1">
                                     <div class="flex items-center gap-2">
                                         <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
                                             class="font-bold text-sm" />
-                                        <span class="text-sm text-gray-600 font-medium">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
                                             {{ directionalBias.confidence }}%
                                         </span>
                                     </div>
                                 </div>
-                                <div v-else class="text-sm text-gray-500">
+                                <div v-else class="text-sm text-gray-500 dark:text-gray-400">
                                     No directional signals selected
                                 </div>
                             </div>

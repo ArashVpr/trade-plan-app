@@ -1,6 +1,6 @@
 <template>
     <div class="evaluation-score">
-        <h3 class="text-xl font-semibold text-blue-900 mb-2">{{ title }}</h3>
+        <h3 class="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ title }}</h3>
         <Tag :value="`${calculatedScore}/100`" :severity="getScoreSeverity(calculatedScore)" :class="tagClass" />
         <div v-if="calculatedScore === 100 && showPerfectMessage"
             class="text-yellow-500 mt-3 font-bold text-lg text-center">
@@ -8,7 +8,7 @@
         </div>
 
         <!-- Score breakdown (optional) -->
-        <div v-if="showBreakdown && breakdown" class="mt-3 text-sm text-gray-600">
+        <div v-if="showBreakdown && breakdown" class="mt-3 text-sm text-gray-600 dark:text-gray-400">
             <div v-for="(item, key) in breakdown" :key="key" class="flex justify-between">
                 <span>{{ item.label }}:</span>
                 <span class="font-medium">{{ item.value }}</span>

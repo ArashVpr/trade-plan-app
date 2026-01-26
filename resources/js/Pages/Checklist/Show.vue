@@ -1,15 +1,13 @@
 <template>
     <AppLayout>
         <div class="max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold text-blue-900 mb-6 text-center">Checklist Details</h1>
+            <h1 class="text-3xl font-bold text-blue-900 dark:text-blue-300 mb-6 text-center">Checklist Details</h1>
 
             <!-- Action Buttons -->
             <div class="flex justify-between mb-6">
                 <Button label="Back" icon="pi pi-arrow-left" severity="secondary"
                     @click="router.get(route('checklists.index'))" />
                 <div class="flex gap-2">
-                    <Button label="Track Similar Setups" icon="pi pi-search" severity="info" outlined
-                        @click="router.get(route('analysis-tracker.index'))" />
                     <Button label="Edit" icon="pi pi-pencil" severity="success"
                         @click="router.get(route('checklists.edit', checklist.id))" />
                     <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDelete" />
@@ -23,8 +21,8 @@
                 <Card>
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-line text-blue-900"></i>
-                            <span class="text-blue-900">Trade Setup Details</span>
+                            <i class="pi pi-chart-line text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Trade Setup Details</span>
                         </div>
                     </template>
                     <template #content>
@@ -53,11 +51,11 @@
                                 <div v-if="directionalBias.hasEnoughData" class="flex items-center gap-2">
                                     <Tag :value="directionalBias.biasDisplay" :severity="directionalBias.severity"
                                         class="text-lg font-bold px-4 py-2" />
-                                    <span class="text-sm text-gray-600 font-medium">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
                                         {{ directionalBias.confidence }}%
                                     </span>
                                 </div>
-                                <div v-else class="text-sm text-gray-500">
+                                <div v-else class="text-sm text-gray-500 dark:text-gray-400">
                                     No directional signals in analysis
                                 </div>
                             </div>
@@ -65,7 +63,7 @@
                             <!-- Created Date -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">Created</label>
-                                <span class="text-sm text-gray-600">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ new Date(checklist.created_at).toLocaleDateString() }}
                                 </span>
                             </div>
@@ -78,7 +76,8 @@
                                 <div class="flex flex-wrap gap-2">
                                     <Chip v-for="qualifier in checklist.zone_qualifiers" :key="qualifier"
                                         :label="qualifier" class="mb-1" />
-                                    <span v-if="checklist.zone_qualifiers.length === 0" class="text-gray-500 text-sm">
+                                    <span v-if="checklist.zone_qualifiers.length === 0"
+                                        class="text-gray-500 dark:text-gray-400 text-sm">
                                         None selected
                                     </span>
                                 </div>
@@ -135,17 +134,17 @@
                 <Card v-if="!tradeEntry">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-line text-blue-900"></i>
-                            <span class="text-blue-900">Trade Status</span>
+                            <i class="pi pi-chart-line text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Trade Status</span>
                         </div>
                     </template>
                     <template #content>
                         <div class="text-center py-8">
                             <div class="mb-4">
-                                <i class="pi pi-info-circle text-blue-900 text-6xl opacity-50"></i>
+                                <i class="pi pi-info-circle text-blue-900 dark:text-blue-300 text-6xl opacity-50"></i>
                             </div>
-                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Analysis Only</h3>
-                            <p class="text-gray-600 mb-4">
+                            <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Analysis Only</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
                                 This setup was analyzed but no trade was taken. You can edit this checklist to add order
                                 entry details if you decide to trade this setup.
                             </p>
@@ -161,8 +160,8 @@
                 <Card v-if="tradeEntry">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-money-bill text-blue-900"></i>
-                            <span class="text-blue-900">Order Entry Details</span>
+                            <i class="pi pi-money-bill text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Order Entry Details</span>
                         </div>
                     </template>
                     <template #content>
@@ -230,7 +229,7 @@
                             <label class="block text-sm font-medium mb-2">Screenshots</label>
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 <div v-for="(path, index) in tradeEntry.screenshot_paths" :key="path"
-                                    class="border border-gray-200 rounded-lg overflow-hidden">
+                                    class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                                     <Image :src="`/storage/${path}`" :alt="`Screenshot ${index + 1}`" preview
                                         class="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity" />
                                 </div>
@@ -243,13 +242,22 @@
                 <Card class="lg:col-span-2">
                     <template #title>
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-chart-pie text-blue-900"></i>
-                            <span class="text-blue-900">Score Breakdown</span>
+                            <i class="pi pi-chart-pie text-blue-900 dark:text-blue-300"></i>
+                            <span class="text-blue-900 dark:text-blue-300">Score Breakdown</span>
                         </div>
                     </template>
                     <template #content>
-                        <div class="w-full h-80">
-                            <Radar :data="chartData" :options="chartOptions" />
+                        <!-- Custom Static Legend -->
+                        <div class="flex justify-center gap-6 mb-6 text-base flex-wrap">
+                            <div v-for="(label, index) in ['Zone Qualifiers', 'Technicals', 'Fundamentals']"
+                                :key="label" class="flex items-center gap-2">
+                                <span class="inline-block w-4 h-4 rounded-sm bg-emerald-500"></span>
+                                <span class="font-semibold">{{ getLegendText(label) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full h-[500px] flex justify-center">
+                            <Chart type="radar" :data="chartData" :options="chartOptions" class="w-full" />
                         </div>
                     </template>
                 </Card>
@@ -258,22 +266,17 @@
 
         <!-- PrimeVue Dialog Components -->
         <ConfirmDialog />
-        <Toast />
     </AppLayout>
 </template>
 
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { Radar } from 'vue-chartjs'
-import { Chart, registerables } from 'chart.js'
 import { computed, onMounted } from 'vue'
 import { route } from 'ziggy-js'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { useDirectionalBias } from '@/composables/useDirectionalBias.js'
-
-Chart.register(...registerables)
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -407,6 +410,17 @@ const calculateCategoryScores = (checklist) => {
     return scores;
 };
 
+// Helper function to generate legend text
+const getLegendText = (label) => {
+    const scores = calculateCategoryScores(props.checklist);
+    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
+    const key = label.replace(' ', '');
+    const value = scores[key];
+    const max = maxValues[key];
+    const percentage = ((value / max) * 100).toFixed(1);
+    return `${label} (${value}/${max}, ${percentage}%)`;
+};
+
 const chartData = computed(() => {
     const scores = calculateCategoryScores(props.checklist);
     const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
@@ -427,72 +441,85 @@ const chartData = computed(() => {
                 return value === max ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.2)';
             },
             borderColor: 'rgba(16, 185, 129, 1)',
-            borderWidth: 2,
+            borderWidth: 3,
             pointBackgroundColor: 'rgba(16, 185, 129, 1)',
             pointBorderColor: '#fff',
+            pointBorderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 8,
             pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgba(16, 185, 129, 1)'
+            pointHoverBorderColor: 'rgba(16, 185, 129, 1)',
+            pointHoverBorderWidth: 3
         }]
     };
 });
 
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-        r: {
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-                stepSize: 25,
-                callback: (value) => `${value}%`
-            },
-            pointLabels: {
-                font: {
-                    size: 14
-                }
-            }
-        }
-    },
-    plugins: {
-        legend: {
-            display: true,
-            position: 'top',
-            labels: {
-                font: {
-                    size: 18
+const chartOptions = computed(() => {
+    const scores = calculateCategoryScores(props.checklist);
+    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: {
+            mode: 'index'
+        },
+        scales: {
+            r: {
+                beginAtZero: true,
+                max: 100,
+                min: 0,
+                ticks: {
+                    stepSize: 25,
+                    callback: (value) => `${value}%`,
+                    font: {
+                        size: 14,
+                        weight: '500'
+                    },
+                    color: '#4B5563',
+                    backdropColor: 'transparent'
                 },
-                generateLabels: (chart) => {
-                    const data = chart.data;
-                    const scores = calculateCategoryScores(props.checklist); // Calculate scores for display
-                    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
-                    return data.labels.map((label, i) => {
-                        const key = label.replace(' ', ''); // Ensure label matches scores key
-                        const value = scores[key]; // Use corrected key to access scores
-                        const max = maxValues[key];
-                        const percentage = (value / max) * 100;
-                        return {
-                            text: `${label} (${value}/${max}, ${percentage.toFixed(1)}%)`,
-                            fillStyle: value === max ? 'gold' : 'rgba(16, 185, 129, 1)',
-                            font: { size: 18 }
-                        };
-                    });
+                pointLabels: {
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: '#1F2937',
+                    padding: 15
+                },
+                grid: {
+                    color: 'rgba(156, 163, 175, 0.3)',
+                    lineWidth: 1
+                },
+                angleLines: {
+                    color: 'rgba(156, 163, 175, 0.3)',
+                    lineWidth: 1
                 }
             }
         },
-        tooltip: {
-            callbacks: {
-                label: (context) => {
-                    const label = context.label || ''
-                    const value = context.raw || 0
-                    const scores = calculateCategoryScores(props.checklist)
-                    const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 }
-                    const max = maxValues[label]
-                    const rawScore = scores[label]
-                    return `${label}: ${rawScore}/${max} (${value.toFixed(1)}%)`
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                enabled: true,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: { size: 14, weight: 'bold' },
+                bodyFont: { size: 13 },
+                callbacks: {
+                    label: (context) => {
+                        const label = context.label || ''
+                        const value = context.raw || 0
+                        const key = label.replace(' ', '')
+                        const max = maxValues[key]
+                        const rawScore = scores[key]
+                        return `${label}: ${rawScore}/${max} (${value.toFixed(1)}%)`
+                    }
                 }
             }
         }
     }
-}
+})
 </script>
