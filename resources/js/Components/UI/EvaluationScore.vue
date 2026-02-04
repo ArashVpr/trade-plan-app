@@ -22,7 +22,8 @@
             <i class="pi pi-star-fill text-xl"></i>
         </div>
 
-        <div v-else-if="animatedScore >= 80" class="mt-4 text-emerald-600 font-medium animate-pulse">
+        <div v-else-if="animatedScore >= SCORE_THRESHOLDS.WARNING"
+            class="mt-4 text-emerald-600 font-medium animate-pulse">
             Strong Setup
         </div>
 
@@ -41,7 +42,8 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import Knob from 'primevue/knob';
+import Knob from 'primevue/knob'
+import { SCORE_THRESHOLDS, getScoreSeverity as getSeverityFromConstants } from '@/constants/evaluationScores'
 
 const props = defineProps({
     // Option 1: Pass pre-calculated score
@@ -226,14 +228,12 @@ function animateValue(target) {
 }
 
 const getScoreSeverity = (score) => {
-    if (score < 50) return 'danger'
-    if (score <= 80) return 'warning'
-    return 'success'
+    return getSeverityFromConstants(score)
 }
 
 const getScoreColor = (score) => {
-    if (score < 50) return '#ef4444' // red-500
-    if (score < 80) return '#f59e0b' // amber-500
+    if (score < SCORE_THRESHOLDS.DANGER) return '#ef4444' // red-500
+    if (score < SCORE_THRESHOLDS.WARNING) return '#f59e0b' // amber-500
     return '#10b981' // emerald-500
 }
 

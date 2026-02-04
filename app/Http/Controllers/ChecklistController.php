@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreChecklistRequest;
+use App\Http\Requests\UpdateChecklistRequest;
 use App\Models\Checklist;
 use App\Models\ChecklistWeights;
 use App\Models\Instrument;
 use App\Models\TradeEntry;
+use App\Traits\HasTradeStatistics;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ChecklistController extends Controller
 {
-    public function index(Request $request)
+    use HasTradeStatistics;
+
+    public function index(Request $request): Response
     {
         // Get user's checklist weights FIRST for bias calculation logic
         $settings = ChecklistWeights::firstOrCreate(
@@ -267,48 +274,8 @@ class ChecklistController extends Controller
 
         $checklists = $query->paginate(10);
 
-        // Calculate statistics
-        $totalChecklists = Checklist::where('user_id', Auth::id())->count();
-
-        $analysisOnly = Checklist::where('user_id', Auth::id())
-            ->doesntHave('tradeEntry')
-            ->count();
-
-        $pendingOrders = TradeEntry::whereHas('checklist', function ($q) {
-            $q->where('user_id', Auth::id());
-        })
-            ->where('trade_status', 'pending')
-            ->count();
-
-        $activePositions = TradeEntry::whereHas('checklist', function ($q) {
-            $q->where('user_id', Auth::id());
-        })
-            ->where('trade_status', 'active')
-            ->count();
-
-        $wins = TradeEntry::whereHas('checklist', function ($q) {
-            $q->where('user_id', Auth::id());
-        })
-            ->where('trade_status', 'win')
-            ->count();
-
-        $losses = TradeEntry::whereHas('checklist', function ($q) {
-            $q->where('user_id', Auth::id());
-        })
-            ->where('trade_status', 'loss')
-            ->count();
-
-        $breakeven = TradeEntry::whereHas('checklist', function ($q) {
-            $q->where('user_id', Auth::id());
-        })
-            ->where('trade_status', 'breakeven')
-            ->count();
-
-        $cancelled = TradeEntry::whereHas('checklist', function ($q) {
-            $q->where('user_id', Auth::id());
-        })
-            ->where('trade_status', 'cancelled')
-            ->count();
+        // Calculate statistics using trait
+        $stats = $this->getUserTradeStatistics();
 
         $instruments = Instrument::active()->get();
 
@@ -322,38 +289,21 @@ class ChecklistController extends Controller
             'instruments' => $instruments,
             'settings' => $settings,
             'statistics' => [
-                'total' => $totalChecklists,
-                'analysisOnly' => $analysisOnly,
-                'pending' => $pendingOrders,
-                'active' => $activePositions,
-                'wins' => $wins,
-                'losses' => $losses,
-                'breakeven' => $breakeven,
-                'cancelled' => $cancelled,
+                'total' => $stats['total_checklists'],
+                'analysisOnly' => $stats['analysis_only'],
+                'pending' => $stats['pending'],
+                'active' => $stats['active'],
+                'wins' => $stats['wins'],
+                'losses' => $stats['losses'],
+                'breakeven' => $stats['breakeven'],
+                'cancelled' => $stats['cancelled'],
             ],
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreChecklistRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'zone_qualifiers' => 'array',
-            'technicals' => 'array',
-            'fundamentals' => 'array',
-            'score' => 'integer|min:0|max:100',
-            'symbol' => 'nullable|string|max:255',
-            // Order entry - now optional
-            'entry_date' => 'nullable|date',
-            'position_type' => 'nullable|in:Long,Short',
-            'entry_price' => 'nullable|numeric',
-            'stop_price' => 'nullable|numeric',
-            'target_price' => 'nullable|numeric',
-            'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
-            'rrr' => 'nullable|numeric',
-            'notes' => 'nullable|string',
-            'screenshots' => 'nullable|array|max:5',
-            'screenshots.*' => 'file|image|max:5120', // Max 5MB per image
-        ]);
+        $validated = $request->validated();
 
         // Wrap in transaction to ensure data consistency
         return DB::transaction(function () use ($validated) {
@@ -367,20 +317,20 @@ class ChecklistController extends Controller
                 'symbol' => $validated['symbol'],
             ]);
 
-            // Create trade entry if ANY order field or screenshots are provided
-            $hasTradeDetails = ($validated['entry_date'] ?? null) ||
-                ($validated['position_type'] ?? null) ||
-                ($validated['entry_price'] ?? null) ||
-                ($validated['stop_price'] ?? null) ||
-                ($validated['target_price'] ?? null) ||
-                ($validated['notes'] ?? null) ||
-                ($validated['screenshots'] ?? null);
+            // Only create TradeEntry if ALL required order fields are present
+            // Required fields: entry_date, position_type, entry_price, stop_price, target_price
+            $hasAllRequiredFields =
+                ! empty($validated['entry_date']) &&
+                ! empty($validated['position_type']) &&
+                isset($validated['entry_price']) &&
+                isset($validated['stop_price']) &&
+                isset($validated['target_price']);
 
-            if ($hasTradeDetails) {
+            if ($hasAllRequiredFields) {
                 $tradeEntryData = [
                     'user_id' => Auth::id(),
                     'checklist_id' => $checklist->id,
-                    'entry_date' => $validated['entry_date'] ?? null,
+                    'entry_date' => $validated['entry_date'],
                     'position_type' => $validated['position_type'] ?? null,
                     'entry_price' => $validated['entry_price'] ?? null,
                     'stop_price' => $validated['stop_price'] ?? null,
@@ -421,7 +371,10 @@ class ChecklistController extends Controller
         });
     }
 
-    public function show(Checklist $checklist)
+    /**
+     * Display the specified checklist.
+     */
+    public function show(Checklist $checklist): Response
     {
         // Fetch the entry tied to this specific checklist
         $tradeEntry = TradeEntry::where('checklist_id', $checklist->id)->first();
@@ -440,7 +393,10 @@ class ChecklistController extends Controller
         ]);
     }
 
-    public function edit(Checklist $checklist)
+    /**
+     * Show the form for editing the specified checklist.
+     */
+    public function edit(Checklist $checklist): Response
     {
 
         $settings = ChecklistWeights::firstOrCreate(
@@ -458,7 +414,10 @@ class ChecklistController extends Controller
         ]);
     }
 
-    public function update(Request $request, Checklist $checklist)
+    /**
+     * Update the specified checklist in storage.
+     */
+    public function update(UpdateChecklistRequest $request, Checklist $checklist): RedirectResponse
     {
         try {
             if ($checklist->user_id !== Auth::id()) {
@@ -484,26 +443,9 @@ class ChecklistController extends Controller
                 $existingScreenshots = json_decode($existingScreenshots, true);
             }
 
-            $validated = $request->validate([
-                'zone_qualifiers' => 'nullable',
-                'technicals' => 'nullable',
-                'fundamentals' => 'nullable',
-                'score' => 'required|integer|min:0|max:100',
-                // Order entry - now optional for updates too
-                'entry_date' => 'nullable|date',
-                'position_type' => 'nullable|in:Long,Short',
-                'entry_price' => 'nullable|numeric',
-                'stop_price' => 'nullable|numeric',
-                'target_price' => 'nullable|numeric',
-                'trade_status' => 'nullable|in:pending,active,win,loss,breakeven,cancelled',
-                'rrr' => 'nullable|numeric',
-                'notes' => 'nullable|string',
-                'screenshots' => 'nullable|array|max:5',
-                'screenshots.*' => 'nullable|file|image|max:5120', // Max 5MB per image
-                'existing_screenshots' => 'nullable',
-            ]);
-
             // Update both Checklist and its TradeEntry atomically
+            $validated = $request->validated();
+
             DB::transaction(function () use ($checklist, $validated, $technicals, $fundamentals, $zoneQualifiers, $existingScreenshots) {
                 // Update checklist fields (excluding symbol)
                 $checklistData = [];
@@ -576,6 +518,7 @@ class ChecklistController extends Controller
                             }
                         }
                     }
+
                     $tradeData['screenshot_paths'] = $screenshotPaths;
 
                     // Only include trade_status if it has a value, otherwise let DB default to 'pending'
@@ -614,14 +557,17 @@ class ChecklistController extends Controller
         }
     }
 
-    public function destroy(Checklist $checklist)
+    /**
+     * Remove the specified checklist from storage.
+     */
+    public function destroy(Checklist $checklist): RedirectResponse
     {
         $checklist->delete();
 
         return to_route('checklists.index');
     }
 
-    public function checklistWeights(Request $request)
+    public function checklistWeights(Request $request): Response
     {
         $settings = ChecklistWeights::firstOrCreate(
             ['user_id' => Auth::id()],

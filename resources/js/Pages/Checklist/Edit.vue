@@ -54,7 +54,7 @@
                                     fluid iconDisplay="input" :invalid="!!$errors.entry_date" />
                                 <Message v-if="$errors.entry_date" severity="error" :closable="false">{{
                                     $errors.entry_date
-                                }}</Message>
+                                    }}</Message>
                             </div>
                             <div class="field">
                                 <label class="block text-sm font-medium mb-2">Created</label>
@@ -481,10 +481,21 @@ const submitForm = (event) => {
     // Create FormData manually to properly handle files + nested objects
     const formData = new FormData()
 
-    // Add all form fields
-    formData.append('zone_qualifiers', JSON.stringify(form.zone_qualifiers))
-    formData.append('technicals', JSON.stringify(form.technicals))
-    formData.append('fundamentals', JSON.stringify(form.fundamentals))
+    // Add zone_qualifiers as individual array items (Laravel will receive as array)
+    if (form.zone_qualifiers && form.zone_qualifiers.length > 0) {
+        form.zone_qualifiers.forEach((qualifier, index) => {
+            formData.append(`zone_qualifiers[${index}]`, qualifier)
+        })
+    }
+
+    // Add technicals and fundamentals as JSON (they're objects)
+    if (form.technicals) {
+        formData.append('technicals', JSON.stringify(form.technicals))
+    }
+    if (form.fundamentals) {
+        formData.append('fundamentals', JSON.stringify(form.fundamentals))
+    }
+
     formData.append('score', form.score)
     formData.append('notes', form.notes)
     formData.append('entry_date', form.entry_date)
@@ -529,9 +540,9 @@ const zoneQualifiers = [
 ]
 
 const form = useForm({
-    zone_qualifiers: [...props.checklist.zone_qualifiers],
-    technicals: { ...props.checklist.technicals },
-    fundamentals: { ...props.checklist.fundamentals },
+    zone_qualifiers: props.checklist.zone_qualifiers ? [...props.checklist.zone_qualifiers] : [],
+    technicals: props.checklist.technicals ? { ...props.checklist.technicals } : null,
+    fundamentals: props.checklist.fundamentals ? { ...props.checklist.fundamentals } : null,
     score: props.checklist.score,
     notes: props.tradeEntry?.notes || '',
     entry_date: props.tradeEntry?.entry_date || '',
@@ -547,12 +558,12 @@ const form = useForm({
 
 const canSubmit = computed(() => {
     // First check if core checklist fields are valid
-    const isValid = form.technicals.location &&
-        form.technicals.direction &&
-        form.fundamentals.valuation &&
-        form.fundamentals.seasonalConfluence &&
-        form.fundamentals.nonCommercials &&
-        form.fundamentals.cotIndex &&
+    const isValid = form.technicals?.location &&
+        form.technicals?.direction &&
+        form.fundamentals?.valuation &&
+        form.fundamentals?.seasonalConfluence &&
+        form.fundamentals?.nonCommercials &&
+        form.fundamentals?.cotIndex &&
         form.zone_qualifiers.length > 0
 
     if (!isValid) return false

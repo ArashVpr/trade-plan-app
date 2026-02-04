@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\UpdateChecklistWeightsRequest;
 use App\Models\ChecklistWeights;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ChecklistWeightsController extends Controller
 {
-    public function index()
+    /**
+     * Display the checklist weights configuration.
+     */
+    public function index(): Response
     {
         // Retrieve default attribute values from the model
         $defaults = (new ChecklistWeights)->getAttributes();
@@ -26,26 +31,14 @@ class ChecklistWeightsController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    /**
+     * Update the checklist weights in storage.
+     */
+    public function update(UpdateChecklistWeightsRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'zone_fresh_weight' => 'required|integer|min:0|max:100',
-            'zone_original_weight' => 'required|integer|min:0|max:100',
-            'zone_flip_weight' => 'required|integer|min:0|max:100',
-            'zone_lol_weight' => 'required|integer|min:0|max:100',
-            'zone_min_profit_margin_weight' => 'required|integer|min:0|max:100',
-            'zone_big_brother_weight' => 'required|integer|min:0|max:100',
-            'technical_very_exp_chp_weight' => 'required|integer|min:0|max:100',
-            'technical_exp_chp_weight' => 'required|integer|min:0|max:100',
-            'technical_direction_impulsive_weight' => 'required|integer|min:0|max:100',
-            'technical_direction_correction_weight' => 'required|integer|min:0|max:100',
-            'fundamental_valuation_weight' => 'required|integer|min:0|max:100',
-            'fundamental_seasonal_weight' => 'required|integer|min:0|max:100',
-            'fundamental_cot_index_weight' => 'required|integer|min:0|max:100',
-            'fundamental_noncommercial_divergence_weight' => 'required|integer|min:0|max:100',
-        ]);
+        $validated = $request->validated();
 
-        $weights = ChecklistWeights::updateOrCreate(
+        ChecklistWeights::updateOrCreate(
             ['user_id' => Auth::id()],
             $validated
         );

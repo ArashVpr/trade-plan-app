@@ -71,12 +71,12 @@
                             <!-- Zone Qualifiers -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">
-                                    Zone Qualifiers ({{ checklist.zone_qualifiers.length }})
+                                    Zone Qualifiers ({{ checklist.zone_qualifiers?.length ?? 0 }})
                                 </label>
                                 <div class="flex flex-wrap gap-2">
-                                    <Chip v-for="qualifier in checklist.zone_qualifiers" :key="qualifier"
+                                    <Chip v-for="qualifier in checklist.zone_qualifiers || []" :key="qualifier"
                                         :label="qualifier" class="mb-1" />
-                                    <span v-if="checklist.zone_qualifiers.length === 0"
+                                    <span v-if="!checklist.zone_qualifiers || checklist.zone_qualifiers.length === 0"
                                         class="text-gray-500 dark:text-gray-400 text-sm">
                                         None selected
                                     </span>
@@ -388,23 +388,27 @@ const confirmDelete = () => {
 const calculateCategoryScores = (checklist) => {
     const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
     let scores = {
-        ZoneQualifiers: Math.min(checklist.zone_qualifiers.length * 5, maxValues.ZoneQualifiers),
+        ZoneQualifiers: Math.min((checklist.zone_qualifiers?.length ?? 0) * 5, maxValues.ZoneQualifiers),
         Technicals: 0,
         Fundamentals: 0
     };
 
     // Technicals score
-    scores.Technicals += ['Very Cheap', 'Very Expensive'].includes(checklist.technicals.location) ? 12 :
-        ['Cheap', 'Expensive'].includes(checklist.technicals.location) ? 7 : 0;
-    scores.Technicals += checklist.technicals.direction === 'Correction' ? 6 :
-        checklist.technicals.direction === 'Impulsion' ? 12 : 0;
+    if (checklist.technicals) {
+        scores.Technicals += ['Very Cheap', 'Very Expensive'].includes(checklist.technicals.location) ? 12 :
+            ['Cheap', 'Expensive'].includes(checklist.technicals.location) ? 7 : 0;
+        scores.Technicals += checklist.technicals.direction === 'Correction' ? 6 :
+            checklist.technicals.direction === 'Impulsion' ? 12 : 0;
+    }
     scores.Technicals = Math.min(scores.Technicals, maxValues.Technicals);
 
     // Fundamentals score
-    scores.Fundamentals += ['Undervalued', 'Overvalued'].includes(checklist.fundamentals.valuation) ? 13 : 0;
-    scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.seasonalConfluence) ? 6 : 0;
-    scores.Fundamentals += ['Bullish Divergence', 'Bearish Divergence'].includes(checklist.fundamentals.nonCommercials) ? 15 : 0;
-    scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.cotIndex) ? 12 : 0;
+    if (checklist.fundamentals) {
+        scores.Fundamentals += ['Undervalued', 'Overvalued'].includes(checklist.fundamentals.valuation) ? 13 : 0;
+        scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.seasonalConfluence) ? 6 : 0;
+        scores.Fundamentals += ['Bullish Divergence', 'Bearish Divergence'].includes(checklist.fundamentals.nonCommercials) ? 15 : 0;
+        scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.cotIndex) ? 12 : 0;
+    }
     scores.Fundamentals = Math.min(scores.Fundamentals, maxValues.Fundamentals);
 
     return scores;
