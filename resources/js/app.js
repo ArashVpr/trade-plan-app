@@ -238,6 +238,20 @@ const TradingTheme = definePreset(Aura, {
             color: '{text.color}',
             disabledColor: '{text.mutedColor}',
             placeholderColor: '{text.mutedColor}'
+          },
+          overlay: {
+            background: '{surface.0}',
+            borderColor: '{border.color}',
+            color: '{text.color}'
+          },
+          option: {
+            focusBackground: '{surface.100}',
+            selectedBackground: '{primary.50}',
+            selectedFocusBackground: '{primary.100}',
+            color: '{text.color}',
+            focusColor: '{text.hoverColor}',
+            selectedColor: '{primary.700}',
+            selectedFocusColor: '{primary.700}'
           }
         },
         dark: {
@@ -249,6 +263,20 @@ const TradingTheme = definePreset(Aura, {
             color: '{text.color}',
             disabledColor: '{text.mutedColor}',
             placeholderColor: '{text.mutedColor}'
+          },
+          overlay: {
+            background: '{surface.0}',
+            borderColor: '{border.color}',
+            color: '{text.color}'
+          },
+          option: {
+            focusBackground: '{surface.100}',
+            selectedBackground: 'rgba(96, 165, 250, 0.16)',
+            selectedFocusBackground: 'rgba(96, 165, 250, 0.24)',
+            color: '{text.color}',
+            focusColor: '{text.hoverColor}',
+            selectedColor: '{primary.400}',
+            selectedFocusColor: '{primary.300}'
           }
         }
       }
@@ -267,6 +295,28 @@ const TradingTheme = definePreset(Aura, {
             background: '{surface.0}',
             borderColor: '{content.borderColor}',
             color: '{text.color}'
+          }
+        }
+      }
+    },
+    checkbox: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{surface.0}',
+            borderColor: '{surface.300}',
+            hoverBorderColor: '{primary.color}',
+            checkedBackground: '{primary.color}',
+            checkedBorderColor: '{primary.color}'
+          }
+        },
+        dark: {
+          root: {
+            background: '{surface.100}',
+            borderColor: '{surface.400}',
+            hoverBorderColor: '{primary.color}',
+            checkedBackground: '{primary.color}',
+            checkedBorderColor: '{primary.color}'
           }
         }
       }

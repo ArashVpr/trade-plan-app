@@ -48,7 +48,7 @@
                         <div class="p-4">
                             <i class="pi pi-star text-4xl text-yellow-600 mb-3"></i>
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ stats.overview.avg_score
-                            }}</h3>
+                                }}</h3>
                             <p class="text-gray-600 dark:text-gray-400">Average Score</p>
                         </div>
                     </template>
@@ -67,12 +67,14 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <Chart
-                                v-if="weeklyTrendData && weeklyTrendData.datasets && weeklyTrendData.datasets.length > 0"
-                                type="line" :data="weeklyTrendData" :options="chartOptions" class="w-full h-64" />
-                            <div v-else class="flex items-center justify-center h-64 text-gray-400">
-                                No data available
-                            </div>
+                            <ChartSkeleton :loading="chartsLoading" type="line" height="16rem">
+                                <Chart
+                                    v-if="weeklyTrendData && weeklyTrendData.datasets && weeklyTrendData.datasets.length > 0"
+                                    type="line" :data="weeklyTrendData" :options="chartOptions" class="w-full h-64" />
+                                <EmptyState v-else title="No activity data"
+                                    description="Create some checklists to see your weekly activity trend here."
+                                    icon="pi pi-chart-line" variant="default" />
+                            </ChartSkeleton>
                         </div>
                     </template>
                 </Card>
@@ -86,13 +88,15 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <Chart
-                                v-if="scoreDistributionData && scoreDistributionData.datasets && scoreDistributionData.datasets.length > 0"
-                                type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
-                                class="w-full h-64" />
-                            <div v-else class="flex items-center justify-center h-64 text-gray-400">
-                                No data available
-                            </div>
+                            <ChartSkeleton :loading="chartsLoading" type="doughnut" height="16rem">
+                                <Chart
+                                    v-if="scoreDistributionData && scoreDistributionData.datasets && scoreDistributionData.datasets.length > 0"
+                                    type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
+                                    class="w-full h-64" />
+                                <EmptyState v-else title="No score data"
+                                    description="Complete some checklists to see score distribution."
+                                    icon="pi pi-chart-pie" variant="default" />
+                            </ChartSkeleton>
                         </div>
                     </template>
                 </Card>
@@ -115,7 +119,7 @@
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900 dark:text-blue-300">{{
                                             slotProps.data.symbol
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -124,7 +128,7 @@
                                         <ProgressBar :value="slotProps.data.avg_score" :showValue="false"
                                             class="mb-1" />
                                         <small class="text-gray-600 dark:text-gray-400">{{ slotProps.data.avg_score
-                                        }}/100</small>
+                                            }}/100</small>
                                     </template>
                                 </Column>
                             </DataTable>
@@ -234,7 +238,7 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                                }}%</span>
+                                                            }}%</span>
                                                         </div>
                                                     </template>
                                                 </Column>
@@ -669,14 +673,14 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                        }}/100</span>
+                                            }}/100</span>
                                     </div>
                                 </template>
                             </Column>
                             <Column field="created_at" header="Created">
                                 <template #body="slotProps">
                                     <small class="text-gray-600 dark:text-gray-400">{{ slotProps.data.created_at
-                                    }}</small>
+                                        }}</small>
                                 </template>
                             </Column>
                             <Column field="has_trade_entry" header="Status">
@@ -710,19 +714,29 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
 import { useDirectionalBias } from '@/composables/useDirectionalBias'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import ChartSkeleton from '@/Components/UI/ChartSkeleton.vue'
+import EmptyState from '@/Components/UI/EmptyState.vue'
 
 // Toast setup
 const toast = useToast()
 const page = usePage()
 
+// Chart loading state - simulates initial load delay
+const chartsLoading = ref(true)
+
 // Show toast for flash messages
 onMounted(() => {
+    // Simulate chart initialization delay for smoother UX
+    setTimeout(() => {
+        chartsLoading.value = false
+    }, 500)
+
     if (page.props.flash?.success) {
         toast.add({
             severity: 'success',

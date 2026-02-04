@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+    <div class="min-h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-200">
         <!-- Sidebar Drawer -->
         <Drawer v-model:visible="sidebarVisible" position="left">
             <template #container="{ closeCallback }">
@@ -32,31 +32,33 @@
                                 </div>
                                 <ul class="list-none p-0 m-0 overflow-hidden">
                                     <li>
-                                        <a v-ripple @click="navigateTo(route('dashboard'))" :class="[
-                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('dashboard')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
-                                        ]">
+                                        <Link :href="route('dashboard')" @click="sidebarVisible = false" prefetch
+                                            :class="[
+                                                'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                                isActive(route('dashboard')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                            ]">
                                             <i class="pi pi-home mr-2"></i>
                                             <span class="font-medium">Dashboard</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li>
-                                        <a v-ripple @click="navigateTo(route('home'))" :class="[
+                                        <Link :href="route('home')" @click="sidebarVisible = false" prefetch :class="[
                                             'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
                                             isActive(route('home')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
                                         ]">
                                             <i class="pi pi-plus mr-2"></i>
                                             <span class="font-medium">New Checklist</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li>
-                                        <a v-ripple @click="navigateTo(route('checklists.index'))" :class="[
-                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('checklists.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
-                                        ]">
+                                        <Link :href="route('checklists.index')" @click="sidebarVisible = false" prefetch
+                                            :class="[
+                                                'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                                isActive(route('checklists.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                            ]">
                                             <i class="pi pi-history mr-2"></i>
                                             <span class="font-medium">History</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li>
                                         <a v-ripple
@@ -86,31 +88,34 @@
                                 </div>
                                 <ul class="list-none p-0 m-0 overflow-hidden">
                                     <li>
-                                        <a v-ripple @click="navigateTo(route('profile.index'))" :class="[
-                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('profile.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
-                                        ]">
+                                        <Link :href="route('profile.index')" @click="sidebarVisible = false" prefetch
+                                            :class="[
+                                                'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                                isActive(route('profile.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                            ]">
                                             <i class="pi pi-user mr-2"></i>
                                             <span class="font-medium">Profile</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li>
-                                        <a v-ripple @click="navigateTo(route('checklist-weights.index'))" :class="[
-                                            'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
-                                            isActive(route('checklist-weights.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
-                                        ]">
+                                        <Link :href="route('checklist-weights.index')" @click="sidebarVisible = false"
+                                            prefetch :class="[
+                                                'flex items-center cursor-pointer p-4 rounded duration-150 transition-colors p-ripple',
+                                                isActive(route('checklist-weights.index')) ? 'bg-primary text-primary-contrast' : 'text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800'
+                                            ]">
                                             <i class="pi pi-sliders-h mr-2"></i>
                                             <span class="font-medium">Checklist Weights</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li>
-                                        <form @submit.prevent="logout" class="w-full">
-                                            <button type="submit"
-                                                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple w-full text-left">
+                                        <Link :href="route('logout')" method="post" as="button" class="w-full text-left"
+                                            @click="sidebarVisible = false">
+                                            <div
+                                                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple">
                                                 <i class="pi pi-sign-out mr-2"></i>
                                                 <span class="font-medium">Logout</span>
-                                            </button>
-                                        </form>
+                                            </div>
+                                        </Link>
                                     </li>
                                 </ul>
                             </li>
@@ -161,7 +166,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { usePage, router } from '@inertiajs/vue3'
+import { usePage, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import ThemeToggle from '@/Components/UI/ThemeToggle.vue'
 import { useTheme } from '@/composables/useTheme'
@@ -174,19 +179,6 @@ const { initTheme } = useTheme()
 onMounted(() => {
     initTheme()
 })
-
-// Helper function to navigate and close sidebar
-const navigateTo = (url) => {
-    if (url && !url.includes('analytics')) {
-        router.get(url)  // SPA navigation with Inertia.js
-        sidebarVisible.value = false // Close sidebar after navigation
-    }
-}
-
-// Logout function
-const logout = () => {
-    router.post(route('logout'))
-}
 
 // Helper function to check if route is active
 const isActive = (routeUrl) => {

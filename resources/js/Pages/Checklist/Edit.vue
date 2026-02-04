@@ -54,7 +54,7 @@
                                     fluid iconDisplay="input" :invalid="!!$errors.entry_date" />
                                 <Message v-if="$errors.entry_date" severity="error" :closable="false">{{
                                     $errors.entry_date
-                                    }}</Message>
+                                }}</Message>
                             </div>
                             <div class="field">
                                 <label class="block text-sm font-medium mb-2">Created</label>
@@ -331,7 +331,7 @@
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max {{
                                                     Math.max(0,
                                                         5 -
-                                                    existingImages.length) }} more images, 5MB each</p>
+                                                        existingImages.length) }} more images, 5MB each</p>
                                             </div>
                                         </template>
                                     </FileUpload>

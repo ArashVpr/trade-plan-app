@@ -74,12 +74,9 @@
                             <div class="flex flex-col gap-2">
                                 <label class="font-medium">Profile Picture</label>
                                 <div class="flex items-center gap-4">
-                                    <Avatar 
-                                        :image="avatarSrc || undefined" 
+                                    <Avatar :image="avatarSrc || undefined"
                                         :label="!avatarSrc ? user.name.charAt(0).toUpperCase() : undefined"
-                                        size="xlarge" 
-                                        shape="circle" 
-                                        class="border" />
+                                        size="xlarge" shape="circle" class="border" />
                                     <div>
                                         <FileUpload mode="basic" name="avatar" accept="image/*" :maxFileSize="2000000"
                                             @select="onAvatarSelect" chooseLabel="Change Picture"

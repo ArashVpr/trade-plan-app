@@ -85,7 +85,7 @@
                                         <div class="text-right">
                                             <div class="font-bold text-green-600">{{ technicalWeightTotal }} </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">{{ technicalPercentage
-                                                }}%</div>
+                                            }}%</div>
                                         </div>
                                     </div>
 
@@ -165,7 +165,7 @@
                                         <Slider v-model="form.zone_flip_weight" :min="0" :max="100" :step="1"
                                             class="w-full" />
                                         <small v-if="errors.zone_flip_weight" class="p-error">{{ errors.zone_flip_weight
-                                        }}</small>
+                                            }}</small>
                                     </div>
 
                                     <div class="flex flex-col gap-2">
@@ -178,7 +178,7 @@
                                         <Slider v-model="form.zone_lol_weight" :min="0" :max="100" :step="1"
                                             class="w-full" />
                                         <small v-if="errors.zone_lol_weight" class="p-error">{{ errors.zone_lol_weight
-                                        }}</small>
+                                            }}</small>
                                     </div>
 
                                     <div class="flex flex-col gap-2">

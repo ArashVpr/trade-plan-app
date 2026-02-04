@@ -1,24 +1,47 @@
 <template>
-    <div class="evaluation-score">
-        <h3 class="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ title }}</h3>
-        <Tag :value="`${calculatedScore}/100`" :severity="getScoreSeverity(calculatedScore)" :class="tagClass" />
-        <div v-if="calculatedScore === 100 && showPerfectMessage"
-            class="text-yellow-500 mt-3 font-bold text-lg text-center">
-            ★ All Stars Aligned ★
+    <div class="evaluation-score flex flex-col items-center animate-fade-in">
+        <h3
+            class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-blue-600 dark:from-blue-300 dark:to-blue-100 mb-6 font-display uppercase tracking-wide">
+            {{ title }}
+        </h3>
+
+        <div class="relative group">
+            <!-- Animate the Knob value -->
+            <Knob :model-value="animatedScore" :min="0" :max="100" :valueColor="getScoreColor(animatedScore)" readonly
+                :size="140" valueTemplate="{value}%" :strokeWidth="8" rangeColor="var(--p-surface-200)"
+                class="transition-transform duration-500 group-hover:scale-105" />
+            <!-- Glow Effect -->
+            <div class="absolute inset-0 rounded-full blur-2xl opacity-30 -z-10 transition-colors duration-500"
+                :style="{ backgroundColor: getScoreColor(animatedScore) }"></div>
         </div>
 
-        <!-- Score breakdown (optional) -->
-        <div v-if="showBreakdown && breakdown" class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-            <div v-for="(item, key) in breakdown" :key="key" class="flex justify-between">
-                <span>{{ item.label }}:</span>
-                <span class="font-medium">{{ item.value }}</span>
+        <div v-if="animatedScore >= 100 && showPerfectMessage"
+            class="mt-6 font-bold text-lg text-center flex items-center justify-center gap-2 animate-bounce text-amber-500">
+            <i class="pi pi-star-fill text-xl"></i>
+            <span>All System Green!</span>
+            <i class="pi pi-star-fill text-xl"></i>
+        </div>
+
+        <div v-else-if="animatedScore >= 80" class="mt-4 text-emerald-600 font-medium animate-pulse">
+            Strong Setup
+        </div>
+
+        <!-- Score breakdown -->
+        <div v-if="showBreakdown && breakdown"
+            class="mt-8 w-full max-w-sm text-sm text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <h4 class="font-semibold mb-3 text-xs uppercase tracking-wider text-slate-500">Score Audit</h4>
+            <div v-for="(item, key) in breakdown" :key="key"
+                class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                <span>{{ item.label }}</span>
+                <Badge :value="item.value" :severity="item.severity" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import Knob from 'primevue/knob';
 
 const props = defineProps({
     // Option 1: Pass pre-calculated score
@@ -92,6 +115,10 @@ const zoneQualifierNames = [
     'Minimum 1:2 Profit Margin',
     'Big Brother Coverage'
 ]
+
+// Animated Score State
+const animatedScore = ref(0)
+const animationDuration = 800 // ms
 
 const calculatedScore = computed(() => {
     // If pre-calculated score is provided, use it
@@ -171,24 +198,43 @@ const calculatedScore = computed(() => {
     return max > 0 ? Math.round((raw / max) * 100) : 0
 })
 
-const tagClass = computed(() => {
-    const classes = ['font-bold']
+// Watch for score changes and animate
+watch(calculatedScore, (newValue) => {
+    animateValue(newValue)
+}, { immediate: true })
 
-    if (props.size === 'small') {
-        classes.push('text-lg px-3 py-1')
-    } else if (props.size === 'large') {
-        classes.push('text-3xl px-6 py-3')
-    } else {
-        classes.push('text-2xl px-4 py-2')
+function animateValue(target) {
+    const start = animatedScore.value
+    const change = target - start
+    const startTime = performance.now()
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / animationDuration, 1)
+
+        // Easing function: easeOutQuart
+        const ease = 1 - Math.pow(1 - progress, 4)
+
+        animatedScore.value = Math.round(start + (change * ease))
+
+        if (progress < 1) {
+            requestAnimationFrame(update)
+        }
     }
 
-    return classes.join(' ')
-})
+    requestAnimationFrame(update)
+}
 
 const getScoreSeverity = (score) => {
     if (score < 50) return 'danger'
     if (score <= 80) return 'warning'
     return 'success'
+}
+
+const getScoreColor = (score) => {
+    if (score < 50) return '#ef4444' // red-500
+    if (score < 80) return '#f59e0b' // amber-500
+    return '#10b981' // emerald-500
 }
 
 // Expose the calculated score for parent components
@@ -198,16 +244,20 @@ defineExpose({
 </script>
 
 <style scoped>
-/* Custom ProgressBar colors */
-:deep(.progress-danger .p-progressbar-value) {
-    background: #dc2626;
+/* Custom animations if not in global css */
+@keyframes fade-in-up {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-:deep(.progress-warning .p-progressbar-value) {
-    background: #eab308;
-}
-
-:deep(.progress-success .p-progressbar-value) {
-    background: #16a34a;
+.animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
 }
 </style>

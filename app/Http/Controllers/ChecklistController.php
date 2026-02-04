@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Checklist;
 use App\Models\ChecklistWeights;
+use App\Models\Instrument;
+use App\Models\TradeEntry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use App\Models\TradeEntry;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Arr;
-use App\Models\Instrument;
-
 
 class ChecklistController extends Controller
 {
@@ -35,12 +34,12 @@ class ChecklistController extends Controller
 
         // --- PREPARE BIAS CALCULATION SQL (Used in Search & Filters) ---
         // Construct the weighted sum SQL expression based on user settings
-        $techVeryExpChp = (int)$settings->technical_very_exp_chp_weight;
-        $techExpChp = (int)$settings->technical_exp_chp_weight;
-        $fundValuation = (int)$settings->fundamental_valuation_weight;
-        $fundSeasonal = (int)$settings->fundamental_seasonal_weight;
-        $fundNonComm = (int)$settings->fundamental_noncommercial_divergence_weight;
-        $fundCot = (int)$settings->fundamental_cot_index_weight;
+        $techVeryExpChp = (int) $settings->technical_very_exp_chp_weight;
+        $techExpChp = (int) $settings->technical_exp_chp_weight;
+        $fundValuation = (int) $settings->fundamental_valuation_weight;
+        $fundSeasonal = (int) $settings->fundamental_seasonal_weight;
+        $fundNonComm = (int) $settings->fundamental_noncommercial_divergence_weight;
+        $fundCot = (int) $settings->fundamental_cot_index_weight;
 
         // Calculate maxSum for confidence percentage
         $maxTechWeight = max($techVeryExpChp, $techExpChp);
@@ -95,14 +94,14 @@ class ChecklistController extends Controller
             ->where('checklists.user_id', Auth::id());
 
         // Apply search filter
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where(function ($q) use ($search, $weightedSumSql, $confidenceSql) {
                 // 1. Symbol Search
                 $q->where('checklists.symbol', 'LIKE', "%{$search}%");
 
                 // 2. Score Search (if numeric)
                 if (is_numeric($search)) {
-                    $q->orWhere('checklists.score', (int)$search);
+                    $q->orWhere('checklists.score', (int) $search);
                 }
 
                 // 3. Trade Entry Fields
@@ -123,27 +122,27 @@ class ChecklistController extends Controller
                     $q->orWhereRaw("{$weightedSumSql} > 0 AND {$confidenceSql} <= 50 AND {$confidenceSql} > 20");
                 }
                 // "Lean Sell" specific
-                else if (str_contains($term, 'lean sell')) {
+                elseif (str_contains($term, 'lean sell')) {
                     $q->orWhereRaw("{$weightedSumSql} < 0 AND {$confidenceSql} <= 50 AND {$confidenceSql} > 20");
                 }
                 // Generic "Buy" (includes Lean, Strong, Normal)
-                else if (str_contains($term, 'buy')) {
+                elseif (str_contains($term, 'buy')) {
                     $q->orWhereRaw("{$weightedSumSql} > 0");
                 }
                 // Generic "Sell" (includes Lean, Strong, Normal)
-                else if (str_contains($term, 'sell')) {
+                elseif (str_contains($term, 'sell')) {
                     // Avoid overlapping with "Close" or similar if needed, but "sell" is distinct enough usually
                     $q->orWhereRaw("{$weightedSumSql} < 0");
                 }
                 // "Neutral"
-                else if (str_contains($term, 'neutral')) {
+                elseif (str_contains($term, 'neutral')) {
                     $q->orWhereRaw("{$confidenceSql} <= 20");
                 }
             });
         }
 
         // Apply bias filter using complex weighted logic
-        if (!empty($biasFilters)) {
+        if (! empty($biasFilters)) {
             $query->where(function ($q) use ($biasFilters, $weightedSumSql, $confidenceSql) {
                 foreach ($biasFilters as $bias) {
                     switch ($bias) {
@@ -169,16 +168,15 @@ class ChecklistController extends Controller
             });
         }
 
-
         // Apply position filter
-        if (!empty($positionFilters)) {
+        if (! empty($positionFilters)) {
             $query->leftJoin('trade_entries', 'checklists.id', '=', 'trade_entries.checklist_id')
                 ->select('checklists.*')
                 ->whereIn('trade_entries.position_type', $positionFilters);
         }
 
         // Apply trade status filter
-        if (!empty($tradeStatusFilters)) {
+        if (! empty($tradeStatusFilters)) {
             if (in_array('analysis_only', $tradeStatusFilters)) {
                 // For analysis_only, we need rows where trade_entry doesn't exist
                 $hasOtherStatuses = count(array_diff($tradeStatusFilters, ['analysis_only'])) > 0;
@@ -335,6 +333,7 @@ class ChecklistController extends Controller
             ],
         ]);
     }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -357,7 +356,7 @@ class ChecklistController extends Controller
         ]);
 
         // Wrap in transaction to ensure data consistency
-        return DB::transaction(function () use ($validated, $request) {
+        return DB::transaction(function () use ($validated) {
             // Persist checklist and capture its ID
             $checklist = Checklist::create([
                 'user_id' => Auth::id(),
@@ -421,6 +420,7 @@ class ChecklistController extends Controller
             return to_route('checklists.index')->with('success', 'Checklist created successfully!');
         });
     }
+
     public function show(Checklist $checklist)
     {
         // Fetch the entry tied to this specific checklist
@@ -439,6 +439,7 @@ class ChecklistController extends Controller
             'settings' => $settings,
         ]);
     }
+
     public function edit(Checklist $checklist)
     {
 
@@ -456,6 +457,7 @@ class ChecklistController extends Controller
             'instruments' => $instruments,
         ]);
     }
+
     public function update(Request $request, Checklist $checklist)
     {
         try {
@@ -502,7 +504,7 @@ class ChecklistController extends Controller
             ]);
 
             // Update both Checklist and its TradeEntry atomically
-            DB::transaction(function () use ($checklist, $validated, $request, $technicals, $fundamentals, $zoneQualifiers, $existingScreenshots) {
+            DB::transaction(function () use ($checklist, $validated, $technicals, $fundamentals, $zoneQualifiers, $existingScreenshots) {
                 // Update checklist fields (excluding symbol)
                 $checklistData = [];
 
@@ -519,7 +521,7 @@ class ChecklistController extends Controller
                     $checklistData['score'] = $validated['score'];
                 }
 
-                if (!empty($checklistData)) {
+                if (! empty($checklistData)) {
                     $checklist->update($checklistData);
                 }
 
@@ -542,12 +544,12 @@ class ChecklistController extends Controller
                         'stop_price',
                         'target_price',
                         'rrr',
-                        'notes'
+                        'notes',
                     ]);
 
                     // Handle multiple screenshot uploads
                     $screenshotPaths = $existingScreenshots ?? [];
-                    if (!is_array($screenshotPaths)) {
+                    if (! is_array($screenshotPaths)) {
                         $screenshotPaths = [];
                     }
 
@@ -565,8 +567,9 @@ class ChecklistController extends Controller
                                 } catch (\Exception $e) {
                                     Log::error('Screenshot storage error: ' . $e->getMessage(), [
                                         'checklist_id' => $checklist->id,
-                                        'error' => $e
+                                        'error' => $e,
                                     ]);
+
                                     // Continue with other screenshots
                                     continue;
                                 }
@@ -576,7 +579,7 @@ class ChecklistController extends Controller
                     $tradeData['screenshot_paths'] = $screenshotPaths;
 
                     // Only include trade_status if it has a value, otherwise let DB default to 'pending'
-                    if (!empty($validated['trade_status'])) {
+                    if (! empty($validated['trade_status'])) {
                         $tradeData['trade_status'] = $validated['trade_status'];
                     }
 
@@ -586,14 +589,14 @@ class ChecklistController extends Controller
                     // Update or create the related trade entry
                     try {
                         $checklist->tradeEntry()->updateOrCreate(
-                            ['checklist_id' => $checklist->id,],
+                            ['checklist_id' => $checklist->id],
                             $tradeData
                         );
                     } catch (\Exception $e) {
                         Log::error('Trade entry update error: ' . $e->getMessage(), [
                             'checklist_id' => $checklist->id,
                             'tradeData' => $tradeData,
-                            'error' => $e
+                            'error' => $e,
                         ]);
                         throw $e;
                     }
@@ -605,7 +608,7 @@ class ChecklistController extends Controller
             Log::error('Checklist update error: ' . $e->getMessage(), [
                 'exception' => $e,
                 'checklist_id' => $checklist->id,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
             throw $e;
         }
@@ -626,7 +629,7 @@ class ChecklistController extends Controller
         $instruments = Instrument::active()->get();
 
         return Inertia::render('ChecklistWizard', [
-            'settings' => $settings,
+            'settings' => $settings->toArray(),
             'instruments' => $instruments,
             'prefilledData' => $request->query('prefilled'),
             'symbol' => $request->query('symbol'),
