@@ -34,17 +34,17 @@ class LoginController extends Controller
                 'string',
                 // 'email:rfc,dns',
                 'max:255',
-                'exists:users,email'
+                'exists:users,email',
             ],
             'password' => [
                 'required',
                 'string',
                 'min:8',
-                'max:255'
+                'max:255',
             ],
         ], [
             'email.required' => 'Email address is required.',
-            // 'email.email' => 'Please enter a valid email address.', 
+            // 'email.email' => 'Please enter a valid email address.',
             'email.exists' => 'No account found with this email address.',
             'password.required' => 'Password is required.',
             'password.min' => 'Password must be at least 8 characters.',
@@ -129,6 +129,6 @@ class LoginController extends Controller
      */
     protected function throttleKey(Request $request)
     {
-        return Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
+        return Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
     }
 }

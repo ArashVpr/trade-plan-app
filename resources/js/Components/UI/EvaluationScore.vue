@@ -71,6 +71,10 @@ const props = defineProps({
             cotIndex: ''
         })
     },
+    excludeFundamentals: {
+        type: Boolean,
+        default: false
+    },
     settings: {
         type: Object,
         default: () => ({})
@@ -158,18 +162,20 @@ const calculatedScore = computed(() => {
         raw += Number(props.settings.technical_direction_correction_weight || 0)
     }
 
-    // Fundamentals
-    if (['Undervalued', 'Overvalued'].includes(props.fundamentals.valuation)) {
-        raw += Number(props.settings.fundamental_valuation_weight || 0)
-    }
-    if (['Bullish', 'Bearish'].includes(props.fundamentals.seasonalConfluence)) {
-        raw += Number(props.settings.fundamental_seasonal_weight || 0)
-    }
-    if (['Bullish Divergence', 'Bearish Divergence'].includes(props.fundamentals.nonCommercials)) {
-        raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0)
-    }
-    if (['Bullish', 'Bearish'].includes(props.fundamentals.cotIndex)) {
-        raw += Number(props.settings.fundamental_cot_index_weight || 0)
+    // Fundamentals (skip if excluded)
+    if (!props.excludeFundamentals) {
+        if (['Undervalued', 'Overvalued'].includes(props.fundamentals.valuation)) {
+            raw += Number(props.settings.fundamental_valuation_weight || 0)
+        }
+        if (['Bullish', 'Bearish'].includes(props.fundamentals.seasonalConfluence)) {
+            raw += Number(props.settings.fundamental_seasonal_weight || 0)
+        }
+        if (['Bullish Divergence', 'Bearish Divergence'].includes(props.fundamentals.nonCommercials)) {
+            raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0)
+        }
+        if (['Bullish', 'Bearish'].includes(props.fundamentals.cotIndex)) {
+            raw += Number(props.settings.fundamental_cot_index_weight || 0)
+        }
     }
 
     // 2. Compute max possible score based on one selection per category
@@ -187,12 +193,13 @@ const calculatedScore = computed(() => {
         Number(props.settings.technical_direction_correction_weight || 0)
     )
 
-    // Fundamentals: sum of all criteria
-    const fundMax =
+    // Fundamentals: sum of all criteria (skip if excluded)
+    const fundMax = props.excludeFundamentals ? 0 : (
         Number(props.settings.fundamental_valuation_weight || 0) +
         Number(props.settings.fundamental_seasonal_weight || 0) +
         Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
         Number(props.settings.fundamental_cot_index_weight || 0)
+    )
 
     const max = zoneMax + locHigh + dirHigh + fundMax
 

@@ -37,6 +37,9 @@
                     <span v-else class="text-slate-400">Select an Asset</span>
                 </template>
             </Select>
+            <p v-if="showSymbolError" class="mt-2 text-sm text-rose-600 dark:text-rose-400">
+                Please select a symbol before submitting.
+            </p>
         </div>
 
         <div>
@@ -92,18 +95,22 @@ const props = defineProps({
     instruments: {
         type: Array,
         default: () => []
+    },
+    showSymbolError: {
+        type: Boolean,
+        default: false
     }
 })
 
 const emit = defineEmits(['update:modelValue', 'progress-updated'])
 
 const zoneQualifiers = [
-    { name: 'Fresh', icon: 'pi pi-sparkles', description: 'Zone has not been tested yet (Virgin Level).' },
-    { name: 'Original', icon: 'pi pi-star', description: 'The origin of the move, not a reaction.' },
-    { name: 'Flip', icon: 'pi pi-sort-alt', description: 'Previous Resistance becoming Support (or vice-versa).' },
-    { name: 'LOL', icon: 'pi pi-clone', description: 'Level Over Level nested structure.' },
-    { name: 'Minimum 1:2 Profit Margin', icon: 'pi pi-chart-line', description: 'Favorable risk to reward ratio' },
-    { name: 'Big Brother Coverage', icon: 'pi pi-eye', description: 'Higher timeframe alignment' }
+    { name: 'Fresh', icon: 'pi pi-sparkles', description: 'Zone has not been touched yet (Virgin Zone).' },
+    { name: 'Original', icon: 'pi pi-star', description: 'The origin of the move not a reaction to another zone.' },
+    { name: 'Flip', icon: 'pi pi-sort-alt', description: 'Previous Demand becoming Supply (or vice-versa).' },
+    { name: 'LOL', icon: 'pi pi-clone', description: 'Level on top of a level.' },
+    { name: 'Minimum 1:2 Profit Margin', icon: 'pi pi-chart-line', description: 'Favorable risk to reward ratio.' },
+    { name: 'Big Brother Coverage', icon: 'pi pi-eye', description: 'The zone is covered by a higher timeframe zone.' }
 ]
 
 // Check if a qualifier is selected

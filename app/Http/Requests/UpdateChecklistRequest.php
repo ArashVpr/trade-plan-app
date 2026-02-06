@@ -57,6 +57,7 @@ class UpdateChecklistRequest extends FormRequest
             'fundamentals.seasonalConfluence' => ['nullable', 'in:Bullish,Bearish,Neutral'],
             'fundamentals.nonCommercials' => ['nullable', 'in:Bullish Divergence,Bearish Divergence,No Divergence,Neutral,Not Assessed'],
             'fundamentals.cotIndex' => ['nullable', 'in:Bullish,Bearish,Neutral,Not Assessed'],
+            'exclude_fundamentals' => ['boolean'],
             'score' => ['integer', 'min:0', 'max:100'],
             'symbol' => ['nullable', 'string', 'max:255'],
             'entry_date' => ['nullable', 'date'],

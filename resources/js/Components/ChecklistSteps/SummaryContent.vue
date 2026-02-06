@@ -13,8 +13,14 @@
         </div>
 
         <div>
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fundamentals</h3>
-            <div class="space-y-1">
+            <div class="flex items-center gap-2 mb-2">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Fundamentals</h3>
+                <Badge v-if="excludeFundamentals" value="Excluded" severity="info" class="text-xs" />
+            </div>
+            <div v-if="excludeFundamentals" class="text-sm text-gray-500 dark:text-gray-400 italic">
+                Skipped for technical trade
+            </div>
+            <div v-else class="space-y-1">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     Valuation: {{ fundamentalsData.valuation || 'Not selected' }}
                 </p>
@@ -68,7 +74,7 @@
         <div>
             <EvaluationScore ref="evaluationScoreComponent" :zone-qualifiers="zoneQualifiersData.selectedZoneQualifiers"
                 :technicals="technicalsData" :fundamentals="fundamentalsData" :settings="settings"
-                title="Evaluation Score" />
+                :exclude-fundamentals="excludeFundamentals" title="Evaluation Score" />
         </div>
     </div>
 </template>
@@ -103,6 +109,10 @@ defineProps({
     directionalBias: {
         type: Object,
         required: true
+    },
+    excludeFundamentals: {
+        type: Boolean,
+        default: false
     },
     settings: {
         type: Object,

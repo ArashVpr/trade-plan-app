@@ -48,7 +48,7 @@
                         <div class="p-4">
                             <i class="pi pi-star text-4xl text-yellow-600 mb-3"></i>
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ stats.overview.avg_score
-                                }}</h3>
+                            }}</h3>
                             <p class="text-gray-600 dark:text-gray-400">Average Score</p>
                         </div>
                     </template>
@@ -119,7 +119,7 @@
                                     <template #body="slotProps">
                                         <span class="font-mono font-bold text-blue-900 dark:text-blue-300">{{
                                             slotProps.data.symbol
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Column>
                                 <Column field="count" header="Trades" />
@@ -128,7 +128,7 @@
                                         <ProgressBar :value="slotProps.data.avg_score" :showValue="false"
                                             class="mb-1" />
                                         <small class="text-gray-600 dark:text-gray-400">{{ slotProps.data.avg_score
-                                            }}/100</small>
+                                        }}/100</small>
                                     </template>
                                 </Column>
                             </DataTable>
@@ -238,7 +238,7 @@
                                                             <ProgressBar :value="slotProps.data.success_rate"
                                                                 :showValue="false" class="w-16" />
                                                             <span class="text-sm">{{ slotProps.data.success_rate
-                                                            }}%</span>
+                                                                }}%</span>
                                                         </div>
                                                     </template>
                                                 </Column>
@@ -661,6 +661,13 @@
                                     <span class="font-mono font-bold">{{ slotProps.data.symbol }}</span>
                                 </template>
                             </Column>
+                            <Column field="exclude_fundamentals" header="Type" :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="slotProps.data.exclude_fundamentals ? 'Technical' : 'Full'"
+                                        :severity="slotProps.data.exclude_fundamentals ? 'info' : 'success'"
+                                        class="text-xs" />
+                                </template>
+                            </Column>
                             <Column field="position_type" header="Position">
                                 <template #body="slotProps">
                                     <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : slotProps.data.position_type === 'Short' ? 'danger' : 'secondary'"
@@ -673,14 +680,14 @@
                                         <ProgressBar :value="slotProps.data.overall_score" :showValue="false"
                                             class="w-16" />
                                         <span class="text-sm font-semibold">{{ slotProps.data.overall_score
-                                            }}/100</span>
+                                        }}/100</span>
                                     </div>
                                 </template>
                             </Column>
                             <Column field="created_at" header="Created">
                                 <template #body="slotProps">
                                     <small class="text-gray-600 dark:text-gray-400">{{ slotProps.data.created_at
-                                        }}</small>
+                                    }}</small>
                                 </template>
                             </Column>
                             <Column field="has_trade_entry" header="Status">

@@ -55,6 +55,7 @@ class DashboardController extends Controller
                 return [
                     'id' => $checklist->id,
                     'symbol' => $checklist->symbol,
+                    'exclude_fundamentals' => (bool) $checklist->exclude_fundamentals,
                     'position_type' => $tradeEntry ? ucfirst($tradeEntry->position_type) : 'N/A',
                     'overall_score' => $checklist->score ?? 0,
                     'created_at' => $checklist->created_at->format('M j, Y g:i A'),
@@ -221,7 +222,7 @@ class DashboardController extends Controller
 
             // Combined Setup Analysis (Location + Direction + Valuation)
             if (isset($technicals['location']) && isset($technicals['direction']) && isset($fundamentals['valuation'])) {
-                $combinedKey = $technicals['location'].' + '.$technicals['direction'].' + '.$fundamentals['valuation'];
+                $combinedKey = $technicals['location'] . ' + ' . $technicals['direction'] . ' + ' . $fundamentals['valuation'];
                 if (! isset($combinedPerformance[$combinedKey])) {
                     $combinedPerformance[$combinedKey] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
                 }
@@ -597,11 +598,11 @@ class DashboardController extends Controller
                 } elseif (in_array($techLocation, ['Expensive', 'Cheap'])) {
                     $technicalPatternTrades['Location: Moderate Zones'][] = $tradeId;
                 } else {
-                    $technicalPatternTrades['Location: '.$techLocation][] = $tradeId;
+                    $technicalPatternTrades['Location: ' . $techLocation][] = $tradeId;
                 }
             }
             if ($techDirection !== 'N/A') {
-                $technicalPatternTrades['Direction: '.$techDirection][] = $tradeId;
+                $technicalPatternTrades['Direction: ' . $techDirection][] = $tradeId;
             }
 
             // Fundamental patterns - track trades, not occurrences
@@ -615,7 +616,7 @@ class DashboardController extends Controller
                 if (in_array($fundValuation, ['Overvalued', 'Undervalued'])) {
                     $fundamentalPatternTrades['Valuation: Extreme Levels'][] = $tradeId;
                 } else {
-                    $fundamentalPatternTrades['Valuation: '.$fundValuation][] = $tradeId;
+                    $fundamentalPatternTrades['Valuation: ' . $fundValuation][] = $tradeId;
                 }
             }
             if ($fundSeasonal === 'Yes') {
@@ -629,7 +630,7 @@ class DashboardController extends Controller
                 if (in_array($fundCotIndex, ['Bullish', 'Bearish'])) {
                     $fundamentalPatternTrades['COT Index: Directional'][] = $tradeId;
                 } else {
-                    $fundamentalPatternTrades['COT Index: '.$fundCotIndex][] = $tradeId;
+                    $fundamentalPatternTrades['COT Index: ' . $fundCotIndex][] = $tradeId;
                 }
             }
 
@@ -902,7 +903,7 @@ class DashboardController extends Controller
 
         // Technical summary
         if (isset($technicals['location']) && isset($technicals['direction'])) {
-            $summary[] = $technicals['location'].' '.$technicals['direction'];
+            $summary[] = $technicals['location'] . ' ' . $technicals['direction'];
         }
 
         // Fundamental summary - include all fundamental fields
@@ -917,7 +918,7 @@ class DashboardController extends Controller
             $fundamentalParts[] = 'COT Divergence';
         }
         if (isset($fundamentals['cotIndex']) && $fundamentals['cotIndex'] !== 'Neutral') {
-            $fundamentalParts[] = $fundamentals['cotIndex'].' COT';
+            $fundamentalParts[] = $fundamentals['cotIndex'] . ' COT';
         }
 
         if (! empty($fundamentalParts)) {
@@ -926,7 +927,7 @@ class DashboardController extends Controller
 
         // Zone qualifiers summary
         if (! empty($zoneQualifiers)) {
-            $summary[] = count($zoneQualifiers).' Zone Qualifiers';
+            $summary[] = count($zoneQualifiers) . ' Zone Qualifiers';
         }
 
         return implode(' + ', $summary);
@@ -944,8 +945,8 @@ class DashboardController extends Controller
         // Check if we have the new trade_status field (after migration)
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'pending' => 'Order Pending',
-                'active' => 'Position Open',
+                'pending' => 'Pending',
+                'active' => 'Open',
                 'win' => 'Win',
                 'loss' => 'Loss',
                 'breakeven' => 'Breakeven',
@@ -954,7 +955,7 @@ class DashboardController extends Controller
             };
         }
 
-        return 'Trade Pending';
+        return 'Pending';
     }
 
     /**
@@ -969,16 +970,16 @@ class DashboardController extends Controller
         // Check if we have the new trade_status field
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'pending' => 'warn',   // Yellow
-                'active' => 'warn',    // Yellow
-                'win' => 'success',     // Green
-                'loss' => 'danger',     // Red
-                'breakeven' => 'warn', // Yellow
-                'cancelled' => 'secondary', // Gray
+                'pending' => 'warn',
+                'active' => 'info',
+                'win' => 'success',
+                'loss' => 'danger',
+                'breakeven' => 'secondary',
+                'cancelled' => 'secondary',
                 default => 'secondary'
             };
         }
 
-        return 'warn'; // Yellow for pending
+        return 'warn';
     }
 }

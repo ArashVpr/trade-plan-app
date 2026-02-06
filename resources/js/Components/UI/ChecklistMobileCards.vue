@@ -1,10 +1,7 @@
 <template>
     <div class="space-y-4">
-        <div
-            v-for="item in items"
-            :key="item.id"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-        >
+        <div v-for="item in items" :key="item.id"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <!-- Header Row: Symbol & Score -->
             <div class="flex justify-between items-start mb-3">
                 <div>
@@ -15,40 +12,24 @@
                         {{ formatDate(item.created_at) }}
                     </div>
                 </div>
-                <Tag
-                    :value="`${item.score}/100`"
-                    :severity="getScoreSeverity(item.score)"
-                    rounded
-                    class="text-sm"
-                />
+                <Tag :value="`${item.score}/100`" :severity="getScoreSeverity(item.score)" rounded class="text-sm" />
             </div>
 
             <!-- Status Row -->
             <div class="flex flex-wrap gap-2 mb-3">
                 <!-- Directional Bias -->
                 <div v-if="getDirectionalBias(item).hasEnoughData">
-                    <Tag
-                        :value="getDirectionalBias(item).biasDisplay"
-                        :severity="getDirectionalBias(item).severity"
-                        class="text-xs font-bold"
-                    />
+                    <Tag :value="getDirectionalBias(item).biasDisplay" :severity="getDirectionalBias(item).severity"
+                        class="text-xs font-bold whitespace-nowrap" />
                 </div>
                 <span v-else class="text-slate-400 dark:text-slate-500 text-xs italic">No Signals</span>
 
                 <!-- Position Type -->
-                <Tag
-                    v-if="item.trade_entry?.position_type"
-                    :value="item.trade_entry.position_type"
-                    :severity="item.trade_entry.position_type === 'Long' ? 'success' : 'danger'"
-                    class="text-xs"
-                />
+                <Tag v-if="item.trade_entry?.position_type" :value="item.trade_entry.position_type"
+                    :severity="item.trade_entry.position_type === 'Long' ? 'success' : 'danger'" class="text-xs" />
 
                 <!-- Trade Status -->
-                <Tag
-                    :value="getTradeStatus(item)"
-                    :severity="getTradeStatusSeverity(item)"
-                    class="text-xs"
-                />
+                <Tag :value="getTradeStatus(item)" :severity="getTradeStatusSeverity(item)" class="text-xs" />
             </div>
 
             <!-- Details Row -->
@@ -75,15 +56,8 @@
                 <Link :href="route('checklists.edit', item.id)">
                     <Button icon="pi pi-pencil" size="small" severity="info" text rounded aria-label="Edit" />
                 </Link>
-                <Button
-                    icon="pi pi-trash"
-                    size="small"
-                    severity="danger"
-                    text
-                    rounded
-                    aria-label="Delete"
-                    @click="$emit('delete', item.id)"
-                />
+                <Button icon="pi pi-trash" size="small" severity="danger" text rounded aria-label="Delete"
+                    @click="$emit('delete', item.id)" />
             </div>
         </div>
     </div>

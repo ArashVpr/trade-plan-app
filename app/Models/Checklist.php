@@ -14,6 +14,7 @@ class Checklist extends Model
         'zone_qualifiers',
         'technicals',
         'fundamentals',
+        'exclude_fundamentals',
         'score',
         'symbol',
     ];
@@ -22,6 +23,7 @@ class Checklist extends Model
         'technicals' => 'array',
         'fundamentals' => 'array',
         'zone_qualifiers' => 'array',
+        'exclude_fundamentals' => 'boolean',
     ];
 
     public function user()

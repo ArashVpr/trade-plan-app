@@ -14,7 +14,7 @@
                 class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center gap-2 border border-slate-200 dark:border-slate-700">
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Symbol</span>
                 <span class="font-mono font-bold text-lg text-slate-800 dark:text-slate-200">{{ symbol || '---'
-                }}</span>
+                    }}</span>
             </div>
         </div>
 
@@ -71,7 +71,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         <button v-for="opt in tradeStatusOptions" :key="opt.value"
                             @click="updateData('trade_status', opt.value)"
-                            class="py-2 px-3 rounded-lg border text-sm font-medium transition-all"
+                            class="py-2 px-3 rounded-lg border text-sm font-medium transition-all cursor-pointer"
                             :class="modelValue.trade_status === opt.value
                                 ? getStatusClass(opt.value)
                                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-slate-200'">

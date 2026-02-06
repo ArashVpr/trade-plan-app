@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="max-w-5xl mx-auto">
+        <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl font text-blue-900 dark:text-blue-300 mb-6 text-center">Checklist History</h1>
             <Card>
                 <template #title>
@@ -31,7 +31,7 @@
                                 class="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 rounded-full border border-red-200 dark:border-red-800">
                                 <i class="pi pi-times-circle text-red-600 dark:text-red-200 text-sm"></i>
                                 <span class="text-sm font-semibold text-red-700 dark:text-red-100">{{ statistics.losses
-                                    }}</span>
+                                }}</span>
                                 <span class="text-xs text-red-600 dark:text-red-200">Losses</span>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                         <DataTable :value="checklists.data" lazy :paginator="true" :rows="checklists.per_page"
                             :totalRecords="checklists.total" :result-count="checklists.total" dataKey="id"
                             :loading="loading" @page="onPageChange" @sort="onSort" @filter="onFilter"
-                            class="p-datatable-sm text-sm" scrollable scrollHeight="600px" :sortField="sortField"
+                            class="p-datatable-sm text-sm w-full" scrollable scrollHeight="600px" :sortField="sortField"
                             :sortOrder="sortOrder" removableSort v-model:filters="filters" filterDisplay="menu"
                             :globalFilterFields="['symbol', 'score']" rowHover>
                             <template #header>
@@ -168,6 +168,14 @@
                                 </template>
                             </Column>
 
+                            <Column field="exclude_fundamentals" header="Type" :style="{ width: '110px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="slotProps.data.exclude_fundamentals ? 'Technical' : 'Full'"
+                                        :severity="slotProps.data.exclude_fundamentals ? 'info' : 'success'"
+                                        class="text-xs" />
+                                </template>
+                            </Column>
+
                             <Column field="score" header="Score" sortable :style="{ width: '100px' }">
                                 <template #body="slotProps">
                                     <Tag :value="`${slotProps.data.score}/100`"
@@ -184,7 +192,8 @@
                                         :showClear="true">
                                         <template #option="slotProps">
                                             <Tag :value="slotProps.option.label"
-                                                :severity="getBiasSeverity(slotProps.option.value)" />
+                                                :severity="getBiasSeverity(slotProps.option.value)"
+                                                class="text-xs whitespace-nowrap" />
                                         </template>
                                     </Select>
                                 </template>
@@ -192,7 +201,7 @@
                                     <div v-if="getDirectionalBias(slotProps.data).hasEnoughData">
                                         <Tag :value="getDirectionalBias(slotProps.data).biasDisplay"
                                             :severity="getDirectionalBias(slotProps.data).severity"
-                                            class="text-xs font-bold" />
+                                            class="text-xs font-bold whitespace-nowrap" />
                                     </div>
                                     <span v-else class="text-slate-400 dark:text-slate-500 text-xs italic">No
                                         Signals</span>
@@ -497,17 +506,17 @@ const getTradeStatusSeverity = (checklist) => {
     const tradeEntry = checklist.trade_entry
 
     if (!tradeEntry || !tradeEntry.trade_status) {
-        return 'info'  // Blue for analysis only
+        return 'info'
     }
 
     // Check if we have the new trade_status field
     switch (tradeEntry.trade_status) {
-        case 'pending': return 'warn'   // Changed to Warn (Yellow) for visibility
-        case 'active': return 'info'    // Changed to Info (Blue)
-        case 'win': return 'success' // Green
-        case 'loss': return 'danger'  // Red
+        case 'pending': return 'warn'
+        case 'active': return 'info'
+        case 'win': return 'success'
+        case 'loss': return 'danger'
         case 'breakeven': return 'secondary'
-        case 'cancelled': return 'contrast'
+        case 'cancelled': return 'secondary'
         default: return 'secondary'
     }
 }

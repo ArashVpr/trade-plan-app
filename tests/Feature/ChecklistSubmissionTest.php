@@ -44,6 +44,7 @@ function validAnalysisData(array $overrides = []): array
             'nonCommercials' => 'Bullish Divergence',
             'cotIndex' => 'Bullish',
         ],
+        'exclude_fundamentals' => false,
         'score' => 75,
         'symbol' => 'EURUSD',
     ], $overrides);

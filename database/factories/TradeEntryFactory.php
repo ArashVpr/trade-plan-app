@@ -2,9 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\TradeEntry;
-use App\Models\User;
 use App\Models\Checklist;
+use App\Models\TradeEntry;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -218,7 +217,7 @@ class TradeEntryFactory extends Factory
                 'Market was choppy, took breakeven exit.',
                 'Protected capital, no loss or gain.',
                 'Risk management - closed flat.',
-            ]
+            ],
         ];
 
         return $this->faker->optional(0.8)->randomElement($notes[$outcome]);

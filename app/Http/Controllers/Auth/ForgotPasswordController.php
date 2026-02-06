@@ -29,7 +29,7 @@ class ForgotPasswordController extends Controller
                 'string',
                 'email:rfc,dns',
                 'max:255',
-                'exists:users,email'
+                'exists:users,email',
             ],
         ], [
             'email.required' => 'Email address is required.',

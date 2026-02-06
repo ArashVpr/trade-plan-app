@@ -28,7 +28,7 @@
                             <span v-else>{{ index + 1 }}</span>
                         </div>
                         <span class="text-[10px] font-bold uppercase tracking-wider mt-1">{{ step.split(' ')[0]
-                        }}</span>
+                            }}</span>
                     </button>
                 </div>
             </div>
@@ -87,7 +87,8 @@
                         <template #content>
                             <!-- Step 1: Zone Qualifiers -->
                             <ZoneQualifiersStep v-if="currentStep === 1" v-model="zoneQualifiersData"
-                                :instruments="instruments" @progress-updated="updateProgress" />
+                                :instruments="instruments" :show-symbol-error="showSymbolError"
+                                @progress-updated="updateProgress" />
 
                             <!-- Step 2: Technicals -->
                             <TechnicalsStep v-if="currentStep === 2" v-model="technicalsData"
@@ -95,7 +96,8 @@
 
                             <!-- Step 3: Fundamentals -->
                             <FundamentalsStep v-if="currentStep === 3" v-model="fundamentalsData"
-                                @progress-updated="updateProgress" />
+                                v-model:exclude-fundamentals="excludeFundamentals"
+                                :exclude-fundamentals="excludeFundamentals" @progress-updated="updateProgress" />
 
                             <!-- Step 4: Order Entry -->
                             <OrderEntryStep v-if="currentStep === 4" v-model="orderEntryData"
@@ -145,7 +147,8 @@
                                             :fundamentalsData="fundamentalsData"
                                             :zoneQualifiersData="zoneQualifiersData"
                                             :selectedZoneQualifiersCount="selectedZoneQualifiersCount"
-                                            :directionalBias="directionalBias" :settings="settings" />
+                                            :directionalBias="directionalBias" :settings="settings"
+                                            :exclude-fundamentals="excludeFundamentals" />
                                     </template>
                                 </Card>
                             </div>
@@ -165,7 +168,8 @@
                                 <SummaryContent ref="summaryContentRef" :technicalsData="technicalsData"
                                     :fundamentalsData="fundamentalsData" :zoneQualifiersData="zoneQualifiersData"
                                     :selectedZoneQualifiersCount="selectedZoneQualifiersCount"
-                                    :directionalBias="directionalBias" :settings="settings" />
+                                    :directionalBias="directionalBias" :settings="settings"
+                                    :exclude-fundamentals="excludeFundamentals" />
                             </template>
                         </Card>
                     </div>
@@ -225,6 +229,7 @@ const toast = useToast();
 const toastRef = ref(null);
 const summaryContentRef = ref(null);
 const showMobileSummary = ref(false);
+const hasAttemptedSubmit = ref(false);
 
 // Reactive data
 const currentStep = ref(1);
@@ -247,6 +252,8 @@ const fundamentalsData = ref({
     nonCommercials: '',
     cotIndex: ''
 });
+
+const excludeFundamentals = ref(false);
 
 const orderEntryData = ref({
     entryDate: '',
@@ -284,6 +291,11 @@ onMounted(() => {
             fundamentalsData.value.seasonalConfluence = props.prefilledData.fundamentals.seasonalConfluence || ''
             fundamentalsData.value.nonCommercials = props.prefilledData.fundamentals.nonCommercials || ''
             fundamentalsData.value.cotIndex = props.prefilledData.fundamentals.cotIndex || ''
+        }
+
+        // Initialize exclude_fundamentals
+        if (props.prefilledData.exclude_fundamentals !== undefined) {
+            excludeFundamentals.value = props.prefilledData.exclude_fundamentals
         }
     }
 
@@ -337,14 +349,21 @@ const progressPercentage = computed(() => {
 
 const selectedZoneQualifiersCount = computed(() => zoneQualifiersData.value.selectedZoneQualifiers.length);
 
+const showSymbolError = computed(() => {
+    return !zoneQualifiersData.value.symbol && (selectedZoneQualifiersCount.value > 0 || hasAttemptedSubmit.value)
+})
+
 const canProceed = computed(() => {
     if (currentStep.value === 1) {
-        return selectedZoneQualifiersCount.value > 0;
+        return zoneQualifiersData.value.symbol && selectedZoneQualifiersCount.value > 0;
     }
     if (currentStep.value === 2) {
         return technicalsData.value.location && technicalsData.value.direction;
     }
     if (currentStep.value === 3) {
+        // Skip validation if fundamentals are excluded
+        if (excludeFundamentals.value) return true;
+
         return fundamentalsData.value.valuation &&
             fundamentalsData.value.seasonalConfluence &&
             fundamentalsData.value.nonCommercials &&
@@ -359,13 +378,16 @@ const canProceed = computed(() => {
 
 const canSubmit = computed(() => {
     // Only require the analysis sections, Order Entry is optional
-    return selectedZoneQualifiersCount.value > 0 &&
-        technicalsData.value.location &&
-        technicalsData.value.direction &&
+    const hasZones = zoneQualifiersData.value.symbol && selectedZoneQualifiersCount.value > 0;
+    const hasTechnicals = technicalsData.value.location && technicalsData.value.direction;
+    const hasFundamentals = excludeFundamentals.value || (
         fundamentalsData.value.valuation &&
         fundamentalsData.value.seasonalConfluence &&
         fundamentalsData.value.nonCommercials &&
-        fundamentalsData.value.cotIndex;
+        fundamentalsData.value.cotIndex
+    );
+
+    return hasZones && hasTechnicals && hasFundamentals;
 });
 
 const evaluationScore = computed(() => {
@@ -422,6 +444,7 @@ function resetWizard() {
         nonCommercials: '',
         cotIndex: ''
     };
+    excludeFundamentals.value = false;
     orderEntryData.value = {
         entryDate: '',
         positionType: '',
@@ -437,12 +460,22 @@ function resetWizard() {
 }
 
 function submitChecklist() {
-    if (!canSubmit.value) return;
+    if (!canSubmit.value) {
+        hasAttemptedSubmit.value = true;
+        if (!zoneQualifiersData.value.symbol) {
+            message.value = 'Please select a symbol before submitting.'
+        } else {
+            message.value = 'Please complete the required fields before submitting.'
+        }
+        messageType.value = 'error'
+        return;
+    }
 
     const submitData = {
         zone_qualifiers: zoneQualifiersData.value.selectedZoneQualifiers,
         technicals: technicalsData.value,
         fundamentals: fundamentalsData.value,
+        exclude_fundamentals: excludeFundamentals.value,
         score: evaluationScore.value,
         symbol: zoneQualifiersData.value.symbol,
         notes: orderEntryData.value.notes,

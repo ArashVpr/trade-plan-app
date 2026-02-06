@@ -23,7 +23,7 @@ return new class extends Migration
                 'win',    // Trade closed with profit
                 'loss',   // Trade closed with loss
                 'breakeven', // Trade closed at breakeven
-                'cancelled'         // Order cancelled before execution
+                'cancelled',         // Order cancelled before execution
             ])->nullable();
             $table->decimal('rrr', 4, 2)->nullable(); // Risk-Reward Ratio
             $table->json('screenshot_paths')->nullable();
