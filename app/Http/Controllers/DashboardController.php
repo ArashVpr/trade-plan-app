@@ -4,21 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Checklist;
 use App\Models\ChecklistWeights;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
+use App\Traits\HasTradeStatistics;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index()
+    use HasTradeStatistics;
+
+    public function index(): Response
     {
         // Get dashboard statistics
         $stats = $this->getDashboardStats();
 
         return Inertia::render('Dashboard', [
-            'stats' => $stats
+            'stats' => $stats,
         ]);
     }
 
@@ -52,11 +55,12 @@ class DashboardController extends Controller
                 return [
                     'id' => $checklist->id,
                     'symbol' => $checklist->symbol,
+                    'exclude_fundamentals' => (bool) $checklist->exclude_fundamentals,
                     'position_type' => $tradeEntry ? ucfirst($tradeEntry->position_type) : 'N/A',
                     'overall_score' => $checklist->score ?? 0,
                     'created_at' => $checklist->created_at->format('M j, Y g:i A'),
                     'trade_status' => $this->getTradeStatus($tradeEntry),
-                    'status_severity' => $this->getStatusSeverity($tradeEntry)
+                    'status_severity' => $this->getStatusSeverity($tradeEntry),
                 ];
             });
 
@@ -71,7 +75,7 @@ class DashboardController extends Controller
 
             $weeklyTrend[] = [
                 'week' => $weekStart->format('M j'),
-                'count' => $count
+                'count' => $count,
             ];
         }
 
@@ -92,7 +96,7 @@ class DashboardController extends Controller
                 return [
                     'symbol' => $item->symbol_key ?? 'Unknown',
                     'count' => $item->count,
-                    'avg_score' => round($item->avg_score, 1)
+                    'avg_score' => round($item->avg_score, 1),
                 ];
             });
 
@@ -123,7 +127,7 @@ class DashboardController extends Controller
             ->map(function ($item) {
                 return [
                     'range' => $item->score_range,
-                    'count' => $item->count
+                    'count' => $item->count,
                 ];
             });
 
@@ -138,14 +142,14 @@ class DashboardController extends Controller
                 'total_checklists' => $totalChecklists,
                 'weekly_checklists' => $weeklyChecklists,
                 'monthly_checklists' => $monthlyChecklists,
-                'avg_score' => round(Checklist::where('user_id', Auth::id())->avg('score') ?? 0, 1)
+                'avg_score' => round(Checklist::where('user_id', Auth::id())->avg('score') ?? 0, 1),
             ],
             'recent_activity' => $recentActivity,
             'weekly_trend' => $weeklyTrend,
             'setup_performance_analysis' => $setupPerformanceAnalysis,
             'pattern_analysis' => $patternAnalysis,
             'top_symbols' => $topSymbols,
-            'score_distribution' => $scoreDistribution
+            'score_distribution' => $scoreDistribution,
         ];
     }
 
@@ -180,44 +184,52 @@ class DashboardController extends Controller
             // Technical Location Analysis
             if (isset($technicals['location'])) {
                 $location = $technicals['location'];
-                if (!isset($technicalPerformance[$location])) {
+                if (! isset($technicalPerformance[$location])) {
                     $technicalPerformance[$location] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
                 }
                 $technicalPerformance[$location]['total']++;
-                if ($isWin) $technicalPerformance[$location]['wins']++;
+                if ($isWin) {
+                    $technicalPerformance[$location]['wins']++;
+                }
                 $technicalPerformance[$location]['total_rrr'] += $trade->rrr ?? 0;
             }
 
             // Technical Direction Analysis
             if (isset($technicals['direction'])) {
                 $direction = $technicals['direction'];
-                if (!isset($technicalPerformance[$direction])) {
+                if (! isset($technicalPerformance[$direction])) {
                     $technicalPerformance[$direction] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
                 }
                 $technicalPerformance[$direction]['total']++;
-                if ($isWin) $technicalPerformance[$direction]['wins']++;
+                if ($isWin) {
+                    $technicalPerformance[$direction]['wins']++;
+                }
                 $technicalPerformance[$direction]['total_rrr'] += $trade->rrr ?? 0;
             }
 
             // Fundamental Analysis
             if (isset($fundamentals['valuation'])) {
                 $valuation = $fundamentals['valuation'];
-                if (!isset($fundamentalPerformance[$valuation])) {
+                if (! isset($fundamentalPerformance[$valuation])) {
                     $fundamentalPerformance[$valuation] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
                 }
                 $fundamentalPerformance[$valuation]['total']++;
-                if ($isWin) $fundamentalPerformance[$valuation]['wins']++;
+                if ($isWin) {
+                    $fundamentalPerformance[$valuation]['wins']++;
+                }
                 $fundamentalPerformance[$valuation]['total_rrr'] += $trade->rrr ?? 0;
             }
 
             // Combined Setup Analysis (Location + Direction + Valuation)
             if (isset($technicals['location']) && isset($technicals['direction']) && isset($fundamentals['valuation'])) {
                 $combinedKey = $technicals['location'] . ' + ' . $technicals['direction'] . ' + ' . $fundamentals['valuation'];
-                if (!isset($combinedPerformance[$combinedKey])) {
+                if (! isset($combinedPerformance[$combinedKey])) {
                     $combinedPerformance[$combinedKey] = ['total' => 0, 'wins' => 0, 'total_rrr' => 0];
                 }
                 $combinedPerformance[$combinedKey]['total']++;
-                if ($isWin) $combinedPerformance[$combinedKey]['wins']++;
+                if ($isWin) {
+                    $combinedPerformance[$combinedKey]['wins']++;
+                }
                 $combinedPerformance[$combinedKey]['total_rrr'] += $trade->rrr ?? 0;
             }
         }
@@ -231,7 +243,7 @@ class DashboardController extends Controller
                         'setup_name' => $setup,
                         'total_trades' => $stats['total'],
                         'win_rate' => round(($stats['wins'] / $stats['total']) * 100, 1),
-                        'avg_rrr' => round($stats['total_rrr'] / $stats['total'], 2)
+                        'avg_rrr' => round($stats['total_rrr'] / $stats['total'], 2),
                     ];
                 }
             }
@@ -239,13 +251,14 @@ class DashboardController extends Controller
             usort($result, function ($a, $b) {
                 return $b['win_rate'] <=> $a['win_rate'];
             });
+
             return array_slice($result, 0, 5); // Top 5
         };
 
         return [
             'technical_setups' => $processPerformanceData($technicalPerformance),
             'fundamental_setups' => $processPerformanceData($fundamentalPerformance),
-            'combined_setups' => $processPerformanceData($combinedPerformance)
+            'combined_setups' => $processPerformanceData($combinedPerformance),
         ];
     }
 
@@ -289,7 +302,7 @@ class DashboardController extends Controller
                     'zone_qualifiers_count' => count($zoneQualifiers),
 
                     // Combined setup description
-                    'setup_summary' => $this->generateSetupSummary($technicals, $fundamentals, $zoneQualifiers)
+                    'setup_summary' => $this->generateSetupSummary($technicals, $fundamentals, $zoneQualifiers),
                 ];
             });
     }
@@ -301,7 +314,9 @@ class DashboardController extends Controller
     {
         // Get signal values (same logic as JavaScript composable)
         $getSignalValue = function ($category, $selection) {
-            if (!$selection || $selection === 'N/A') return 0;
+            if (! $selection || $selection === 'N/A') {
+                return 0;
+            }
 
             switch ($category) {
                 case 'location':
@@ -310,35 +325,35 @@ class DashboardController extends Controller
                         'Cheap' => +1,
                         'EQ' => 0,
                         'Expensive' => -1,
-                        'Very Expensive' => -1
+                        'Very Expensive' => -1,
                     ][$selection] ?? 0;
 
                 case 'valuation':
                     return [
                         'Undervalued' => +1,
                         'Neutral' => 0,
-                        'Overvalued' => -1
+                        'Overvalued' => -1,
                     ][$selection] ?? 0;
 
                 case 'seasonality':
                     return [
                         'Bullish' => +1,
                         'Neutral' => 0,
-                        'Bearish' => -1
+                        'Bearish' => -1,
                     ][$selection] ?? 0;
 
                 case 'nonCommercials':
                     return [
                         'Bullish Divergence' => +1,
                         'Neutral' => 0,
-                        'Bearish Divergence' => -1
+                        'Bearish Divergence' => -1,
                     ][$selection] ?? 0;
 
                 case 'cotIndex':
                     return [
                         'Bullish' => +1,
                         'Neutral' => 0,
-                        'Bearish' => -1
+                        'Bearish' => -1,
                     ][$selection] ?? 0;
 
                 default:
@@ -390,15 +405,18 @@ class DashboardController extends Controller
 
         // Determine strength
         $strength = 'Weak';
-        if ($confidence >= 81) $strength = 'Strong';
-        elseif ($confidence >= 61) $strength = 'Moderate';
+        if ($confidence >= 81) {
+            $strength = 'Strong';
+        } elseif ($confidence >= 61) {
+            $strength = 'Moderate';
+        }
 
         return [
             'bias' => $bias,
             'confidence' => $confidence,
             'strength' => $strength,
             'weighted_sum' => round($weightedSum, 1),
-            'max_sum' => round($maxSum, 1)
+            'max_sum' => round($maxSum, 1),
         ];
     }
 
@@ -453,10 +471,10 @@ class DashboardController extends Controller
                     'zones_focused' => 0,
                     'technicals_focused' => 0,
                     'fundamentals_focused' => 0,
-                    'balanced' => 0
+                    'balanced' => 0,
                 ],
                 'recommendations' => [],
-                'total_wins' => 0
+                'total_wins' => 0,
             ];
         }
 
@@ -464,9 +482,9 @@ class DashboardController extends Controller
 
         // Get user's checklist weights for directional bias calculation
         $settings = ChecklistWeights::where('user_id', Auth::id())->first();
-        if (!$settings) {
+        if (! $settings) {
             // Default weights if none set
-            $settings = new ChecklistWeights();
+            $settings = new ChecklistWeights;
         }
 
         // Initialize counters for patterns
@@ -486,7 +504,7 @@ class DashboardController extends Controller
             'zones_focused' => 0,
             'technicals_focused' => 0,
             'fundamentals_focused' => 0,
-            'balanced' => 0
+            'balanced' => 0,
         ];
 
         foreach ($winningTrades as $trade) {
@@ -494,12 +512,12 @@ class DashboardController extends Controller
 
             // Setup combination frequency
             $setupKey = $trade['setup_summary'];
-            if (!isset($setupFrequency[$setupKey])) {
+            if (! isset($setupFrequency[$setupKey])) {
                 $setupFrequency[$setupKey] = [
                     'count' => 0,
                     'total_rrr' => 0,
                     'avg_score' => 0,
-                    'directional_bias_data' => []
+                    'directional_bias_data' => [],
                 ];
             }
             $setupFrequency[$setupKey]['count']++;
@@ -511,15 +529,20 @@ class DashboardController extends Controller
             $setupFrequency[$setupKey]['directional_bias_data'][] = [
                 'bias' => $biasData['bias'],
                 'strength' => $biasData['strength'],
-                'confidence' => $biasData['confidence']
+                'confidence' => $biasData['confidence'],
             ];
 
             // Score patterns
             $score = $trade['score'] ?? 0;
-            if ($score >= 80) $scorePatterns['80+']++;
-            elseif ($score >= 60) $scorePatterns['60-79']++;
-            elseif ($score >= 40) $scorePatterns['40-59']++;
-            else $scorePatterns['<40']++;
+            if ($score >= 80) {
+                $scorePatterns['80+']++;
+            } elseif ($score >= 60) {
+                $scorePatterns['60-79']++;
+            } elseif ($score >= 40) {
+                $scorePatterns['40-59']++;
+            } else {
+                $scorePatterns['<40']++;
+            }
 
             // Symbol patterns
             $symbol = $trade['symbol'] ?? 'Unknown';
@@ -603,7 +626,7 @@ class DashboardController extends Controller
                 $fundamentalPatternTrades['COT Divergence'][] = $tradeId;
             }
             if ($fundCotIndex !== 'N/A' && $fundCotIndex !== 'Neutral') {
-                // Group COT Index categories  
+                // Group COT Index categories
                 if (in_array($fundCotIndex, ['Bullish', 'Bearish'])) {
                     $fundamentalPatternTrades['COT Index: Directional'][] = $tradeId;
                 } else {
@@ -616,15 +639,27 @@ class DashboardController extends Controller
 
             // Technical strength (location + direction)
             $technicalStrength = 0;
-            if (($trade['technical_location'] ?? 'N/A') !== 'N/A') $technicalStrength++;
-            if (($trade['technical_direction'] ?? 'N/A') !== 'N/A') $technicalStrength++;
+            if (($trade['technical_location'] ?? 'N/A') !== 'N/A') {
+                $technicalStrength++;
+            }
+            if (($trade['technical_direction'] ?? 'N/A') !== 'N/A') {
+                $technicalStrength++;
+            }
 
             // Fundamental strength (valuation + seasonal + COT factors)
             $fundamentalStrength = 0;
-            if (($trade['fundamental_valuation'] ?? 'N/A') !== 'N/A' && $trade['fundamental_valuation'] !== 'Neutral') $fundamentalStrength++;
-            if (($trade['fundamental_seasonal'] ?? 'N/A') === 'Yes') $fundamentalStrength++;
-            if (($trade['fundamental_noncommercials'] ?? 'N/A') === 'Divergence') $fundamentalStrength++;
-            if (($trade['fundamental_cot_index'] ?? 'N/A') !== 'N/A' && $trade['fundamental_cot_index'] !== 'Neutral') $fundamentalStrength++;
+            if (($trade['fundamental_valuation'] ?? 'N/A') !== 'N/A' && $trade['fundamental_valuation'] !== 'Neutral') {
+                $fundamentalStrength++;
+            }
+            if (($trade['fundamental_seasonal'] ?? 'N/A') === 'Yes') {
+                $fundamentalStrength++;
+            }
+            if (($trade['fundamental_noncommercials'] ?? 'N/A') === 'Divergence') {
+                $fundamentalStrength++;
+            }
+            if (($trade['fundamental_cot_index'] ?? 'N/A') !== 'N/A' && $trade['fundamental_cot_index'] !== 'Neutral') {
+                $fundamentalStrength++;
+            }
 
             // Determine primary alignment
             $maxStrength = max($zoneStrength, $technicalStrength, $fundamentalStrength);
@@ -651,7 +686,7 @@ class DashboardController extends Controller
             $uniqueTradesCount = count(array_unique($tradeIds));
             $technicalPatterns[$pattern] = [
                 'count' => $uniqueTradesCount,
-                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1)
+                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1),
             ];
         }
 
@@ -661,7 +696,7 @@ class DashboardController extends Controller
             $uniqueTradesCount = count(array_unique($tradeIds));
             $fundamentalPatterns[$pattern] = [
                 'count' => $uniqueTradesCount,
-                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1)
+                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1),
             ];
         }
 
@@ -671,7 +706,7 @@ class DashboardController extends Controller
             $uniqueTradesCount = count(array_unique($tradeIds));
             $directionalBiasPatterns[$pattern] = [
                 'count' => $uniqueTradesCount,
-                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1)
+                'percentage' => round(($uniqueTradesCount / $totalWins) * 100, 1),
             ];
         }
 
@@ -691,7 +726,7 @@ class DashboardController extends Controller
                 }
 
                 // Find the most common bias for this setup
-                if (!empty($biasFrequency)) {
+                if (! empty($biasFrequency)) {
                     arsort($biasFrequency);
                     $dominantBias = array_key_first($biasFrequency);
                 }
@@ -708,7 +743,7 @@ class DashboardController extends Controller
                     'success_rate' => round(($data['count'] / $totalWins) * 100, 1),
                     'dominant_bias' => $dominantBias,
                     'avg_bias_confidence' => $avgConfidence,
-                    'bias_distribution' => $biasFrequency
+                    'bias_distribution' => $biasFrequency,
                 ];
             }
         }
@@ -732,7 +767,7 @@ class DashboardController extends Controller
             'directional_bias_patterns' => $directionalBiasPatterns,
             'alignment_analysis' => $alignmentAnalysis,
             'recommendations' => $recommendations,
-            'total_wins' => $totalWins
+            'total_wins' => $totalWins,
         ];
     }
 
@@ -744,14 +779,14 @@ class DashboardController extends Controller
         $recommendations = [];
 
         // Setup-based recommendations
-        if (!empty($setups)) {
+        if (! empty($setups)) {
             $topSetup = $setups[0];
             if ($topSetup['frequency'] >= 3) {
                 $recommendations[] = [
                     'type' => 'setup',
                     'title' => 'Your Most Successful Setup',
                     'description' => "'{$topSetup['setup']}' has won {$topSetup['frequency']} times with avg R:R of {$topSetup['avg_rrr']}",
-                    'action' => 'Focus on this setup pattern for future trades'
+                    'action' => 'Focus on this setup pattern for future trades',
                 ];
             }
         }
@@ -765,20 +800,20 @@ class DashboardController extends Controller
                     'type' => 'score',
                     'title' => 'High Score Pattern',
                     'description' => "{$highScorePercentage}% of your wins came from scores 80+",
-                    'action' => 'Only trade setups with scores above 80 for higher win probability'
+                    'action' => 'Only trade setups with scores above 80 for higher win probability',
                 ];
             } elseif ($scorePatterns['60-79'] > $scorePatterns['80+']) {
                 $recommendations[] = [
                     'type' => 'score',
                     'title' => 'Sweet Spot Identified',
-                    'description' => "Most wins come from 60-79 score range",
-                    'action' => 'Your optimal trading zone appears to be 60-79 score range'
+                    'description' => 'Most wins come from 60-79 score range',
+                    'action' => 'Your optimal trading zone appears to be 60-79 score range',
                 ];
             }
         }
 
         // Symbol-based recommendations
-        if (!empty($symbolFrequency)) {
+        if (! empty($symbolFrequency)) {
             arsort($symbolFrequency);
             $topSymbol = array_key_first($symbolFrequency);
             $topSymbolWins = $symbolFrequency[$topSymbol];
@@ -787,13 +822,13 @@ class DashboardController extends Controller
                     'type' => 'symbol',
                     'title' => 'Favorite Currency Pair',
                     'description' => "{$topSymbol} has generated {$topSymbolWins} winning trades",
-                    'action' => 'Consider specializing in this pair - you understand its behavior well'
+                    'action' => 'Consider specializing in this pair - you understand its behavior well',
                 ];
             }
         }
 
         // Zone-based recommendations
-        if (!empty($zonePatterns)) {
+        if (! empty($zonePatterns)) {
             arsort($zonePatterns);
             $topZonePattern = array_key_first($zonePatterns);
             $zoneWins = $zonePatterns[$topZonePattern];
@@ -802,13 +837,13 @@ class DashboardController extends Controller
                     'type' => 'zone',
                     'title' => 'Zone Qualifier Sweet Spot',
                     'description' => "Setups with {$topZonePattern} won {$zoneWins} times",
-                    'action' => 'This zone qualifier combination seems optimal for your strategy'
+                    'action' => 'This zone qualifier combination seems optimal for your strategy',
                 ];
             }
         }
 
         // Directional bias-based recommendations
-        if (!empty($directionalBiasPatterns)) {
+        if (! empty($directionalBiasPatterns)) {
             $bullishWins = $directionalBiasPatterns['Bullish']['count'] ?? 0;
             $bearishWins = $directionalBiasPatterns['Bearish']['count'] ?? 0;
             $neutralWins = $directionalBiasPatterns['Neutral']['count'] ?? 0;
@@ -822,7 +857,7 @@ class DashboardController extends Controller
                         'type' => 'directional_bias',
                         'title' => 'Bullish Specialist',
                         'description' => "{$bullishPercentage}% of your wins came from bullish setups ({$bullishWins} trades)",
-                        'action' => 'Focus on oversold conditions and undervalued assets for your edge'
+                        'action' => 'Focus on oversold conditions and undervalued assets for your edge',
                     ];
                 } elseif ($bearishWins >= $bullishWins * 2 && $bearishWins >= 3) {
                     $bearishPercentage = round(($bearishWins / $totalDirectionalWins) * 100, 1);
@@ -830,14 +865,14 @@ class DashboardController extends Controller
                         'type' => 'directional_bias',
                         'title' => 'Bearish Expert',
                         'description' => "{$bearishPercentage}% of your wins came from bearish setups ({$bearishWins} trades)",
-                        'action' => 'Focus on overbought conditions and overvalued assets for your edge'
+                        'action' => 'Focus on overbought conditions and overvalued assets for your edge',
                     ];
                 } elseif (abs($bullishWins - $bearishWins) <= 1 && ($bullishWins + $bearishWins) >= 4) {
                     $recommendations[] = [
                         'type' => 'directional_bias',
                         'title' => 'Direction Agnostic Trader',
                         'description' => "Balanced success in both bullish ({$bullishWins}) and bearish ({$bearishWins}) setups",
-                        'action' => 'Your flexibility in market direction is your competitive advantage'
+                        'action' => 'Your flexibility in market direction is your competitive advantage',
                     ];
                 }
 
@@ -850,7 +885,7 @@ class DashboardController extends Controller
                         'type' => 'directional_confidence',
                         'title' => 'High Conviction Performer',
                         'description' => "{$confidencePercentage}% of wins came from high-confidence directional calls ({$highConfidenceWins} trades)",
-                        'action' => 'Trust your analysis when multiple directional factors align strongly'
+                        'action' => 'Trust your analysis when multiple directional factors align strongly',
                     ];
                 }
             }
@@ -886,12 +921,12 @@ class DashboardController extends Controller
             $fundamentalParts[] = $fundamentals['cotIndex'] . ' COT';
         }
 
-        if (!empty($fundamentalParts)) {
+        if (! empty($fundamentalParts)) {
             $summary[] = implode(' & ', $fundamentalParts);
         }
 
         // Zone qualifiers summary
-        if (!empty($zoneQualifiers)) {
+        if (! empty($zoneQualifiers)) {
             $summary[] = count($zoneQualifiers) . ' Zone Qualifiers';
         }
 
@@ -903,15 +938,15 @@ class DashboardController extends Controller
      */
     private function getTradeStatus($tradeEntry)
     {
-        if (!$tradeEntry) {
+        if (! $tradeEntry) {
             return 'Analysis Only';
         }
 
         // Check if we have the new trade_status field (after migration)
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'pending' => 'Order Pending',
-                'active' => 'Position Open',
+                'pending' => 'Pending',
+                'active' => 'Open',
                 'win' => 'Win',
                 'loss' => 'Loss',
                 'breakeven' => 'Breakeven',
@@ -920,7 +955,7 @@ class DashboardController extends Controller
             };
         }
 
-        return 'Trade Pending';
+        return 'Pending';
     }
 
     /**
@@ -928,23 +963,23 @@ class DashboardController extends Controller
      */
     private function getStatusSeverity($tradeEntry)
     {
-        if (!$tradeEntry) {
+        if (! $tradeEntry) {
             return 'info'; // Blue for analysis only
         }
 
         // Check if we have the new trade_status field
         if (isset($tradeEntry->trade_status)) {
             return match ($tradeEntry->trade_status) {
-                'pending' => 'warn',   // Yellow  
-                'active' => 'warn',    // Yellow
-                'win' => 'success',     // Green
-                'loss' => 'danger',     // Red  
-                'breakeven' => 'warn', // Yellow
-                'cancelled' => 'secondary', // Gray
+                'pending' => 'warn',
+                'active' => 'info',
+                'win' => 'success',
+                'loss' => 'danger',
+                'breakeven' => 'secondary',
+                'cancelled' => 'secondary',
                 default => 'secondary'
             };
         }
 
-        return 'warn'; // Yellow for pending
+        return 'warn';
     }
 }

@@ -53,7 +53,6 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'COTTON', 'name' => 'Cotton', 'type' => 'commodity', 'category' => 'agricultural'],
             ['symbol' => 'RICE', 'name' => 'Rice', 'type' => 'commodity', 'category' => 'agricultural'],
 
-
             // Metal Commodities
             ['symbol' => 'XAUUSD', 'name' => 'Gold vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
             ['symbol' => 'XAGUSD', 'name' => 'Silver vs US Dollar', 'type' => 'commodity', 'category' => 'metal'],
@@ -79,7 +78,6 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'ASX200', 'name' => 'S&P/ASX 200 Index', 'type' => 'index', 'category' => null],
             ['symbol' => 'IBEX', 'name' => 'IBEX 35 Index', 'type' => 'index', 'category' => null],
             ['symbol' => 'EU50', 'name' => 'Euro Stoxx 50 Index', 'type' => 'index', 'category' => null],
-            
 
             // US Top 100 Stocks (sample - top 20 for brevity, can be expanded)
             ['symbol' => 'AAPL', 'name' => 'Apple Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NASDAQ'],

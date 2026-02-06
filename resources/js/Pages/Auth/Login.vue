@@ -17,6 +17,14 @@
 
             <Card class="p-6">
                 <template #content>
+                    <!-- Error Summary at top of form -->
+                    <FormErrorSummary
+                        :errors="form.errors"
+                        title="Unable to sign in"
+                        :field-labels="{ email: 'Email Address', password: 'Password' }"
+                        :show-fix-hint="Object.keys(form.errors).length > 1"
+                    />
+
                     <form @submit.prevent="submit" class="space-y-6" method="post" action="/login">
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -81,6 +89,7 @@ import { onMounted } from 'vue'
 import { useForm, Link, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
+import FormErrorSummary from '@/Components/UI/FormErrorSummary.vue'
 
 // Toast setup
 const toast = useToast()

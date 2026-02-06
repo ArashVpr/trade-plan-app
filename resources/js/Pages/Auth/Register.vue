@@ -16,6 +16,18 @@
 
             <Card class="p-6">
                 <template #content>
+                    <!-- Error Summary at top of form -->
+                    <FormErrorSummary
+                        :errors="form.errors"
+                        title="Please fix the following to create your account:"
+                        :field-labels="{
+                            name: 'Full Name',
+                            email: 'Email Address',
+                            password: 'Password',
+                            password_confirmation: 'Confirm Password'
+                        }"
+                    />
+
                     <form @submit.prevent="submit" class="space-y-6" method="post" action="/register">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -101,6 +113,7 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import FormErrorSummary from '@/Components/UI/FormErrorSummary.vue'
 
 const form = useForm({
     name: '',

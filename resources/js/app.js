@@ -238,6 +238,20 @@ const TradingTheme = definePreset(Aura, {
             color: '{text.color}',
             disabledColor: '{text.mutedColor}',
             placeholderColor: '{text.mutedColor}'
+          },
+          overlay: {
+            background: '{surface.0}',
+            borderColor: '{border.color}',
+            color: '{text.color}'
+          },
+          option: {
+            focusBackground: '{surface.100}',
+            selectedBackground: '{primary.50}',
+            selectedFocusBackground: '{primary.100}',
+            color: '{text.color}',
+            focusColor: '{text.hoverColor}',
+            selectedColor: '{primary.700}',
+            selectedFocusColor: '{primary.700}'
           }
         },
         dark: {
@@ -249,6 +263,20 @@ const TradingTheme = definePreset(Aura, {
             color: '{text.color}',
             disabledColor: '{text.mutedColor}',
             placeholderColor: '{text.mutedColor}'
+          },
+          overlay: {
+            background: '{surface.0}',
+            borderColor: '{border.color}',
+            color: '{text.color}'
+          },
+          option: {
+            focusBackground: '{surface.100}',
+            selectedBackground: 'rgba(96, 165, 250, 0.16)',
+            selectedFocusBackground: 'rgba(96, 165, 250, 0.24)',
+            color: '{text.color}',
+            focusColor: '{text.hoverColor}',
+            selectedColor: '{primary.400}',
+            selectedFocusColor: '{primary.300}'
           }
         }
       }
@@ -270,6 +298,28 @@ const TradingTheme = definePreset(Aura, {
           }
         }
       }
+    },
+    checkbox: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{surface.0}',
+            borderColor: '{surface.300}',
+            hoverBorderColor: '{primary.color}',
+            checkedBackground: '{primary.color}',
+            checkedBorderColor: '{primary.color}'
+          }
+        },
+        dark: {
+          root: {
+            background: '{surface.100}',
+            borderColor: '{surface.400}',
+            hoverBorderColor: '{primary.color}',
+            checkedBackground: '{primary.color}',
+            checkedBorderColor: '{primary.color}'
+          }
+        }
+      }
     }
   }
 })
@@ -280,7 +330,7 @@ createInertiaApp({
     return pages[`./Pages/${name}.vue`]
   },
   setup({ el, App, props, plugin }) {
-    createApp({ render: () => h(App, props) })
+    const app = createApp({ render: () => h(App, props) })
       .use(plugin)
       .use(PrimeVue, {
         theme: {
@@ -295,6 +345,33 @@ createInertiaApp({
       .use(ConfirmationService)
       .use(ToastService)
       .use(ZiggyVue)
-      .mount(el)
+
+    // Global error handler for production
+    app.config.errorHandler = (err, instance, info) => {
+      console.error('Global error:', err)
+      console.error('Component:', instance)
+      console.error('Error info:', info)
+
+      // Send error to toast service if available
+      if (app.config.globalProperties.$toast) {
+        app.config.globalProperties.$toast.add({
+          severity: 'error',
+          summary: 'Application Error',
+          detail: err.message || 'An unexpected error occurred',
+          life: 5000
+        })
+      }
+
+      // In production, you could send to error tracking service
+      // e.g., Sentry.captureException(err)
+    }
+
+    // Global warning handler (optional - for development)
+    app.config.warnHandler = (msg, instance, trace) => {
+      console.warn('Vue warning:', msg)
+      console.warn('Trace:', trace)
+    }
+
+    app.mount(el)
   },
 })

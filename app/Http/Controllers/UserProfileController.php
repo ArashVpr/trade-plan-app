@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateChecklistWeightsRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use App\Models\ChecklistWeights;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserProfileController extends Controller
 {
     /**
      * Display the user profile page.
      */
-    public function index()
+    public function index(): Response
     {
         $user = Auth::user();
 
@@ -57,7 +60,7 @@ class UserProfileController extends Controller
                 'string',
                 'email:rfc,dns',
                 'max:255',
-                'unique:users,email,' . $user->id,
+                'unique:users,email,'.$user->id,
             ],
             'timezone' => ['nullable', 'string', 'max:50'],
             'bio' => ['nullable', 'string', 'max:500'],
@@ -78,7 +81,7 @@ class UserProfileController extends Controller
     /**
      * Upload and update user avatar
      */
-    public function uploadAvatar(Request $request)
+    public function uploadAvatar(Request $request): RedirectResponse
     {
         $user = Auth::user();
 
@@ -111,28 +114,10 @@ class UserProfileController extends Controller
     /**
      * Update user password
      */
-    public function updatePassword(Request $request)
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers(),
-            ],
-        ], [
-            'current_password.required' => 'Current password is required.',
-            'current_password.current_password' => 'The current password is incorrect.',
-            'password.required' => 'New password is required.',
-            'password.confirmed' => 'Password confirmation does not match.',
-        ]);
-
         Auth::user()->update([
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make($request->validated()['password']),
         ]);
 
         // Log password change for security
@@ -148,7 +133,7 @@ class UserProfileController extends Controller
     /**
      * Update notification preferences
      */
-    public function updateNotifications(Request $request)
+    public function updateNotifications(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'email_notifications' => ['boolean'],
@@ -167,28 +152,11 @@ class UserProfileController extends Controller
     /**
      * Update the user's checklist weights.
      */
-    public function updateChecklistWeights(Request $request)
+    public function updateChecklistWeights(UpdateChecklistWeightsRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'zone_fresh_weight' => 'required|integer|min:0|max:100',
-            'zone_original_weight' => 'required|integer|min:0|max:100',
-            'zone_flip_weight' => 'required|integer|min:0|max:100',
-            'zone_lol_weight' => 'required|integer|min:0|max:100',
-            'zone_min_profit_margin_weight' => 'required|integer|min:0|max:100',
-            'zone_big_brother_weight' => 'required|integer|min:0|max:100',
-            'technical_very_exp_chp_weight' => 'required|integer|min:0|max:100',
-            'technical_exp_chp_weight' => 'required|integer|min:0|max:100',
-            'technical_direction_impulsive_weight' => 'required|integer|min:0|max:100',
-            'technical_direction_correction_weight' => 'required|integer|min:0|max:100',
-            'fundamental_valuation_weight' => 'required|integer|min:0|max:100',
-            'fundamental_seasonal_weight' => 'required|integer|min:0|max:100',
-            'fundamental_cot_index_weight' => 'required|integer|min:0|max:100',
-            'fundamental_noncommercial_divergence_weight' => 'required|integer|min:0|max:100',
-        ]);
-
-        $weights = ChecklistWeights::updateOrCreate(
+        ChecklistWeights::updateOrCreate(
             ['user_id' => Auth::id()],
-            $validated
+            $request->validated()
         );
 
         return back()->with('success', 'Checklist weights updated successfully!');
@@ -197,7 +165,7 @@ class UserProfileController extends Controller
     /**
      * Delete user account
      */
-    public function deleteAccount(Request $request)
+    public function deleteAccount(Request $request): RedirectResponse
     {
         $request->validate([
             'password' => ['required', 'current_password'],

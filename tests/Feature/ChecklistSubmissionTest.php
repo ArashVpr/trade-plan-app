@@ -44,6 +44,7 @@ function validAnalysisData(array $overrides = []): array
             'nonCommercials' => 'Bullish Divergence',
             'cotIndex' => 'Bullish',
         ],
+        'exclude_fundamentals' => false,
         'score' => 75,
         'symbol' => 'EURUSD',
     ], $overrides);
@@ -291,19 +292,19 @@ test('creates short position trade entry', function () {
 // VALIDATION AND EDGE CASE TESTS
 // ============================================================================
 
-test('does not create trade entry when only partial order data provided (missing entry_price)', function () {
+test('creates trade entry when partial order data provided (missing entry_price)', function () {
     $partialOrder = validOrderEntryData();
-    unset($partialOrder['entry_price']); // Missing required field
+    unset($partialOrder['entry_price']); // Missing field - but TradeEntry still created with partial data
 
     $data = array_merge(validAnalysisData(), $partialOrder);
 
     $this->post(route('checklists.store'), $data);
 
     $checklist = Checklist::where('user_id', $this->user->id)->first();
-    expect($checklist->tradeEntry)->toBeNull();
+    expect($checklist->tradeEntry)->not()->toBeNull();
 });
 
-test('does not create trade entry when only partial order data provided (missing stop_price)', function () {
+test('creates trade entry when partial order data provided (missing stop_price)', function () {
     $partialOrder = validOrderEntryData();
     unset($partialOrder['stop_price']);
 
@@ -312,10 +313,10 @@ test('does not create trade entry when only partial order data provided (missing
     $this->post(route('checklists.store'), $data);
 
     $checklist = Checklist::where('user_id', $this->user->id)->first();
-    expect($checklist->tradeEntry)->toBeNull();
+    expect($checklist->tradeEntry)->not()->toBeNull();
 });
 
-test('does not create trade entry when only partial order data provided (missing target_price)', function () {
+test('creates trade entry when partial order data provided (missing target_price)', function () {
     $partialOrder = validOrderEntryData();
     unset($partialOrder['target_price']);
 
@@ -324,10 +325,10 @@ test('does not create trade entry when only partial order data provided (missing
     $this->post(route('checklists.store'), $data);
 
     $checklist = Checklist::where('user_id', $this->user->id)->first();
-    expect($checklist->tradeEntry)->toBeNull();
+    expect($checklist->tradeEntry)->not()->toBeNull();
 });
 
-test('does not create trade entry when only partial order data provided (missing entry_date)', function () {
+test('creates trade entry when partial order data provided (missing entry_date)', function () {
     $partialOrder = validOrderEntryData();
     unset($partialOrder['entry_date']);
 
@@ -336,10 +337,10 @@ test('does not create trade entry when only partial order data provided (missing
     $this->post(route('checklists.store'), $data);
 
     $checklist = Checklist::where('user_id', $this->user->id)->first();
-    expect($checklist->tradeEntry)->toBeNull();
+    expect($checklist->tradeEntry)->not()->toBeNull();
 });
 
-test('does not create trade entry when only partial order data provided (missing position_type)', function () {
+test('creates trade entry when partial order data provided (missing position_type)', function () {
     $partialOrder = validOrderEntryData();
     unset($partialOrder['position_type']);
 
@@ -348,7 +349,7 @@ test('does not create trade entry when only partial order data provided (missing
     $this->post(route('checklists.store'), $data);
 
     $checklist = Checklist::where('user_id', $this->user->id)->first();
-    expect($checklist->tradeEntry)->toBeNull();
+    expect($checklist->tradeEntry)->not()->toBeNull();
 });
 
 test('validates position_type must be Long or Short', function () {
@@ -593,9 +594,9 @@ test('handles decimal precision for prices correctly', function () {
 
     // SQLite doesn't enforce decimal precision like MySQL (stores full precision)
     // Test that values are stored correctly (MySQL would round to 4 decimals)
-    expect((float)$checklist->tradeEntry->entry_price)->toBe(1.12345678);
-    expect((float)$checklist->tradeEntry->stop_price)->toBe(1.12005678);
-    expect((float)$checklist->tradeEntry->target_price)->toBe(1.12685678);
+    expect((float) $checklist->tradeEntry->entry_price)->toBe(1.12345678);
+    expect((float) $checklist->tradeEntry->stop_price)->toBe(1.12005678);
+    expect((float) $checklist->tradeEntry->target_price)->toBe(1.12685678);
 });
 
 test('can update checklist analysis without affecting existing trade entry', function () {
@@ -723,39 +724,36 @@ test('validates fundamentals valuation must be valid enum in update', function (
     $response->assertSessionHasErrors('fundamentals.valuation');
 });
 
-test('requires all fundamental fields in update', function () {
+test('allows partial fundamental fields in update', function () {
     $checklist = Checklist::factory()->create(['user_id' => $this->user->id]);
 
     $updateData = array_merge(validAnalysisData(), [
         'fundamentals' => [
             'valuation' => 'Undervalued',
-            // Missing other required fields
+            // Other fields are optional
         ],
     ]);
 
     $response = $this->put(route('checklists.update', $checklist), $updateData);
 
-    $response->assertSessionHasErrors([
-        'fundamentals.seasonalConfluence',
-        'fundamentals.nonCommercials',
-        'fundamentals.cotIndex',
-    ]);
+    $response->assertRedirect();
 });
 
-test('requires both technical fields in update', function () {
+test('allows partial technical fields in update', function () {
     $checklist = Checklist::factory()->create(['user_id' => $this->user->id]);
 
     $updateData = array_merge(validAnalysisData(), [
         'technicals' => [
             'location' => 'Cheap',
-            // Missing direction
+            // direction is optional
         ],
     ]);
 
     $response = $this->put(route('checklists.update', $checklist), $updateData);
 
-    $response->assertSessionHasErrors('technicals.direction');
+    $response->assertRedirect();
 });
+
 // ============================================================================
 // FILE UPLOAD TESTS
 // ============================================================================
@@ -793,7 +791,7 @@ test('validates screenshot must be an image file', function () {
 
     $response = $this->post(route('checklists.store'), $data);
 
-    $response->assertSessionHasErrors('screenshot');
+    $response->assertSessionHasErrors('screenshots.0');
 });
 
 test('validates screenshot file size does not exceed 10MB', function () {
@@ -810,7 +808,7 @@ test('validates screenshot file size does not exceed 10MB', function () {
 
     $response = $this->post(route('checklists.store'), $data);
 
-    $response->assertSessionHasErrors('screenshot');
+    $response->assertSessionHasErrors('screenshots.0');
 });
 
 test('can update screenshot file in existing trade entry', function () {

@@ -96,13 +96,29 @@
                                 </div>
 
                                 <!-- Fundamental Analysis -->
-                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg transition-opacity duration-300"
+                                    :class="{ 'opacity-50 pointer-events-none': form.exclude_fundamentals }">
                                     <h3
                                         class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                                         <i class="pi pi-globe text-blue-900 dark:text-blue-300"></i>
                                         Fundamental Analysis
+                                        <Badge v-if="form.exclude_fundamentals" value="Excluded" severity="info" />
                                     </h3>
-                                    <div class="grid grid-cols-1 gap-4">
+                                    <div v-if="form.exclude_fundamentals" class="mb-4">
+                                        <Message severity="info" :closable="false">
+                                            Fundamental analysis is excluded from this trade evaluation. Scores are calculated based on zones and technicals only.
+                                        </Message>
+                                    </div>
+                                    <div class="mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <Checkbox v-model="form.exclude_fundamentals" :binary="true"
+                                                inputId="exclude_fundamentals" />
+                                            <label for="exclude_fundamentals" class="text-sm font-medium cursor-pointer">
+                                                Skip fundamental analysis for this trade
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-4" v-if="!form.exclude_fundamentals">
                                         <div class="field">
                                             <label class="block text-sm font-medium mb-1">Valuation</label>
                                             <Select v-model="form.fundamentals.valuation"
@@ -331,7 +347,7 @@
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max {{
                                                     Math.max(0,
                                                         5 -
-                                                    existingImages.length) }} more images, 5MB each</p>
+                                                        existingImages.length) }} more images, 5MB each</p>
                                             </div>
                                         </template>
                                     </FileUpload>
@@ -481,11 +497,23 @@ const submitForm = (event) => {
     // Create FormData manually to properly handle files + nested objects
     const formData = new FormData()
 
-    // Add all form fields
-    formData.append('zone_qualifiers', JSON.stringify(form.zone_qualifiers))
-    formData.append('technicals', JSON.stringify(form.technicals))
-    formData.append('fundamentals', JSON.stringify(form.fundamentals))
+    // Add zone_qualifiers as individual array items (Laravel will receive as array)
+    if (form.zone_qualifiers && form.zone_qualifiers.length > 0) {
+        form.zone_qualifiers.forEach((qualifier, index) => {
+            formData.append(`zone_qualifiers[${index}]`, qualifier)
+        })
+    }
+
+    // Add technicals and fundamentals as JSON (they're objects)
+    if (form.technicals) {
+        formData.append('technicals', JSON.stringify(form.technicals))
+    }
+    if (form.fundamentals) {
+        formData.append('fundamentals', JSON.stringify(form.fundamentals))
+    }
+
     formData.append('score', form.score)
+    formData.append('exclude_fundamentals', form.exclude_fundamentals ? '1' : '0')
     formData.append('notes', form.notes)
     formData.append('entry_date', form.entry_date)
     formData.append('position_type', form.position_type)
@@ -529,9 +557,10 @@ const zoneQualifiers = [
 ]
 
 const form = useForm({
-    zone_qualifiers: [...props.checklist.zone_qualifiers],
-    technicals: { ...props.checklist.technicals },
-    fundamentals: { ...props.checklist.fundamentals },
+    zone_qualifiers: props.checklist.zone_qualifiers ? [...props.checklist.zone_qualifiers] : [],
+    technicals: props.checklist.technicals ? { ...props.checklist.technicals } : null,
+    fundamentals: props.checklist.fundamentals ? { ...props.checklist.fundamentals } : null,
+    exclude_fundamentals: props.checklist.exclude_fundamentals ?? false,
     score: props.checklist.score,
     notes: props.tradeEntry?.notes || '',
     entry_date: props.tradeEntry?.entry_date || '',
@@ -547,13 +576,15 @@ const form = useForm({
 
 const canSubmit = computed(() => {
     // First check if core checklist fields are valid
-    const isValid = form.technicals.location &&
-        form.technicals.direction &&
-        form.fundamentals.valuation &&
-        form.fundamentals.seasonalConfluence &&
-        form.fundamentals.nonCommercials &&
-        form.fundamentals.cotIndex &&
-        form.zone_qualifiers.length > 0
+    const isValid = form.technicals?.location &&
+        form.technicals?.direction &&
+        form.zone_qualifiers.length > 0 &&
+        (form.exclude_fundamentals || (
+            form.fundamentals?.valuation &&
+            form.fundamentals?.seasonalConfluence &&
+            form.fundamentals?.nonCommercials &&
+            form.fundamentals?.cotIndex
+        ))
 
     if (!isValid) return false
 
@@ -623,7 +654,8 @@ const hasFormChanges = computed(() => {
 const { directionalBias } = useDirectionalBias(
     computed(() => form.technicals),
     computed(() => form.fundamentals),
-    computed(() => props.settings)
+    computed(() => props.settings),
+    computed(() => form.exclude_fundamentals)
 )
 
 const evaluationScore = () => {
@@ -647,22 +679,27 @@ const evaluationScore = () => {
     } else if (form.technicals.direction === 'Correction') {
         raw += Number(props.settings.technical_direction_correction_weight || 0);
     }
-    // Fundamentals: Valuation
-    if (['Undervalued', 'Overvalued'].includes(form.fundamentals.valuation)) {
-        raw += Number(props.settings.fundamental_valuation_weight || 0);
+    
+    // Fundamentals (only if not excluded)
+    if (!form.exclude_fundamentals) {
+        // Fundamentals: Valuation
+        if (['Undervalued', 'Overvalued'].includes(form.fundamentals.valuation)) {
+            raw += Number(props.settings.fundamental_valuation_weight || 0);
+        }
+        // Fundamentals: Seasonal
+        if (['Bullish', 'Bearish'].includes(form.fundamentals.seasonalConfluence)) {
+            raw += Number(props.settings.fundamental_seasonal_weight || 0);
+        }
+        // Fundamentals: Non-Commercial
+        if (['Bullish Divergence', 'Bearish Divergence'].includes(form.fundamentals.nonCommercials)) {
+            raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
+        }
+        // Fundamentals: CoT Index
+        if (['Bullish', 'Bearish'].includes(form.fundamentals.cotIndex)) {
+            raw += Number(props.settings.fundamental_cot_index_weight || 0);
+        }
     }
-    // Fundamentals: Seasonal
-    if (['Bullish', 'Bearish'].includes(form.fundamentals.seasonalConfluence)) {
-        raw += Number(props.settings.fundamental_seasonal_weight || 0);
-    }
-    // Fundamentals: Non-Commercial
-    if (['Bullish Divergence', 'Bearish Divergence'].includes(form.fundamentals.nonCommercials)) {
-        raw += Number(props.settings.fundamental_noncommercial_divergence_weight || 0);
-    }
-    // Fundamentals: CoT Index
-    if (['Bullish', 'Bearish'].includes(form.fundamentals.cotIndex)) {
-        raw += Number(props.settings.fundamental_cot_index_weight || 0);
-    }
+    
     // 2. Max possible score based on one selection per category
     const zoneMax = zoneKeys.reduce((sum, key) => sum + Number(props.settings[`zone_${key}_weight`] || 0), 0);
     const locHigh = Math.max(
@@ -673,11 +710,15 @@ const evaluationScore = () => {
         Number(props.settings.technical_direction_impulsive_weight || 0),
         Number(props.settings.technical_direction_correction_weight || 0)
     );
-    const fundMax =
+    
+    // Fundamental max (0 if excluded, otherwise sum of all fundamental weights)
+    const fundMax = form.exclude_fundamentals ? 0 : (
         Number(props.settings.fundamental_valuation_weight || 0) +
         Number(props.settings.fundamental_seasonal_weight || 0) +
         Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
-        Number(props.settings.fundamental_cot_index_weight || 0);
+        Number(props.settings.fundamental_cot_index_weight || 0)
+    );
+    
     const max = zoneMax + locHigh + dirHigh + fundMax;
     // 3. Normalize to 0-100
     form.score = max > 0 ? Math.round((raw / max) * 100) : 0;

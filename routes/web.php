@@ -7,7 +7,6 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ChecklistWeightsController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TradeJournalController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;

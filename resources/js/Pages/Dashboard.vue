@@ -67,12 +67,14 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <Chart
-                                v-if="weeklyTrendData && weeklyTrendData.datasets && weeklyTrendData.datasets.length > 0"
-                                type="line" :data="weeklyTrendData" :options="chartOptions" class="w-full h-64" />
-                            <div v-else class="flex items-center justify-center h-64 text-gray-400">
-                                No data available
-                            </div>
+                            <ChartSkeleton :loading="chartsLoading" type="line" height="16rem">
+                                <Chart
+                                    v-if="weeklyTrendData && weeklyTrendData.datasets && weeklyTrendData.datasets.length > 0"
+                                    type="line" :data="weeklyTrendData" :options="chartOptions" class="w-full h-64" />
+                                <EmptyState v-else title="No activity data"
+                                    description="Create some checklists to see your weekly activity trend here."
+                                    icon="pi pi-chart-line" variant="default" />
+                            </ChartSkeleton>
                         </div>
                     </template>
                 </Card>
@@ -86,13 +88,15 @@
                     </template>
                     <template #content>
                         <div class="p-4">
-                            <Chart
-                                v-if="scoreDistributionData && scoreDistributionData.datasets && scoreDistributionData.datasets.length > 0"
-                                type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
-                                class="w-full h-64" />
-                            <div v-else class="flex items-center justify-center h-64 text-gray-400">
-                                No data available
-                            </div>
+                            <ChartSkeleton :loading="chartsLoading" type="doughnut" height="16rem">
+                                <Chart
+                                    v-if="scoreDistributionData && scoreDistributionData.datasets && scoreDistributionData.datasets.length > 0"
+                                    type="doughnut" :data="scoreDistributionData" :options="doughnutOptions"
+                                    class="w-full h-64" />
+                                <EmptyState v-else title="No score data"
+                                    description="Complete some checklists to see score distribution."
+                                    icon="pi pi-chart-pie" variant="default" />
+                            </ChartSkeleton>
                         </div>
                     </template>
                 </Card>
@@ -657,6 +661,13 @@
                                     <span class="font-mono font-bold">{{ slotProps.data.symbol }}</span>
                                 </template>
                             </Column>
+                            <Column field="exclude_fundamentals" header="Type" :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="slotProps.data.exclude_fundamentals ? 'Technical' : 'Full'"
+                                        :severity="slotProps.data.exclude_fundamentals ? 'info' : 'success'"
+                                        class="text-xs" />
+                                </template>
+                            </Column>
                             <Column field="position_type" header="Position">
                                 <template #body="slotProps">
                                     <Tag :severity="slotProps.data.position_type === 'Long' ? 'success' : slotProps.data.position_type === 'Short' ? 'danger' : 'secondary'"
@@ -710,19 +721,29 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
 import { useDirectionalBias } from '@/composables/useDirectionalBias'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import ChartSkeleton from '@/Components/UI/ChartSkeleton.vue'
+import EmptyState from '@/Components/UI/EmptyState.vue'
 
 // Toast setup
 const toast = useToast()
 const page = usePage()
 
+// Chart loading state - simulates initial load delay
+const chartsLoading = ref(true)
+
 // Show toast for flash messages
 onMounted(() => {
+    // Simulate chart initialization delay for smoother UX
+    setTimeout(() => {
+        chartsLoading.value = false
+    }, 500)
+
     if (page.props.flash?.success) {
         toast.add({
             severity: 'success',

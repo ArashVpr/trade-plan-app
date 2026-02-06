@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="max-w-5xl mx-auto">
+        <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl font text-blue-900 dark:text-blue-300 mb-6 text-center">Checklist History</h1>
             <Card>
                 <template #title>
@@ -38,193 +38,264 @@
                     </div>
                 </template>
                 <template #content>
-                    <DataTable :value="checklists.data" lazy :paginator="true" :rows="checklists.per_page"
-                        :totalRecords="checklists.total" :result-count="checklists.total" dataKey="id"
-                        :loading="loading" @page="onPageChange" @sort="onSort" @filter="onFilter"
-                        class="p-datatable-sm text-sm" scrollable scrollHeight="600px" :sortField="sortField"
-                        :sortOrder="sortOrder" removableSort v-model:filters="filters" filterDisplay="menu"
-                        :globalFilterFields="['symbol', 'score']" rowHover>
-                        <template #header>
-                            <div class="flex justify-between items-center h-10">
-                                <!-- Dynamic Header Title / Clear Button Area -->
-                                <div class="flex items-center">
-                                    <div v-if="filters.global.value || filters.bias.value || filters.position_type.value || filters.trade_status.value"
-                                        class="animate-fade-in">
-                                        <Button label="Clear Filters" icon="pi pi-filter-slash" severity="danger" text
-                                            class="!px-0 hover:bg-transparent text-red-600 hover:text-red-700 font-semibold"
-                                            @click="clearAllFilters" />
+                    <!-- Mobile Card View (visible on small screens only) -->
+                    <div class="md:hidden">
+                        <!-- Mobile Search & Filters -->
+                        <div class="mb-4 space-y-3">
+                            <IconField class="w-full">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Search checklists..."
+                                    class="w-full" />
+                            </IconField>
+                            <div v-if="hasActiveFilters" class="flex justify-end">
+                                <Button label="Clear Filters" icon="pi pi-filter-slash" severity="danger" text
+                                    size="small" @click="clearAllFilters" />
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div v-if="loading" class="space-y-4">
+                            <div v-for="i in 3" :key="i"
+                                class="bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg p-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <Skeleton width="6rem" height="1.5rem" />
+                                    <Skeleton width="4rem" height="1.5rem" borderRadius="9999px" />
+                                </div>
+                                <div class="flex gap-2 mb-3">
+                                    <Skeleton width="4rem" height="1.25rem" borderRadius="9999px" />
+                                    <Skeleton width="3rem" height="1.25rem" borderRadius="9999px" />
+                                </div>
+                                <Skeleton width="100%" height="2rem" class="mb-3" />
+                                <div class="flex justify-end gap-2">
+                                    <Skeleton shape="circle" size="2rem" />
+                                    <Skeleton shape="circle" size="2rem" />
+                                    <Skeleton shape="circle" size="2rem" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <EmptyState v-else-if="checklists.data.length === 0 && !hasActiveFilters"
+                            title="No checklists yet"
+                            description="Start your trading journey by creating your first checklist to analyze trade setups."
+                            icon="pi pi-list-check" action-label="Create First Checklist" action-icon="pi pi-plus"
+                            @action="router.visit(route('home'))" />
+
+                        <!-- Filtered Empty State -->
+                        <EmptyState v-else-if="checklists.data.length === 0 && hasActiveFilters" variant="search"
+                            title="No matches found"
+                            description="Try adjusting your search or filters to find what you're looking for."
+                            action-label="Clear Filters" action-icon="pi pi-filter-slash" action-severity="secondary"
+                            @action="clearAllFilters" />
+
+                        <!-- Mobile Cards -->
+                        <ChecklistMobileCards v-else :items="checklists.data" :get-directional-bias="getDirectionalBias"
+                            :get-trade-status="getTradeStatus" :get-trade-status-severity="getTradeStatusSeverity"
+                            @delete="confirmDelete" />
+
+                        <!-- Mobile Pagination -->
+                        <div v-if="checklists.data.length > 0" class="mt-4 flex justify-center">
+                            <Paginator :rows="checklists.per_page" :totalRecords="checklists.total"
+                                :first="(checklists.current_page - 1) * checklists.per_page" @page="onPageChange"
+                                template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                                currentPageReportTemplate="{first}-{last} of {totalRecords}" />
+                        </div>
+                    </div>
+
+                    <!-- Desktop DataTable (hidden on small screens, visible on md+) -->
+                    <div class="hidden md:block">
+                        <DataTable :value="checklists.data" lazy :paginator="true" :rows="checklists.per_page"
+                            :totalRecords="checklists.total" :result-count="checklists.total" dataKey="id"
+                            :loading="loading" @page="onPageChange" @sort="onSort" @filter="onFilter"
+                            class="p-datatable-sm text-sm w-full" scrollable scrollHeight="600px" :sortField="sortField"
+                            :sortOrder="sortOrder" removableSort v-model:filters="filters" filterDisplay="menu"
+                            :globalFilterFields="['symbol', 'score']" rowHover>
+                            <template #header>
+                                <div class="flex justify-between items-center h-10">
+                                    <!-- Dynamic Header Title / Clear Button Area -->
+                                    <div class="flex items-center">
+                                        <div v-if="hasActiveFilters" class="animate-fade-in">
+                                            <Button label="Clear Filters" icon="pi pi-filter-slash" severity="danger"
+                                                text
+                                                class="!px-0 hover:bg-transparent text-red-600 hover:text-red-700 font-semibold"
+                                                @click="clearAllFilters" />
+                                        </div>
+                                        <div v-else class="text-lg font-semibold text-slate-700 dark:text-slate-300">
+                                            Checklists
+                                        </div>
                                     </div>
-                                    <div v-else class="text-lg font-semibold text-slate-700 dark:text-slate-300">
-                                        Checklists
+
+                                    <!-- Search Area -->
+                                    <IconField>
+                                        <InputIcon>
+                                            <i class="pi pi-search" />
+                                        </InputIcon>
+                                        <InputText v-model="filters['global'].value" placeholder="Keyword Search..."
+                                            class="w-64" />
+                                    </IconField>
+                                </div>
+                            </template>
+                            <template #empty>
+                                <EmptyState v-if="!hasActiveFilters" title="No checklists yet"
+                                    description="Start your trading journey by creating your first checklist to analyze trade setups."
+                                    icon="pi pi-list-check" action-label="Create First Checklist"
+                                    action-icon="pi pi-plus" @action="router.visit(route('home'))" />
+                                <EmptyState v-else variant="search" title="No matches found"
+                                    description="We couldn't find any results matching your search or filters."
+                                    action-label="Clear All Filters" action-icon="pi pi-filter-slash"
+                                    action-severity="secondary" @action="clearAllFilters" />
+                            </template>
+                            <template #loading>
+                                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    Loading data...
+                                </div>
+                            </template>
+
+                            <Column field="created_at" header="Date" sortable :style="{ width: '110px' }">
+                                <template #body="slotProps">
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">
+                                        {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+                                    </span>
+                                </template>
+                            </Column>
+
+                            <Column field="symbol" header="Symbol" sortable :style="{ width: '110px' }">
+                                <template #body="slotProps">
+                                    <div class="font-bold text-blue-900 dark:text-blue-300">{{ slotProps.data.symbol ||
+                                        'N/A' }}</div>
+                                </template>
+                            </Column>
+
+                            <Column field="exclude_fundamentals" header="Type" :style="{ width: '110px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="slotProps.data.exclude_fundamentals ? 'Technical' : 'Full'"
+                                        :severity="slotProps.data.exclude_fundamentals ? 'info' : 'success'"
+                                        class="text-xs" />
+                                </template>
+                            </Column>
+
+                            <Column field="score" header="Score" sortable :style="{ width: '100px' }">
+                                <template #body="slotProps">
+                                    <Tag :value="`${slotProps.data.score}/100`"
+                                        :severity="getScoreSeverity(slotProps.data.score)" rounded />
+                                </template>
+                            </Column>
+
+                            <Column field="bias" header="Bias" :showFilterMatchModes="false"
+                                :style="{ width: '140px' }">
+                                <template #filter="{ filterModel, filterCallback }">
+                                    <Select v-model="filterModel.value" @change="filterCallback()"
+                                        :options="biasOptions" optionLabel="label" optionValue="value"
+                                        placeholder="Select Bias" class="p-column-filter min-w-[12rem]"
+                                        :showClear="true">
+                                        <template #option="slotProps">
+                                            <Tag :value="slotProps.option.label"
+                                                :severity="getBiasSeverity(slotProps.option.value)"
+                                                class="text-xs whitespace-nowrap" />
+                                        </template>
+                                    </Select>
+                                </template>
+                                <template #body="slotProps">
+                                    <div v-if="getDirectionalBias(slotProps.data).hasEnoughData">
+                                        <Tag :value="getDirectionalBias(slotProps.data).biasDisplay"
+                                            :severity="getDirectionalBias(slotProps.data).severity"
+                                            class="text-xs font-bold whitespace-nowrap" />
                                     </div>
-                                </div>
+                                    <span v-else class="text-slate-400 dark:text-slate-500 text-xs italic">No
+                                        Signals</span>
+                                </template>
+                            </Column>
 
-                                <!-- Search Area -->
-                                <IconField>
-                                    <InputIcon>
-                                        <i class="pi pi-search" />
-                                    </InputIcon>
-                                    <InputText v-model="filters['global'].value" placeholder="Keyword Search..."
-                                        class="w-64" />
-                                </IconField>
-                            </div>
-                        </template>
-                        <template #empty>
-                            <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
-                                <div class="bg-slate-50 dark:bg-slate-900/40 rounded-full p-4 mb-4">
-                                    <i class="pi pi-search text-4xl text-slate-300 dark:text-slate-500"></i>
-                                </div>
-                                <h3 class="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No checklists
-                                    found</h3>
-                                <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
-                                    We couldn't find any results matching your search or filters.
-                                </p>
-                                <Button
-                                    v-if="filters.global.value || filters.bias.value || filters.position_type.value || filters.trade_status.value"
-                                    label="Clear All Filters" icon="pi pi-filter-slash" severity="primary" outlined
-                                    @click="clearAllFilters" />
-                                <div v-else>
-                                    <Link :href="route('home')">
-                                        <Button label="Create New Checklist" icon="pi pi-plus" severity="primary" />
-                                    </Link>
-                                </div>
-                            </div>
-                        </template>
-                        <template #loading>
-                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                Loading data...
-                            </div>
-                        </template>
+                            <Column field="position_type" header="Position" :showFilterMatchModes="false"
+                                :style="{ width: '130px' }">
+                                <template #filter="{ filterModel, filterCallback }">
+                                    <Select v-model="filterModel.value" @change="filterCallback()"
+                                        :options="positionOptions" optionLabel="label" optionValue="value"
+                                        placeholder="Select Position" class="p-column-filter min-w-[12rem]"
+                                        :showClear="true">
+                                        <template #option="slotProps">
+                                            <Tag :value="slotProps.option.label"
+                                                :severity="slotProps.option.value === 'Long' ? 'success' : 'danger'" />
+                                        </template>
+                                    </Select>
+                                </template>
+                                <template #body="slotProps">
+                                    <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
+                                        :severity="slotProps.data.trade_entry?.position_type === 'Long' ? 'success' : 'danger'"
+                                        v-if="slotProps.data.trade_entry?.position_type" />
+                                    <span v-else class="text-slate-400 dark:text-slate-500 text-sm">-</span>
+                                </template>
+                            </Column>
 
-                        <Column field="created_at" header="Date" sortable :style="{ width: '110px' }">
-                            <template #body="slotProps">
-                                <span class="font-medium text-slate-700 dark:text-slate-300">
-                                    {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
-                                </span>
-                            </template>
-                        </Column>
+                            <Column field="entry_date" header="Entry&#160;Date" sortable
+                                :style="{ width: '130px', whiteSpace: 'nowrap' }">
+                                <template #body="slotProps">
+                                    <span class="text-sm border-b border-dotted border-slate-300 dark:border-slate-600">
+                                        {{ slotProps.data.trade_entry?.entry_date ?
+                                            new Date(slotProps.data.trade_entry.entry_date).toLocaleDateString() : '-'
+                                        }}
+                                    </span>
+                                </template>
+                            </Column>
 
-                        <Column field="symbol" header="Symbol" sortable :style="{ width: '110px' }">
-                            <template #body="slotProps">
-                                <div class="font-bold text-blue-900 dark:text-blue-300">{{ slotProps.data.symbol ||
-                                    'N/A' }}</div>
-                            </template>
-                        </Column>
+                            <Column field="trade_status" header="Status" :showFilterMatchModes="false"
+                                :style="{ width: '150px' }">
+                                <template #filter="{ filterModel, filterCallback }">
+                                    <Select v-model="filterModel.value" @change="filterCallback()"
+                                        :options="tradeStatusOptions" optionLabel="label" optionValue="value"
+                                        placeholder="Select Status" class="p-column-filter min-w-[12rem]"
+                                        :showClear="true">
+                                        <template #option="slotProps">
+                                            <Tag :value="slotProps.option.label"
+                                                :severity="getTradeStatusSeverity({ trade_entry: { trade_status: slotProps.option.value } })" />
+                                        </template>
+                                    </Select>
+                                </template>
+                                <template #body="slotProps">
+                                    <Tag :value="getTradeStatus(slotProps.data)"
+                                        :severity="getTradeStatusSeverity(slotProps.data)" class="!whitespace-nowrap" />
+                                </template>
+                            </Column>
 
-                        <Column field="score" header="Score" sortable :style="{ width: '100px' }">
-                            <template #body="slotProps">
-                                <Tag :value="`${slotProps.data.score}/100`"
-                                    :severity="getScoreSeverity(slotProps.data.score)" rounded />
-                            </template>
-                        </Column>
+                            <Column field="rrr" header="R:R" sortable :style="{ width: '80px' }">
+                                <template #body="slotProps">
+                                    <span class="font-mono font-semibold text-slate-600 dark:text-slate-300">
+                                        {{ slotProps.data.trade_entry?.rrr ?
+                                            Number(slotProps.data.trade_entry.rrr).toFixed(2) : '-' }}
+                                    </span>
+                                </template>
+                            </Column>
 
-                        <Column field="bias" header="Bias" :showFilterMatchModes="false" :style="{ width: '140px' }">
-                            <template #filter="{ filterModel, filterCallback }">
-                                <Select v-model="filterModel.value" @change="filterCallback()" :options="biasOptions"
-                                    optionLabel="label" optionValue="value" placeholder="Select Bias"
-                                    class="p-column-filter min-w-[12rem]" :showClear="true">
-                                    <template #option="slotProps">
-                                        <Tag :value="slotProps.option.label"
-                                            :severity="getBiasSeverity(slotProps.option.value)" />
-                                    </template>
-                                </Select>
-                            </template>
-                            <template #body="slotProps">
-                                <div v-if="getDirectionalBias(slotProps.data).hasEnoughData">
-                                    <Tag :value="getDirectionalBias(slotProps.data).biasDisplay"
-                                        :severity="getDirectionalBias(slotProps.data).severity"
-                                        class="text-xs font-bold" />
-                                </div>
-                                <span v-else class="text-slate-400 dark:text-slate-500 text-xs italic">No Signals</span>
-                            </template>
-                        </Column>
+                            <Column header="Img" :style="{ width: '60px' }">
+                                <template #body="slotProps">
+                                    <div v-if="slotProps.data.trade_entry?.screenshot_paths && slotProps.data.trade_entry.screenshot_paths.length > 0"
+                                        class="flex items-center justify-center">
+                                        <i class="pi pi-image text-blue-500"
+                                            v-tooltip="`${slotProps.data.trade_entry.screenshot_paths.length} images`"></i>
+                                    </div>
+                                </template>
+                            </Column>
 
-                        <Column field="position_type" header="Position" :showFilterMatchModes="false"
-                            :style="{ width: '130px' }">
-                            <template #filter="{ filterModel, filterCallback }">
-                                <Select v-model="filterModel.value" @change="filterCallback()"
-                                    :options="positionOptions" optionLabel="label" optionValue="value"
-                                    placeholder="Select Position" class="p-column-filter min-w-[12rem]"
-                                    :showClear="true">
-                                    <template #option="slotProps">
-                                        <Tag :value="slotProps.option.label"
-                                            :severity="slotProps.option.value === 'Long' ? 'success' : 'danger'" />
-                                    </template>
-                                </Select>
-                            </template>
-                            <template #body="slotProps">
-                                <Tag :value="slotProps.data.trade_entry?.position_type || 'N/A'"
-                                    :severity="slotProps.data.trade_entry?.position_type === 'Long' ? 'success' : 'danger'"
-                                    v-if="slotProps.data.trade_entry?.position_type" />
-                                <span v-else class="text-slate-400 dark:text-slate-500 text-sm">-</span>
-                            </template>
-                        </Column>
-
-                        <Column field="entry_date" header="Entry&#160;Date" sortable
-                            :style="{ width: '130px', whiteSpace: 'nowrap' }">
-                            <template #body="slotProps">
-                                <span class="text-sm border-b border-dotted border-slate-300 dark:border-slate-600">
-                                    {{ slotProps.data.trade_entry?.entry_date ?
-                                        new Date(slotProps.data.trade_entry.entry_date).toLocaleDateString() : '-'
-                                    }}
-                                </span>
-                            </template>
-                        </Column>
-
-                        <Column field="trade_status" header="Status" :showFilterMatchModes="false"
-                            :style="{ width: '150px' }">
-                            <template #filter="{ filterModel, filterCallback }">
-                                <Select v-model="filterModel.value" @change="filterCallback()"
-                                    :options="tradeStatusOptions" optionLabel="label" optionValue="value"
-                                    placeholder="Select Status" class="p-column-filter min-w-[12rem]" :showClear="true">
-                                    <template #option="slotProps">
-                                        <Tag :value="slotProps.option.label"
-                                            :severity="getTradeStatusSeverity({ trade_entry: { trade_status: slotProps.option.value } })" />
-                                    </template>
-                                </Select>
-                            </template>
-                            <template #body="slotProps">
-                                <Tag :value="getTradeStatus(slotProps.data)"
-                                    :severity="getTradeStatusSeverity(slotProps.data)" class="!whitespace-nowrap" />
-                            </template>
-                        </Column>
-
-                        <Column field="rrr" header="R:R" sortable :style="{ width: '80px' }">
-                            <template #body="slotProps">
-                                <span class="font-mono font-semibold text-slate-600 dark:text-slate-300">
-                                    {{ slotProps.data.trade_entry?.rrr ?
-                                        Number(slotProps.data.trade_entry.rrr).toFixed(2) : '-' }}
-                                </span>
-                            </template>
-                        </Column>
-
-                        <Column header="Img" :style="{ width: '60px' }">
-                            <template #body="slotProps">
-                                <div v-if="slotProps.data.trade_entry?.screenshot_paths && slotProps.data.trade_entry.screenshot_paths.length > 0"
-                                    class="flex items-center justify-center">
-                                    <i class="pi pi-image text-blue-500"
-                                        v-tooltip="`${slotProps.data.trade_entry.screenshot_paths.length} images`"></i>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column header="Actions" :style="{ width: '120px' }" Frozen alignFrozen="right">
-                            <template #body="slotProps">
-                                <div class="flex gap-2 justify-end">
-                                    <Link :href="route('checklists.show', slotProps.data.id)">
-                                        <Button icon="pi pi-eye" size="small" severity="secondary" text rounded
-                                            aria-label="View" />
-                                    </Link>
-                                    <Link :href="route('checklists.edit', slotProps.data.id)">
-                                        <Button icon="pi pi-pencil" size="small" severity="info" text rounded
-                                            aria-label="Edit" />
-                                    </Link>
-                                    <Button icon="pi pi-trash" size="small" severity="danger" text rounded
-                                        aria-label="Delete" @click="confirmDelete(slotProps.data.id)" />
-                                </div>
-                            </template>
-                        </Column>
-                    </DataTable>
+                            <Column header="Actions" :style="{ width: '120px' }" Frozen alignFrozen="right">
+                                <template #body="slotProps">
+                                    <div class="flex gap-2 justify-end">
+                                        <Link :href="route('checklists.show', slotProps.data.id)">
+                                            <Button icon="pi pi-eye" size="small" severity="secondary" text rounded
+                                                aria-label="View" />
+                                        </Link>
+                                        <Link :href="route('checklists.edit', slotProps.data.id)">
+                                            <Button icon="pi pi-pencil" size="small" severity="info" text rounded
+                                                aria-label="Edit" />
+                                        </Link>
+                                        <Button icon="pi pi-trash" size="small" severity="danger" text rounded
+                                            aria-label="Delete" @click="confirmDelete(slotProps.data.id)" />
+                                    </div>
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </div>
 
                     <!-- Custom Pagination - Removed in favor of built-in DataTable paginator for cleaner integration -->
 
@@ -255,6 +326,8 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
+import EmptyState from '@/Components/UI/EmptyState.vue'
+import ChecklistMobileCards from '@/Components/UI/ChecklistMobileCards.vue'
 import { onMounted, computed, ref, watch } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import { useConfirm } from 'primevue/useconfirm'
@@ -313,6 +386,16 @@ const tradeStatusOptions = ref([
     { label: 'Cancelled', value: 'cancelled' },
     { label: 'Analysis Only', value: 'analysis_only' }
 ])
+
+// Computed property to check if any filters are active
+const hasActiveFilters = computed(() => {
+    return !!(
+        filters.value.global.value ||
+        filters.value.bias.value ||
+        filters.value.position_type.value ||
+        filters.value.trade_status.value
+    )
+})
 
 onMounted(() => {
     if (page.props.flash?.success) {
@@ -423,17 +506,17 @@ const getTradeStatusSeverity = (checklist) => {
     const tradeEntry = checklist.trade_entry
 
     if (!tradeEntry || !tradeEntry.trade_status) {
-        return 'info'  // Blue for analysis only
+        return 'info'
     }
 
     // Check if we have the new trade_status field
     switch (tradeEntry.trade_status) {
-        case 'pending': return 'warn'   // Changed to Warn (Yellow) for visibility
-        case 'active': return 'info'    // Changed to Info (Blue)
-        case 'win': return 'success' // Green
-        case 'loss': return 'danger'  // Red
+        case 'pending': return 'warn'
+        case 'active': return 'info'
+        case 'win': return 'success'
+        case 'loss': return 'danger'
         case 'breakeven': return 'secondary'
-        case 'cancelled': return 'contrast'
+        case 'cancelled': return 'secondary'
         default: return 'secondary'
     }
 }

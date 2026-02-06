@@ -30,7 +30,7 @@ class ChecklistFactory extends Factory
 
         // Get symbols from database instead of hardcoded array
         $instruments = \App\Models\Instrument::active()->pluck('symbol')->toArray();
-        $symbols = !empty($instruments) ? $instruments : ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY'];
+        $symbols = ! empty($instruments) ? $instruments : ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY'];
 
         return [
             'user_id' => 1, // Using static user ID for now, could use User::factory()
@@ -45,6 +45,7 @@ class ChecklistFactory extends Factory
                 'nonCommercials' => $this->faker->randomElement(['Bullish Divergence', 'Neutral', 'Bearish Divergence']),
                 'cotIndex' => $this->faker->randomElement(['Bullish', 'Neutral', 'Bearish']),
             ],
+            'exclude_fundamentals' => false,
             'score' => $this->faker->numberBetween(0, 100),
             'symbol' => $this->faker->randomElement($symbols),
             'created_at' => $this->faker->dateTimeBetween('-4 weeks', 'now'),
@@ -116,6 +117,24 @@ class ChecklistFactory extends Factory
             \App\Models\TradeEntry::factory()->cancelled()->create([
                 'checklist_id' => $checklist->id,
             ]);
+        });
+    }
+
+    /**
+     * Create checklist with fundamentals excluded (technical trade only)
+     */
+    public function excludingFundamentals()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'exclude_fundamentals' => true,
+                'fundamentals' => [
+                    'valuation' => 'Neutral',
+                    'seasonalConfluence' => 'Neutral',
+                    'nonCommercials' => 'Neutral',
+                    'cotIndex' => 'Neutral',
+                ],
+            ];
         });
     }
 }

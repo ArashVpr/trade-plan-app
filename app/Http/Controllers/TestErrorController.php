@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class TestErrorController extends Controller
 {
     /**
@@ -17,7 +15,7 @@ class TestErrorController extends Controller
         // Return the 500 error view directly for testing
         // In production, this would be triggered by actual exceptions
         return response()->view('errors.500', [
-            'exception' => new \Exception('This is a test 500 error for demonstration purposes.')
+            'exception' => new \Exception('This is a test 500 error for demonstration purposes.'),
         ], 500);
     }
 

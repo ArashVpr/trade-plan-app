@@ -9,7 +9,21 @@ class ChecklistWeights extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id',
+        'zone_fresh_weight',
+        'zone_original_weight',
+        'zone_flip_weight',
+        'zone_lol_weight',
+        'zone_min_rr_weight',
+        'zone_big_brother_weight',
+        'technical_very_exp_chp_weight',
+        'technical_exp_chp_weight',
+        'fundamental_valuation_weight',
+        'fundamental_seasonal_weight',
+        'fundamental_noncommercial_divergence_weight',
+        'fundamental_cot_index_weight',
+    ];
 
     /**
      * Default values for each weight attribute.

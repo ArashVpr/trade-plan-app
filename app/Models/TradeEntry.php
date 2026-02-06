@@ -9,7 +9,19 @@ class TradeEntry extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id',
+        'checklist_id',
+        'entry_date',
+        'position_type',
+        'entry_price',
+        'stop_price',
+        'target_price',
+        'rrr',
+        'notes',
+        'screenshot_paths',
+        'trade_status',
+    ];
 
     protected $casts = [
         'screenshot_paths' => 'array',
@@ -24,7 +36,6 @@ class TradeEntry extends Model
     {
         return $this->belongsTo(Checklist::class);
     }
-
 
     /**
      * Check if trade is a win
@@ -48,5 +59,15 @@ class TradeEntry extends Model
     public function isBreakeven()
     {
         return $this->trade_status === 'breakeven';
+    }
+
+    /**
+     * Get the first screenshot path (for backward compatibility)
+     */
+    public function getScreenshotPathAttribute()
+    {
+        $paths = $this->screenshot_paths;
+
+        return is_array($paths) && count($paths) > 0 ? $paths[0] : null;
     }
 }

@@ -85,7 +85,7 @@
                                         <div class="text-right">
                                             <div class="font-bold text-green-600">{{ technicalWeightTotal }} </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">{{ technicalPercentage
-                                                }}%</div>
+                                            }}%</div>
                                         </div>
                                     </div>
 
@@ -165,7 +165,7 @@
                                         <Slider v-model="form.zone_flip_weight" :min="0" :max="100" :step="1"
                                             class="w-full" />
                                         <small v-if="errors.zone_flip_weight" class="p-error">{{ errors.zone_flip_weight
-                                        }}</small>
+                                            }}</small>
                                     </div>
 
                                     <div class="flex flex-col gap-2">
@@ -178,7 +178,7 @@
                                         <Slider v-model="form.zone_lol_weight" :min="0" :max="100" :step="1"
                                             class="w-full" />
                                         <small v-if="errors.zone_lol_weight" class="p-error">{{ errors.zone_lol_weight
-                                        }}</small>
+                                            }}</small>
                                     </div>
 
                                     <div class="flex flex-col gap-2">
@@ -301,9 +301,18 @@
                                 <div class="flex items-center gap-2">
                                     <i class="pi pi-globe text-purple-600"></i>
                                     Fundamental Analysis
+                                    <i v-tooltip.top="redistributionTooltip" class="pi pi-info-circle text-gray-400 cursor-help text-sm ml-auto"></i>
                                 </div>
                             </template>
                             <template #content>
+                                <Message severity="info" :closable="false" class="mb-4">
+                                    <template #icon>
+                                        <i class="pi pi-info-circle text-sm"></i>
+                                    </template>
+                                    <div class="text-xs">
+                                        When fundamentals are excluded from a checklist, these weights are removed from the calculation. The score redistributes proportionally across zones and technicals only.
+                                    </div>
+                                </Message>
                                 <div class="space-y-4">
                                     <div class="flex flex-col gap-2">
                                         <label
@@ -442,6 +451,20 @@ const technicalPercentage = computed(() => {
 const fundamentalPercentage = computed(() => {
     const total = categoryTotal.value;
     return total > 0 ? Math.round((fundamentalWeightTotal.value / total) * 100) : 0;
+});
+
+// Tooltip explaining weight redistribution
+const redistributionTooltip = computed(() => {
+    const zonesOnly = zoneWeightTotal.value;
+    const technicalsOnly = technicalWeightTotal.value;
+    const totalWithoutFundamentals = zonesOnly + technicalsOnly;
+    
+    if (totalWithoutFundamentals === 0) return 'Configure weights to see redistribution example';
+    
+    const zonesPercent = Math.round((zonesOnly / totalWithoutFundamentals) * 100);
+    const technicalsPercent = Math.round((technicalsOnly / totalWithoutFundamentals) * 100);
+    
+    return `When fundamentals are excluded:\n\nZones: ${zonesPercent}%\nTechnicals: ${technicalsPercent}%\n\nScores are calculated only from zones and technicals, maintaining accurate 0-100% range.`;
 });
 
 // Chart data

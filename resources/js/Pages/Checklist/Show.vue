@@ -71,12 +71,12 @@
                             <!-- Zone Qualifiers -->
                             <div class="field">
                                 <label class="block text-sm font-medium mb-1">
-                                    Zone Qualifiers ({{ checklist.zone_qualifiers.length }})
+                                    Zone Qualifiers ({{ checklist.zone_qualifiers?.length ?? 0 }})
                                 </label>
                                 <div class="flex flex-wrap gap-2">
-                                    <Chip v-for="qualifier in checklist.zone_qualifiers" :key="qualifier"
+                                    <Chip v-for="qualifier in checklist.zone_qualifiers || []" :key="qualifier"
                                         :label="qualifier" class="mb-1" />
-                                    <span v-if="checklist.zone_qualifiers.length === 0"
+                                    <span v-if="!checklist.zone_qualifiers || checklist.zone_qualifiers.length === 0"
                                         class="text-gray-500 dark:text-gray-400 text-sm">
                                         None selected
                                     </span>
@@ -102,8 +102,15 @@
 
                             <!-- Fundamentals -->
                             <div class="field">
-                                <label class="block text-sm font-medium mb-1">Fundamentals</label>
-                                <div class="space-y-2">
+                                <label class="block text-sm font-medium mb-1 flex items-center gap-2">
+                                    <span>Fundamentals</span>
+                                    <Badge v-if="checklist.exclude_fundamentals" value="Excluded" severity="info" />
+                                </label>
+                                <div v-if="checklist.exclude_fundamentals"
+                                    class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                    This trade was analyzed without fundamental analysis.
+                                </div>
+                                <div v-if="!checklist.exclude_fundamentals" class="space-y-2">
                                     <div class="flex items-center gap-2">
                                         <span class="text-sm font-medium">Valuation:</span>
                                         <Tag :value="checklist.fundamentals?.valuation || 'Not selected'"
@@ -249,7 +256,7 @@
                     <template #content>
                         <!-- Custom Static Legend -->
                         <div class="flex justify-center gap-6 mb-6 text-base flex-wrap">
-                            <div v-for="(label, index) in ['Zone Qualifiers', 'Technicals', 'Fundamentals']"
+                            <div v-for="(label, index) in (props.checklist.exclude_fundamentals ? ['Zone Qualifiers', 'Technicals'] : ['Zone Qualifiers', 'Technicals', 'Fundamentals'])"
                                 :key="label" class="flex items-center gap-2">
                                 <span class="inline-block w-4 h-4 rounded-sm bg-emerald-500"></span>
                                 <span class="font-semibold">{{ getLegendText(label) }}</span>
@@ -292,7 +299,8 @@ const props = defineProps({
 const { directionalBias } = useDirectionalBias(
     computed(() => props.checklist.technicals),
     computed(() => props.checklist.fundamentals),
-    computed(() => props.settings)
+    computed(() => props.settings),
+    computed(() => props.checklist.exclude_fundamentals ?? false)
 )
 
 onMounted(() => {
@@ -344,17 +352,17 @@ const getTradeStatus = (tradeEntry) => {
  */
 const getTradeStatusSeverity = (tradeEntry) => {
     if (!tradeEntry || !tradeEntry.trade_status) {
-        return 'info' // Blue for analysis only
+        return 'info'
     }
 
     // Check if we have the new trade_status field
     switch (tradeEntry.trade_status) {
-        case 'pending': return 'warn'   // Yellow  
-        case 'active': return 'info'    // Yellow
-        case 'win': return 'success'     // Green
-        case 'loss': return 'danger'     // Red  
-        case 'breakeven': return 'warn' // Yellow
-        case 'cancelled': return 'secondary' // Gray
+        case 'pending': return 'warn'
+        case 'active': return 'info'
+        case 'win': return 'success'
+        case 'loss': return 'danger'
+        case 'breakeven': return 'secondary'
+        case 'cancelled': return 'secondary'
         default: return 'secondary'
     }
 }
@@ -388,23 +396,27 @@ const confirmDelete = () => {
 const calculateCategoryScores = (checklist) => {
     const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
     let scores = {
-        ZoneQualifiers: Math.min(checklist.zone_qualifiers.length * 5, maxValues.ZoneQualifiers),
+        ZoneQualifiers: Math.min((checklist.zone_qualifiers?.length ?? 0) * 5, maxValues.ZoneQualifiers),
         Technicals: 0,
         Fundamentals: 0
     };
 
     // Technicals score
-    scores.Technicals += ['Very Cheap', 'Very Expensive'].includes(checklist.technicals.location) ? 12 :
-        ['Cheap', 'Expensive'].includes(checklist.technicals.location) ? 7 : 0;
-    scores.Technicals += checklist.technicals.direction === 'Correction' ? 6 :
-        checklist.technicals.direction === 'Impulsion' ? 12 : 0;
+    if (checklist.technicals) {
+        scores.Technicals += ['Very Cheap', 'Very Expensive'].includes(checklist.technicals.location) ? 12 :
+            ['Cheap', 'Expensive'].includes(checklist.technicals.location) ? 7 : 0;
+        scores.Technicals += checklist.technicals.direction === 'Correction' ? 6 :
+            checklist.technicals.direction === 'Impulsion' ? 12 : 0;
+    }
     scores.Technicals = Math.min(scores.Technicals, maxValues.Technicals);
 
-    // Fundamentals score
-    scores.Fundamentals += ['Undervalued', 'Overvalued'].includes(checklist.fundamentals.valuation) ? 13 : 0;
-    scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.seasonalConfluence) ? 6 : 0;
-    scores.Fundamentals += ['Bullish Divergence', 'Bearish Divergence'].includes(checklist.fundamentals.nonCommercials) ? 15 : 0;
-    scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.cotIndex) ? 12 : 0;
+    // Fundamentals score - only if NOT excluded
+    if (!checklist.exclude_fundamentals && checklist.fundamentals) {
+        scores.Fundamentals += ['Undervalued', 'Overvalued'].includes(checklist.fundamentals.valuation) ? 13 : 0;
+        scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.seasonalConfluence) ? 6 : 0;
+        scores.Fundamentals += ['Bullish Divergence', 'Bearish Divergence'].includes(checklist.fundamentals.nonCommercials) ? 15 : 0;
+        scores.Fundamentals += ['Bullish', 'Bearish'].includes(checklist.fundamentals.cotIndex) ? 12 : 0;
+    }
     scores.Fundamentals = Math.min(scores.Fundamentals, maxValues.Fundamentals);
 
     return scores;
@@ -425,20 +437,22 @@ const chartData = computed(() => {
     const scores = calculateCategoryScores(props.checklist);
     const maxValues = { ZoneQualifiers: 30, Technicals: 24, Fundamentals: 46 };
     return {
-        labels: ['Zone Qualifiers', 'Technicals', 'Fundamentals'],
+        labels: ['Zone Qualifiers', 'Technicals', ...(props.checklist.exclude_fundamentals ? [] : ['Fundamentals'])],
         datasets: [{
             label: 'Score Contribution',
-            data: [
-                (scores.ZoneQualifiers / maxValues.ZoneQualifiers) * 100,
-                (scores.Technicals / maxValues.Technicals) * 100,
-                (scores.Fundamentals / maxValues.Fundamentals) * 100
-            ],
+            data: props.checklist.exclude_fundamentals ?
+                [
+                    (scores.ZoneQualifiers / maxValues.ZoneQualifiers) * 100,
+                    (scores.Technicals / maxValues.Technicals) * 100,
+                ] :
+                [
+                    (scores.ZoneQualifiers / maxValues.ZoneQualifiers) * 100,
+                    (scores.Technicals / maxValues.Technicals) * 100,
+                    (scores.Fundamentals / maxValues.Fundamentals) * 100
+                ],
             backgroundColor: (context) => {
-                const index = context.dataIndex;
-                const labels = ['ZoneQualifiers', 'Technicals', 'Fundamentals'];
-                const value = scores[labels[index]];
-                const max = maxValues[labels[index]];
-                return value === max ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+                const colors = ['rgba(16, 185, 129, 0.2)', 'rgba(16, 185, 129, 0.2)', 'rgba(16, 185, 129, 0.2)'];
+                return colors[context.dataIndex] || 'rgba(16, 185, 129, 0.2)';
             },
             borderColor: 'rgba(16, 185, 129, 1)',
             borderWidth: 3,
