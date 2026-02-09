@@ -508,10 +508,10 @@ class ChecklistController extends Controller
                                     if ($path) {
                                         $screenshotPaths[] = $path;
                                     } else {
-                                        Log::warning('Failed to store screenshot for checklist '.$checklist->id);
+                                        Log::warning('Failed to store screenshot for checklist ' . $checklist->id);
                                     }
                                 } catch (\Exception $e) {
-                                    Log::error('Screenshot storage error: '.$e->getMessage(), [
+                                    Log::error('Screenshot storage error: ' . $e->getMessage(), [
                                         'checklist_id' => $checklist->id,
                                         'error' => $e,
                                     ]);
@@ -540,7 +540,7 @@ class ChecklistController extends Controller
                             $tradeData
                         );
                     } catch (\Exception $e) {
-                        Log::error('Trade entry update error: '.$e->getMessage(), [
+                        Log::error('Trade entry update error: ' . $e->getMessage(), [
                             'checklist_id' => $checklist->id,
                             'tradeData' => $tradeData,
                             'error' => $e,
@@ -552,7 +552,7 @@ class ChecklistController extends Controller
 
             return to_route('checklists.show', $checklist->id, 303)->with('success', 'Checklist updated successfully!');
         } catch (\Exception $e) {
-            Log::error('Checklist update error: '.$e->getMessage(), [
+            Log::error('Checklist update error: ' . $e->getMessage(), [
                 'exception' => $e,
                 'checklist_id' => $checklist->id,
                 'user_id' => Auth::id(),
