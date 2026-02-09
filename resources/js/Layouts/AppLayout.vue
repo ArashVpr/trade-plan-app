@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-200">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
         <!-- Sidebar Drawer -->
         <Drawer v-model:visible="sidebarVisible" position="left">
             <template #container="{ closeCallback }">
@@ -161,6 +161,10 @@
 
         <!-- Global Toast for notifications -->
         <Toast />
+
+        <!-- Chatbot Components -->
+        <ChatbotButton :visible="showChatbot" @toggle="toggleChatbot" />
+        <ChatbotDrawer v-model:visible="showChatbot" />
     </div>
 </template>
 
@@ -169,10 +173,13 @@ import { ref, computed, onMounted } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import ThemeToggle from '@/Components/UI/ThemeToggle.vue'
+import ChatbotButton from '@/Components/UI/ChatbotButton.vue'
+import ChatbotDrawer from '@/Components/Chatbot/ChatbotDrawer.vue'
 import { useTheme } from '@/composables/useTheme'
 
 const page = usePage()
 const sidebarVisible = ref(false)
+const showChatbot = ref(false)
 const { initTheme } = useTheme()
 
 // Initialize theme on component mount
@@ -220,6 +227,11 @@ const pageTitle = computed(() => {
 const toggleUserMenu = () => {
     // Future: Implement user dropdown menu
     console.log('User menu clicked - future feature')
+}
+
+// Chatbot toggle
+const toggleChatbot = () => {
+    showChatbot.value = !showChatbot.value
 }
 </script>
 // Future: Implement user dropdown menu

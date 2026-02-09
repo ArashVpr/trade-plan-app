@@ -54,7 +54,7 @@
                                     fluid iconDisplay="input" :invalid="!!$errors.entry_date" />
                                 <Message v-if="$errors.entry_date" severity="error" :closable="false">{{
                                     $errors.entry_date
-                                    }}</Message>
+                                }}</Message>
                             </div>
                             <div class="field">
                                 <label class="block text-sm font-medium mb-2">Created</label>
@@ -106,14 +106,16 @@
                                     </h3>
                                     <div v-if="form.exclude_fundamentals" class="mb-4">
                                         <Message severity="info" :closable="false">
-                                            Fundamental analysis is excluded from this trade evaluation. Scores are calculated based on zones and technicals only.
+                                            Fundamental analysis is excluded from this trade evaluation. Scores are
+                                            calculated based on zones and technicals only.
                                         </Message>
                                     </div>
                                     <div class="mb-4">
                                         <div class="flex items-center gap-2">
                                             <Checkbox v-model="form.exclude_fundamentals" :binary="true"
                                                 inputId="exclude_fundamentals" />
-                                            <label for="exclude_fundamentals" class="text-sm font-medium cursor-pointer">
+                                            <label for="exclude_fundamentals"
+                                                class="text-sm font-medium cursor-pointer">
                                                 Skip fundamental analysis for this trade
                                             </label>
                                         </div>
@@ -122,7 +124,7 @@
                                         <div class="field">
                                             <label class="block text-sm font-medium mb-1">Valuation</label>
                                             <Select v-model="form.fundamentals.valuation"
-                                                :options="['Overvalued', 'Neutral', 'Undervalued']"
+                                                :options="['Overvalued', 'Fairly Valued', 'Undervalued']"
                                                 placeholder="Select Valuation" class="w-full"
                                                 :invalid="!!$errors['fundamentals.valuation']" />
                                             <Message v-if="$errors['fundamentals.valuation']" severity="error"
@@ -141,7 +143,7 @@
                                         <div class="field">
                                             <label class="block text-sm font-medium mb-1">Non-Commercials</label>
                                             <Select v-model="form.fundamentals.nonCommercials"
-                                                :options="['Bullish Divergence', 'Neutral', 'Bearish Divergence']"
+                                                :options="['Bullish Divergence', 'No Divergence', 'Bearish Divergence']"
                                                 placeholder="Select Non-Commercials" class="w-full"
                                                 :invalid="!!$errors['fundamentals.nonCommercials']" />
                                             <Message v-if="$errors['fundamentals.nonCommercials']" severity="error"
@@ -679,7 +681,7 @@ const evaluationScore = () => {
     } else if (form.technicals.direction === 'Correction') {
         raw += Number(props.settings.technical_direction_correction_weight || 0);
     }
-    
+
     // Fundamentals (only if not excluded)
     if (!form.exclude_fundamentals) {
         // Fundamentals: Valuation
@@ -699,7 +701,7 @@ const evaluationScore = () => {
             raw += Number(props.settings.fundamental_cot_index_weight || 0);
         }
     }
-    
+
     // 2. Max possible score based on one selection per category
     const zoneMax = zoneKeys.reduce((sum, key) => sum + Number(props.settings[`zone_${key}_weight`] || 0), 0);
     const locHigh = Math.max(
@@ -710,7 +712,7 @@ const evaluationScore = () => {
         Number(props.settings.technical_direction_impulsive_weight || 0),
         Number(props.settings.technical_direction_correction_weight || 0)
     );
-    
+
     // Fundamental max (0 if excluded, otherwise sum of all fundamental weights)
     const fundMax = form.exclude_fundamentals ? 0 : (
         Number(props.settings.fundamental_valuation_weight || 0) +
@@ -718,7 +720,7 @@ const evaluationScore = () => {
         Number(props.settings.fundamental_noncommercial_divergence_weight || 0) +
         Number(props.settings.fundamental_cot_index_weight || 0)
     );
-    
+
     const max = zoneMax + locHigh + dirHigh + fundMax;
     // 3. Normalize to 0-100
     form.score = max > 0 ? Math.round((raw / max) * 100) : 0;
