@@ -136,45 +136,51 @@
         </div>
 
         <!-- Screenshots -->
-        <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Chart Screenshots</label>
+        <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                <i class="pi pi-image text-blue-900 dark:text-blue-300"></i>
+                Chart Screenshots (Max 5)
+            </h3>
             <FileUpload ref="fileupload" name="screenshots[]" :multiple="true" accept="image/*" :maxFileSize="5000000"
                 :fileLimit="5" customUpload @select="onFilesSelect" @remove="onFileRemove" class="w-full">
                 <template #header="{ chooseCallback, clearCallback, files }">
-                    <div class="flex flex-wrap justify-between items-center gap-4 w-full">
+                    <div class="flex flex-wrap justify-between items-center gap-4">
                         <div class="flex gap-2">
-                            <Button @click="chooseCallback()" icon="pi pi-images" label="Add Images" size="small"
-                                severity="secondary" />
-                            <Button @click="clearCallback()" icon="pi pi-trash" label="Clear" outlined severity="danger"
+                            <Button @click="chooseCallback()" icon="pi pi-images" label="Choose" outlined
+                                severity="secondary" size="small" />
+                            <Button @click="clearCallback()" icon="pi pi-times" label="Clear" outlined severity="danger"
                                 size="small" :disabled="!files || files.length === 0" />
                         </div>
-                        <span class="text-xs font-mono bg-slate-100 px-2 py-1 rounded text-slate-600">{{ files?.length
-                            || 0 }}/5</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ files?.length || 0 }}/5 total</span>
                     </div>
                 </template>
                 <template #content="{ files, removeFileCallback }">
                     <div v-if="files.length > 0" class="pt-4">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div v-for="(file, index) of files" :key="file.name + file.type + file.size"
-                                class="relative group border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white shadow-sm">
+                                class="relative border border-gray-200 dark:border-gray-700 rounded-lg p-2">
                                 <img role="presentation" :alt="file.name" :src="file.objectURL"
-                                    class="w-full h-24 object-cover" />
-                                <div class="px-2 py-1 bg-white dark:bg-slate-800">
-                                    <div class="text-[10px] text-slate-500 truncate">{{ file.name }}</div>
-                                    <div class="text-[10px] text-slate-400">{{ formatSize(file.size) }}</div>
+                                    class="w-full h-32 object-cover rounded" />
+                                <div class="mt-2 text-xs text-gray-600 dark:text-gray-400 truncate">{{ file.name }}
                                 </div>
-                                <Button icon="pi pi-times" @click="removeFileCallback(index)" rounded severity="danger"
-                                    class="absolute top-1 right-1 w-6 h-6 !p-0 opacity-80 hover:opacity-100" />
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ formatSize(file.size) }}</div>
+                                <Button icon="pi pi-times" @click="removeFileCallback(index)" rounded text
+                                    severity="danger" class="absolute top-1 right-1" size="small" />
                             </div>
                         </div>
                     </div>
                 </template>
                 <template #empty>
-                    <div class="flex items-center justify-center flex-col py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                        @click="$refs.fileupload.choose()">
-                        <i class="pi pi-cloud-upload text-blue-400 text-3xl mb-3"></i>
-                        <p class="text-slate-600 dark:text-slate-300 font-medium">Drop charts here</p>
-                        <p class="text-xs text-slate-400 mt-1">Supports JPG/PNG up to 5MB</p>
+                    <div class="flex items-center justify-center flex-col py-8">
+                        <i class="pi pi-image text-gray-400 dark:text-gray-500 text-4xl mb-3"></i>
+                        <p class="text-gray-600 dark:text-gray-400">Drag and drop images here or click Choose</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max 5 images, 5MB each</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1">
+                            <i class="pi pi-clone text-[10px]"></i>
+                            Or press <kbd
+                                class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px] font-mono mx-1">Ctrl+V</kbd>
+                            to paste
+                        </p>
                     </div>
                 </template>
             </FileUpload>
@@ -189,6 +195,8 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
 const props = defineProps({
     modelValue: {
         type: Object,
@@ -201,6 +209,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'progress-updated'])
+
+const fileupload = ref(null)
 
 const positionOptions = ['Long', 'Short']
 const tradeStatusOptions = [
@@ -245,4 +255,65 @@ const formatSize = (bytes) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
+
+// Paste functionality
+const handlePaste = async (event) => {
+    const items = event.clipboardData?.items
+    if (!items) return
+
+    // Check if we've reached the file limit
+    const currentFiles = fileupload.value?.files || []
+    if (currentFiles.length >= 5) {
+        console.warn('Maximum file limit (5) reached')
+        return
+    }
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+
+        // Check if the clipboard item is an image
+        if (item.type.indexOf('image') !== -1) {
+            event.preventDefault()
+
+            const blob = item.getAsFile()
+            if (!blob) continue
+
+            // Check file size (5MB limit)
+            if (blob.size > 5000000) {
+                console.warn('Pasted image exceeds 5MB limit')
+                continue
+            }
+
+            // Create a File object with a meaningful name
+            const timestamp = new Date().getTime()
+            const extension = blob.type.split('/')[1]
+            const file = new File([blob], `pasted-image-${timestamp}.${extension}`, { type: blob.type })
+
+            // Add object URL for preview
+            file.objectURL = URL.createObjectURL(file)
+
+            // Add the file to the FileUpload component
+            const updatedFiles = [...currentFiles, file]
+
+            // Update the FileUpload component's files
+            if (fileupload.value) {
+                fileupload.value.files = updatedFiles
+                updateData('screenshots', updatedFiles)
+            }
+
+            // Only handle the first image if multiple items in clipboard
+            break
+        }
+    }
+}
+
+onMounted(() => {
+    // Add paste event listener to the entire document
+    document.addEventListener('paste', handlePaste)
+})
+
+onUnmounted(() => {
+    // Clean up the event listener
+    document.removeEventListener('paste', handlePaste)
+})
 </script>

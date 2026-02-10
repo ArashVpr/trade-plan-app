@@ -778,6 +778,25 @@ test('stores screenshot file when provided with trade entry', function () {
     Storage::disk('public')->assertExists($checklist->tradeEntry->screenshot_path);
 });
 
+test('creates trade entry when only screenshots are provided', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('trade-setup.png', 800, 600);
+
+    $data = array_merge(
+        validAnalysisData(),
+        ['screenshots' => [$file]]
+    );
+
+    $this->post(route('checklists.store'), $data);
+
+    $checklist = Checklist::where('user_id', $this->user->id)->first();
+
+    expect($checklist->tradeEntry)->not()->toBeNull();
+    expect($checklist->tradeEntry->screenshot_paths)->toHaveCount(1);
+    Storage::disk('public')->assertExists($checklist->tradeEntry->screenshot_paths[0]);
+});
+
 test('validates screenshot must be an image file', function () {
     Storage::fake('public');
 

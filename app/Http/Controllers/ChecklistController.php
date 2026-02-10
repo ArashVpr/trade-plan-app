@@ -318,20 +318,20 @@ class ChecklistController extends Controller
                 'symbol' => $validated['symbol'],
             ]);
 
-            // Only create TradeEntry if ALL required order fields are present
-            // Required fields: entry_date, position_type, entry_price, stop_price, target_price
-            $hasAllRequiredFields =
-                ! empty($validated['entry_date']) &&
-                ! empty($validated['position_type']) &&
-                isset($validated['entry_price']) &&
-                isset($validated['stop_price']) &&
-                isset($validated['target_price']);
+            // Create TradeEntry if any order detail, notes, or screenshots are provided
+            $hasTradeDetails = ($validated['entry_date'] ?? null) ||
+                ($validated['position_type'] ?? null) ||
+                ($validated['entry_price'] ?? null) ||
+                ($validated['stop_price'] ?? null) ||
+                ($validated['target_price'] ?? null) ||
+                ($validated['notes'] ?? null) ||
+                ($validated['screenshots'] ?? null);
 
-            if ($hasAllRequiredFields) {
+            if ($hasTradeDetails) {
                 $tradeEntryData = [
                     'user_id' => Auth::id(),
                     'checklist_id' => $checklist->id,
-                    'entry_date' => $validated['entry_date'],
+                    'entry_date' => $validated['entry_date'] ?? null,
                     'position_type' => $validated['position_type'] ?? null,
                     'entry_price' => $validated['entry_price'] ?? null,
                     'stop_price' => $validated['stop_price'] ?? null,
