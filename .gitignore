@@ -24,3 +24,4 @@ Homestead.yaml
 Thumbs.db
 *.md
 PrimeVue Documentation.html 
+scripts/fetch-logos.js

@@ -54,7 +54,7 @@
                                     fluid iconDisplay="input" :invalid="!!$errors.entry_date" />
                                 <Message v-if="$errors.entry_date" severity="error" :closable="false">{{
                                     $errors.entry_date
-                                }}</Message>
+                                    }}</Message>
                             </div>
                             <div class="field">
                                 <label class="block text-sm font-medium mb-2">Created</label>
@@ -350,6 +350,13 @@
                                                     Math.max(0,
                                                         5 -
                                                         existingImages.length) }} more images, 5MB each</p>
+                                                <p
+                                                    class="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1">
+                                                    <i class="pi pi-clone text-[10px]"></i>
+                                                    Or press <kbd
+                                                        class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px] font-mono mx-1">Ctrl+V</kbd>
+                                                    to paste
+                                                </p>
                                             </div>
                                         </template>
                                     </FileUpload>
@@ -367,7 +374,7 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import { computed, watch, onMounted, ref } from 'vue';
+import { computed, watch, onMounted, onUnmounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { useToast } from 'primevue/usetoast'
@@ -376,6 +383,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 
 const toast = useToast()
 const orderEntryRef = ref(null)
+const fileupload = ref(null)
 
 const props = defineProps({
     checklist: Object,
@@ -426,6 +434,9 @@ onMounted(() => {
             shouldHighlightOrderEntry.value = false
         }, 3000)
     }
+
+    // Add paste event listener for screenshots
+    document.addEventListener('paste', handlePaste)
 })
 
 // Helper functions for PrimeVue components
@@ -728,4 +739,90 @@ const evaluationScore = () => {
 
 // Watch for changes in form fields and update score
 watch(() => form, evaluationScore, { deep: true })
+
+// Paste functionality for screenshots
+const handlePaste = async (event) => {
+    const items = event.clipboardData?.items
+    if (!items) return
+
+    // Check if we've reached the file limit
+    const currentFiles = fileupload.value?.files || []
+    const totalImages = existingImages.value.length + currentFiles.length
+
+    if (totalImages >= 5) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Upload Limit',
+            detail: 'Maximum of 5 images allowed',
+            life: 3000
+        })
+        return
+    }
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+
+        // Check if the clipboard item is an image
+        if (item.type.indexOf('image') !== -1) {
+            event.preventDefault()
+
+            const blob = item.getAsFile()
+            if (!blob) continue
+
+            // Check file size (5MB limit)
+            if (blob.size > 5000000) {
+                toast.add({
+                    severity: 'warn',
+                    summary: 'File Too Large',
+                    detail: 'Pasted image exceeds 5MB limit',
+                    life: 3000
+                })
+                continue
+            }
+
+            // Check if adding this file would exceed limit
+            if (totalImages + 1 > 5) {
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Upload Limit',
+                    detail: `Cannot paste image. You can only have 5 total. Currently have ${totalImages} image(s).`,
+                    life: 3000
+                })
+                break
+            }
+
+            // Create a File object with a meaningful name
+            const timestamp = new Date().getTime()
+            const extension = blob.type.split('/')[1]
+            const file = new File([blob], `pasted-image-${timestamp}.${extension}`, { type: blob.type })
+
+            // Add object URL for preview
+            file.objectURL = URL.createObjectURL(file)
+
+            // Add the file to the FileUpload component
+            const updatedFiles = [...currentFiles, file]
+
+            // Update the FileUpload component's files
+            if (fileupload.value) {
+                fileupload.value.files = updatedFiles
+                form.screenshots = updatedFiles
+
+                toast.add({
+                    severity: 'success',
+                    summary: 'Image Pasted',
+                    detail: 'Screenshot added successfully',
+                    life: 2000
+                })
+            }
+
+            // Only handle the first image if multiple items in clipboard
+            break
+        }
+    }
+}
+
+onUnmounted(() => {
+    // Clean up the paste event listener
+    document.removeEventListener('paste', handlePaste)
+})
 </script>

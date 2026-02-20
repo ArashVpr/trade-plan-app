@@ -28,7 +28,7 @@
                             <span v-else>{{ index + 1 }}</span>
                         </div>
                         <span class="text-[10px] font-bold uppercase tracking-wider mt-1">{{ step.split(' ')[0]
-                            }}</span>
+                        }}</span>
                     </button>
                 </div>
             </div>
