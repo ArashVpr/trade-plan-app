@@ -43,6 +43,16 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'CADJPY', 'name' => 'Canadian Dollar vs Japanese Yen', 'type' => 'forex', 'category' => 'minor'],
             ['symbol' => 'CHFJPY', 'name' => 'Swiss Franc vs Japanese Yen', 'type' => 'forex', 'category' => 'minor'],
 
+            // Cryptocurrencies
+            ['symbol' => 'BTCUSDT', 'name' => 'Bitcoin vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'ETHUSDT', 'name' => 'Ethereum vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'LTCUSDT', 'name' => 'Litecoin vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'XRPUSDT', 'name' => 'Ripple vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'ADAUSDT', 'name' => 'Cardano vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'SOLUSDT', 'name' => 'Solana vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'DOTUSDT', 'name' => 'Polkadot vs US Dollar', 'type' => 'crypto', 'category' => null],
+            ['symbol' => 'AVAXUSDT', 'name' => 'Avalanche vs US Dollar', 'type' => 'crypto', 'category' => null],
+
             // Agricultural Commodities
             ['symbol' => 'CORN', 'name' => 'Corn', 'type' => 'commodity', 'category' => 'agricultural'],
             ['symbol' => 'WHEAT', 'name' => 'Wheat', 'type' => 'commodity', 'category' => 'agricultural'],
@@ -103,7 +113,7 @@ class InstrumentSeeder extends Seeder
             ['symbol' => 'PYPL', 'name' => 'PayPal Holdings Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NASDAQ'],
             ['symbol' => 'ZOOM', 'name' => 'Zoom Video Communications Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NASDAQ'],
             ['symbol' => 'SHOP', 'name' => 'Shopify Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NYSE'],
-            ['symbol' => 'SQ', 'name' => 'Block Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NYSE'],
+            ['symbol' => 'XYZ', 'name' => 'Block Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NYSE'],
             ['symbol' => 'COIN', 'name' => 'Coinbase Global Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NASDAQ'],
             ['symbol' => 'BAC', 'name' => 'Bank of America Corporation', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NYSE'],
             ['symbol' => 'T', 'name' => 'AT&T Inc.', 'type' => 'stock', 'category' => 'top100', 'exchange' => 'NASDAQ'],
@@ -112,7 +122,7 @@ class InstrumentSeeder extends Seeder
         ];
 
         foreach ($instruments as $instrument) {
-            Instrument::create($instrument);
+            Instrument::updateOrCreate(['symbol' => $instrument['symbol']], $instrument);
         }
     }
 }

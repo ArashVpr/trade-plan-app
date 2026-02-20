@@ -24,14 +24,18 @@
                 }">
                 <template #option="slotProps">
                     <div class="flex flex-col py-1">
-                        <span class="font-bold text-slate-800 dark:text-slate-200">{{ slotProps.option.code }}</span>
+                        <div class="flex items-center gap-2">
+                            <SymbolLogo :symbol="slotProps.option.code" size="small" />
+                            <span class="font-bold text-slate-800 dark:text-slate-200">{{ slotProps.option.code
+                                }}</span>
+                        </div>
                         <span class="text-xs text-slate-500">{{ slotProps.option.label.split(' - ')[1] ||
                             slotProps.option.label }}</span>
                     </div>
                 </template>
                 <template #value="slotProps">
                     <div v-if="slotProps.value" class="flex items-center gap-2">
-                        <i class="pi pi-chart-line text-blue-500"></i>
+                        <SymbolLogo :symbol="slotProps.value" size="small" />
                         <span class="font-bold">{{ slotProps.value }}</span>
                     </div>
                     <span v-else class="text-slate-400">Select an Asset</span>
@@ -86,6 +90,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import SymbolLogo from '@/Components/SymbolLogo.vue'
 
 const props = defineProps({
     modelValue: {
