@@ -17,6 +17,7 @@ return new class extends Migration
             $table->json('zone_qualifiers')->nullable(); // Array of selected zone qualifiers
             $table->json('technicals')->nullable(); // Location and Direction
             $table->json('fundamentals')->nullable(); // Valuation, Seasonal Confluence, Non-Commercials, CoT Index
+            $table->boolean('exclude_fundamentals')->default(false); // Option to exclude fundamentals from scoring
             $table->integer('score')->default(0); // Calculated evaluation score
             $table->string('symbol')->nullable();
             $table->timestamps();
